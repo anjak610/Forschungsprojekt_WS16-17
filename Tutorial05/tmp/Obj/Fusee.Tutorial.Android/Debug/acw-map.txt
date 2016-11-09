@@ -1,0 +1,12 @@
+Fusee.Tutorial.Android.MainActivity, Fusee.Tutorial.Android;md5b232c40bc2cef2be8177c91972e239c5.MainActivity
+Fusee.Tutorial.Android.MainActivity, Fusee.Tutorial.Android, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;md5b232c40bc2cef2be8177c91972e239c5.MainActivity
+Fusee.Tutorial.Android.MainActivity;md5b232c40bc2cef2be8177c91972e239c5.MainActivity
+fusee.tutorial.android.MainActivity;md5b232c40bc2cef2be8177c91972e239c5.MainActivity
+Fusee.Engine.Imp.Graphics.Android.LibPaintingView, Fusee.Engine.Imp.Graphics.Android;md535255eb44394a01260b71f316d506d06.LibPaintingView
+Fusee.Engine.Imp.Graphics.Android.LibPaintingView, Fusee.Engine.Imp.Graphics.Android, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null;md535255eb44394a01260b71f316d506d06.LibPaintingView
+Fusee.Engine.Imp.Graphics.Android.LibPaintingView;md535255eb44394a01260b71f316d506d06.LibPaintingView
+fusee.engine.imp.graphics.android.LibPaintingView;md535255eb44394a01260b71f316d506d06.LibPaintingView
+Fusee.Engine.Imp.Graphics.Android.RenderCanvasGameView, Fusee.Engine.Imp.Graphics.Android;md535255eb44394a01260b71f316d506d06.RenderCanvasGameView
+Fusee.Engine.Imp.Graphics.Android.RenderCanvasGameView, Fusee.Engine.Imp.Graphics.Android, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null;md535255eb44394a01260b71f316d506d06.RenderCanvasGameView
+Fusee.Engine.Imp.Graphics.Android.RenderCanvasGameView;md535255eb44394a01260b71f316d506d06.RenderCanvasGameView
+fusee.engine.imp.graphics.android.RenderCanvasGameView;md535255eb44394a01260b71f316d506d06.RenderCanvasGameView
