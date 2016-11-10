@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Fusee.Base.Core;
 using Fusee.Engine.Common;
@@ -42,9 +41,6 @@ namespace Fusee.Tutorial.Core
         // Init is called on startup. 
         public override void Init()
         {
-            // read point cloud from file
-            PointCloud pointCloud = AssetStorage.Get<PointCloud>("pcl.ipm");
-
             var vertsh = AssetStorage.Get<string>("VertexShader.vert");
             var pixsh = AssetStorage.Get<string>("PixelShader.frag");
             _renderer = new Renderer(RC);
