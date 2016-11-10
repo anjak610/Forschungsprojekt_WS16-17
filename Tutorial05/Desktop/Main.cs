@@ -98,7 +98,7 @@ namespace Fusee.Tutorial.Desktop
 
             AssetStorage.RegisterProvider(fap);
 
-            var app = new Core.Tutorial();
+            var app = new Core.PointVisualizationBase();
 
             // Inject Fusee.Engine InjectMe dependencies (hard coded)
             app.CanvasImplementor = new Fusee.Engine.Imp.Graphics.Desktop.RenderCanvasImp();

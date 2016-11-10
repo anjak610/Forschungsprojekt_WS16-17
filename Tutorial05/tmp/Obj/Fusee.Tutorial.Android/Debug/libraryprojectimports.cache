@@ -2,8 +2,8 @@
 <Paths>
   <Jars></Jars>
   <ResolvedResourceDirectories>
-    <ResolvedResourceDirectory>C:\Users\Tanja Langer\Desktop\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\__library_projects__\Fusee.Base.Imp.Android\library_project_imports\res</ResolvedResourceDirectory>
-    <ResolvedResourceDirectory>C:\Users\Tanja Langer\Desktop\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\__library_projects__\Fusee.Engine.Imp.Graphics.Android\library_project_imports\res</ResolvedResourceDirectory>
+    <ResolvedResourceDirectory>C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\__library_projects__\Fusee.Base.Imp.Android\library_project_imports\res</ResolvedResourceDirectory>
+    <ResolvedResourceDirectory>C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\__library_projects__\Fusee.Engine.Imp.Graphics.Android\library_project_imports\res</ResolvedResourceDirectory>
   </ResolvedResourceDirectories>
   <ResolvedAssetDirectories>
     <ResolvedAssetDirectory>..\tmp\Obj\Fusee.Tutorial.Android\Debug\\__library_projects__\Fusee.Base.Imp.Android\library_project_imports\assets</ResolvedAssetDirectory>
@@ -11,7 +11,7 @@
   </ResolvedAssetDirectories>
   <ResolvedEnvironmentFiles />
   <ResolvedResourceDirectoryStamps>
-    <ResolvedResourceDirectoryStamp>C:\Users\Tanja Langer\Desktop\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\__library_projects__\Fusee.Base.Imp.Android.stamp</ResolvedResourceDirectoryStamp>
-    <ResolvedResourceDirectoryStamp>C:\Users\Tanja Langer\Desktop\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\__library_projects__\Fusee.Engine.Imp.Graphics.Android.stamp</ResolvedResourceDirectoryStamp>
+    <ResolvedResourceDirectoryStamp>C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\__library_projects__\Fusee.Base.Imp.Android.stamp</ResolvedResourceDirectoryStamp>
+    <ResolvedResourceDirectoryStamp>C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\__library_projects__\Fusee.Engine.Imp.Graphics.Android.stamp</ResolvedResourceDirectoryStamp>
   </ResolvedResourceDirectoryStamps>
 </Paths>

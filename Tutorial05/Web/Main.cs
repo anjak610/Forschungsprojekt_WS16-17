@@ -51,7 +51,7 @@ namespace Fusee.Tutorial.Web
                 });
             AssetStorage.RegisterProvider(fap);
 
-            var app = new Fusee.Tutorial.Core.Tutorial();
+            var app = new Fusee.Tutorial.Core.PointVisualizationBase();
 
             // Inject Fusee.Engine InjectMe dependencies (hard coded)
             app.CanvasImplementor = new Fusee.Engine.Imp.Graphics.Web.RenderCanvasImp();
