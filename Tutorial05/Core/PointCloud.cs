@@ -19,6 +19,10 @@ namespace Fusee.Tutorial.Core
         private float[] _echoIds;
         private float[] _scanNrs;
 
+        public PointCloud(){
+
+            }
+
         public float3[] Vertices
         {
             get { return _vertices; }
