@@ -42,7 +42,7 @@ JSIL.DeclareNamespace("Fusee.Tutorial.Web");
     return ($T09 = JSIL.Memoize($asm01.Fusee.Base.Core.AssetStorage)) ();
   };
   var $T0A = function () {
-    return ($T0A = JSIL.Memoize($asm09.Fusee.Tutorial.Core.Tutorial)) ();
+    return ($T0A = JSIL.Memoize($asm09.Fusee.Tutorial.Core.PointVisualizationBase)) ();
   };
   var $T0B = function () {
     return ($T0B = JSIL.Memoize($asm04.Fusee.Engine.Core.RenderCanvas)) ();
@@ -103,11 +103,11 @@ JSIL.DeclareNamespace("Fusee.Tutorial.Web");
     handler.Checker = arg_E0_1;
     webAssetProvider.RegisterTypeHandler(handler.MemberwiseClone());
     $T09().RegisterProvider(webAssetProvider);
-    var tutorial = new ($T0A())();
-    tutorial.RenderCanvas$CanvasImplementor$value = new ($T0C())();
-    tutorial.RenderCanvas$ContextImplementor$value = new ($T0D())(tutorial.RenderCanvas$CanvasImplementor$value);
-    $T0E().AddDriverImp(new ($T0F())(tutorial.RenderCanvas$CanvasImplementor$value));
-    tutorial.Run();
+    var pointVisualizationBase = new ($T0A())();
+    pointVisualizationBase.RenderCanvas$CanvasImplementor$value = new ($T0C())();
+    pointVisualizationBase.RenderCanvas$ContextImplementor$value = new ($T0D())(pointVisualizationBase.RenderCanvas$CanvasImplementor$value);
+    $T0E().AddDriverImp(new ($T0F())(pointVisualizationBase.RenderCanvas$CanvasImplementor$value));
+    pointVisualizationBase.Run();
   }; 
 
   JSIL.MakeType({
