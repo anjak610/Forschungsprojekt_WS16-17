@@ -7,6 +7,7 @@ uniform vec3 albedo;
 uniform float shininess;
 uniform float specfactor;
 
+
 void main()
 {
     vec3 nnormal = normalize(normal);
@@ -21,8 +22,9 @@ void main()
     {
         vec3 viewdir = -viewpos;
         vec3 h = normalize(viewdir+lightdir);
-        intensitySpec = pow(max(0.0, dot(h, nnormal)), shininess);
+       intensitySpec = pow(max(0.0, dot(h, nnormal)), shininess);
     }
 
     gl_FragColor = vec4(intensityDiff * albedo + vec3(intensitySpec), 1);
+	
 }

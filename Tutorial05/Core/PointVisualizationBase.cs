@@ -4,90 +4,63 @@ using Fusee.Base.Core;
 using Fusee.Engine.Common;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
-using Fusee.Serialization;
-using Fusee.Xene;
-using static Fusee.Engine.Core.Input;
 
 
 namespace Fusee.Tutorial.Core
 {
 
-    [FuseeApplication(Name = "Tutorial Example", Description = "The official FUSEE Tutorial.")]
+    [FuseeApplication(Name = "Forschungsprojekt", Description = "HFU, Wintersemester 16-17")]
     public class PointVisualizationBase : RenderCanvas
     {
         private Mesh _mesh;
-        private Mesh cube;
 
-        private IShaderParam _albedoParam;
-        private float _alpha = 0.001f;
-        private float _beta;
+        private const string _vertexShader = @"
+     attribute vec3 fuVertex;
 
-        private Renderer _renderer; 
-    
+    void main()
+    {
+        gl_Position = vec4(fuVertex, 1.0);
+    }";
 
-        public static Mesh LoadMesh(string assetName)
-        {
-            SceneContainer sc = AssetStorage.Get<SceneContainer>(assetName);
-            MeshComponent mc = sc.Children.FindComponents<MeshComponent>(c => true).First();
-            return new Mesh
-            {
-                Vertices = mc.Vertices,
-                Normals = mc.Normals,
-                Triangles = mc.Triangles
-            };
-        }
+        private const string _pixelShader = @"
+    #ifdef GL_ES
+        precision highp float;
+    #endif
+
+    void main()
+    {
+        gl_FragColor = vec4(1, 0, 1, 1);
+    }";
+
 
         // Init is called on startup. 
         public override void Init()
         {
-            var vertsh = AssetStorage.Get<string>("VertexShader.vert");
-            var pixsh = AssetStorage.Get<string>("PixelShader.frag");
-            _renderer = new Renderer(RC);
-     
-            // Initialize the shader(s)
-            var shader = RC.CreateShader(vertsh, pixsh);
-            RC.SetShader(shader);
-            _albedoParam = RC.GetShaderParam(shader, "albedo");
-
-            _renderer.RC = RC;
-            _renderer.AlbedoParam = _albedoParam;
-
-            // Load some meshes
-            //Mesh cube = LoadMesh("Cube.fus");
-            
-           
-
             // Set the clear color for the backbuffer
-            RC.ClearColor = new float4(1, 1, 1, 1);
-        }
+            RC.ClearColor = new float4(0.75f, 1, 0.52f, 1);
 
-        static float4x4 ModelXForm(float3 pos, float3 rot, float3 pivot)
-        {
-            return float4x4.CreateTranslation(pos + pivot)
-                   *float4x4.CreateRotationY(rot.y)
-                   *float4x4.CreateRotationX(rot.x)
-                   *float4x4.CreateRotationZ(rot.z)
-                   *float4x4.CreateTranslation(-pivot);
-        }
+            //var vertsh = AssetStorage.Get<string>("VertexShader.vert");
+            //var pixsh = AssetStorage.Get<string>("PixelShader.frag");
 
-        void RenderSceneOb(SceneOb so, float4x4 modelView)
-        {
-            modelView = modelView * ModelXForm(so.Pos, so.Rot, so.Pivot) * float4x4.CreateScale(so.Scale);
-            if (so.Mesh != null)
+
+            // Initialize the shader(s)
+            var shader = RC.CreateShader(_vertexShader, _pixelShader);
+            RC.SetShader(shader);
+
+            // Load a mesh
+            _mesh = new Mesh
             {
-                RC.ModelView = modelView*float4x4.CreateScale(so.ModelScale);
-                RC.SetShaderParam(_albedoParam, so.Albedo);
-                RC.Render(so.Mesh);
-            }
-
-            if (so.Children != null)
+                Vertices = new[]
             {
-                foreach (var child in so.Children)
-                {
-                    RenderSceneOb(child, modelView);
-                }
-            }
+                new float3(-0.75f, -0.75f, 0),
+                new float3(0.75f, -0.75f, 0),
+                new float3(0, 0.75f, 0)
+
+               },
+                Triangles = new ushort[] { 0, 1, 2, 3 },
+            };
         }
+
 
 
         // RenderAFrame is called once a frame
@@ -95,20 +68,8 @@ namespace Fusee.Tutorial.Core
         {
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
-
-            float2 speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);
-            if (Mouse.LeftButton || Touch.GetTouchActive(TouchPoints.Touchpoint_0))
-            {
-                _alpha -= speed.x*0.0001f;
-                _beta  -= speed.y*0.0001f;
-            }
-          
-            // Setup matrices
-            var aspectRatio = Width / (float)Height;
-            RC.Projection = float4x4.CreatePerspectiveFieldOfView(3.141592f * 0.25f, aspectRatio, 0.01f, 20);
-            float4x4 view = float4x4.CreateTranslation(0, 0, 5) * float4x4.CreateRotationY(_alpha) * float4x4.CreateRotationX(_beta) *
-                     float4x4.CreateTranslation(0, -0.5f, 0);
-            _renderer.View = view;
+         
+            RC.Render(_mesh);
 
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
