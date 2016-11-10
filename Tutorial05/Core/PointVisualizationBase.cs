@@ -13,18 +13,17 @@ namespace Fusee.Tutorial.Core
 {
 
     [FuseeApplication(Name = "Tutorial Example", Description = "The official FUSEE Tutorial.")]
-    public class Tutorial : RenderCanvas
+    public class PointVisualizationBase : RenderCanvas
     {
         private Mesh _mesh;
+        private Mesh cube;
 
         private IShaderParam _albedoParam;
         private float _alpha = 0.001f;
         private float _beta;
 
-        private SceneOb _root;
-        private SceneContainer _wuggy;
-        private Renderer _renderer;
-        private TransformComponent _wheelBigL;
+        private Renderer _renderer; 
+    
 
         public static Mesh LoadMesh(string assetName)
         {
@@ -44,10 +43,7 @@ namespace Fusee.Tutorial.Core
             var vertsh = AssetStorage.Get<string>("VertexShader.vert");
             var pixsh = AssetStorage.Get<string>("PixelShader.frag");
             _renderer = new Renderer(RC);
-            SceneContainer wuggy = AssetStorage.Get<SceneContainer>("wuggy.fus");
-            _wuggy = AssetStorage.Get<SceneContainer>("wuggy.fus");  
-            _wheelBigL = _wuggy.Children.FindNodes(n => n.Name == "WheelBigL").First().GetTransform();
-
+     
             // Initialize the shader(s)
             var shader = RC.CreateShader(vertsh, pixsh);
             RC.SetShader(shader);
@@ -57,32 +53,9 @@ namespace Fusee.Tutorial.Core
             _renderer.AlbedoParam = _albedoParam;
 
             // Load some meshes
-            Mesh cube = LoadMesh("Cube.fus");
-            Mesh cylinder = LoadMesh("Cylinder.fus");
-            Mesh sphere = LoadMesh("Sphere.fus");
-
-            // Setup a list of objects
-            _root = new SceneOb { 
-                Children = new List<SceneOb>(new []
-                {
-                    // Body
-                    new SceneOb { Mesh = cube,     Pos = new float3(0, 2.75f, 0),     ModelScale = new float3(0.5f, 1, 0.25f),      Albedo = new float3(0.2f, 0.6f, 0.3f) },
-                    // Legs
-                    new SceneOb { Mesh = cylinder, Pos = new float3(-0.25f, 1, 0),    ModelScale = new float3(0.15f, 1, 0.15f),     },
-                    new SceneOb { Mesh = cylinder, Pos = new float3( 0.25f, 1, 0),    ModelScale = new float3(0.15f, 1, 0.15f),     },
-                    // Shoulders
-                    new SceneOb { Mesh = sphere,   Pos = new float3(-0.75f, 3.5f, 0), ModelScale = new float3(0.25f, 0.25f, 0.25f), },
-                    new SceneOb { Mesh = sphere,   Pos = new float3( 0.75f, 3.5f, 0), ModelScale = new float3(0.25f, 0.25f, 0.25f), },
-                    // Arms
-                    new SceneOb { Mesh = cylinder, Pos = new float3(-0.75f, 2.5f, 0), ModelScale = new float3(0.15f, 1, 0.15f),     },
-                    new SceneOb { Mesh = cylinder, Pos = new float3( 0.75f, 2.5f, 0), ModelScale = new float3(0.15f, 1, 0.15f),     },
-                    // Head
-                    new SceneOb
-                    {
-                        Mesh = sphere,   Pos = new float3(0, 4.2f, 0),      ModelScale = new float3(0.35f, 0.5f, 0.35f),  
-                        Albedo = new float3(0.9f, 0.6f, 0.5f)
-                    },
-                })};
+            //Mesh cube = LoadMesh("Cube.fus");
+            
+           
 
             // Set the clear color for the backbuffer
             RC.ClearColor = new float4(1, 1, 1, 1);
@@ -129,16 +102,13 @@ namespace Fusee.Tutorial.Core
                 _alpha -= speed.x*0.0001f;
                 _beta  -= speed.y*0.0001f;
             }
-            //steer the wheels
-            _wheelBigL.Rotation += new float3(-0.05f * Keyboard.WSAxis, 0, 0);
-
+          
             // Setup matrices
             var aspectRatio = Width / (float)Height;
             RC.Projection = float4x4.CreatePerspectiveFieldOfView(3.141592f * 0.25f, aspectRatio, 0.01f, 20);
             float4x4 view = float4x4.CreateTranslation(0, 0, 5) * float4x4.CreateRotationY(_alpha) * float4x4.CreateRotationX(_beta) *
                      float4x4.CreateTranslation(0, -0.5f, 0);
             _renderer.View = view;
-            _renderer.Traverse(_wuggy.Children);
 
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
