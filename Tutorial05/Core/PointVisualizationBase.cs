@@ -7,6 +7,8 @@ using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using Fusee.Serialization;
 using Fusee.Xene;
+
+
 using static Fusee.Engine.Core.Input;
 
 
@@ -19,7 +21,8 @@ namespace Fusee.Tutorial.Core
         private Mesh _mesh;
         private float _alpha = 0.0001f;
         private float _beta = 0.0001f;
-        public PointCloud pointCloud;
+        //public PointCloud pointCloud;
+        
 
 
         public static Mesh LoadMesh(string assetName)
@@ -54,15 +57,17 @@ namespace Fusee.Tutorial.Core
 
         void PrintVertices()
         {
-          
+           
+         
         }
 
         // Init is called on startup. 
         public override void Init()
         {
             // read point cloud from file
-            pointCloud = new PointCloud();
-            pointCloud = AssetStorage.Get<PointCloud>("test_points.ipm");
+           
+           // pointCloud = new PointCloud();
+            //pointCloud = AssetStorage.Get<PointCloud>("test_points.ipm");
 
          
             //var vertsh = AssetStorage.Get<string>("VertexShader.vert");
@@ -118,12 +123,6 @@ namespace Fusee.Tutorial.Core
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
 
-            float3[] vertexarray = pointCloud.Vertices;
-            /*for (var i = 0; i < vertexarray.Length; i++)
-            {
-                Debug.WriteLine(vertexarray[i]);
-            };*/
-            Debug.WriteLine("First point: " + vertexarray[0]);
 
         }
 

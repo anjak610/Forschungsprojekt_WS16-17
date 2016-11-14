@@ -21,3 +21,4 @@ C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16
 C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Desktop\Debug\Fusee.Tutorial.Desktop.exe
 C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Desktop\Debug\Fusee.Tutorial.Desktop.pdb
 C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\bin\Debug\Desktop\Assets\AboutFuseeAssets.txt
+C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\bin\Debug\Desktop\Assets\small_test_points.txt

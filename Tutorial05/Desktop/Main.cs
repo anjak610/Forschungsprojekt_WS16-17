@@ -15,8 +15,14 @@ namespace Fusee.Tutorial.Desktop
 {
     public class Simple
     {
-        public static void Main()
+        public static PointCloud cloud = new PointCloud();
+
+        public static void Main()   
         {
+            //read file
+            FileReader reader = new FileReader(cloud);
+            reader.writePointList();
+
             // Inject Fusee.Engine.Base InjectMe dependencies
             IO.IOImp = new Fusee.Base.Imp.Desktop.IOImp();
 
@@ -44,7 +50,11 @@ namespace Fusee.Tutorial.Desktop
                     },
                     Checker = id => Path.GetExtension(id).ToLower().Contains("fus")
                 });
-            fap.RegisterTypeHandler( // TO-DO: implement on other platforms as well
+            //file reader test 
+            
+            
+
+            /*fap.RegisterTypeHandler( // TO-DO: implement on other platforms as well
                 new AssetHandler
                 {
                     ReturnedType = typeof(PointCloud),
@@ -96,7 +106,7 @@ namespace Fusee.Tutorial.Desktop
                     Checker = id => Path.GetExtension(id).ToLower().Contains("ipm")
                 });
 
-            AssetStorage.RegisterProvider(fap);
+            AssetStorage.RegisterProvider(fap);*/
 
             var app = new Core.PointVisualizationBase();
 

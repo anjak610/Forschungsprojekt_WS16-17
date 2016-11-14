@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using Fusee.Math.Core;
+
 
 namespace Fusee.Tutorial.Core
 {
@@ -14,34 +12,41 @@ namespace Fusee.Tutorial.Core
 
     public class PointCloud
     {
-        private float3[] _vertices;
-        private float3[] _colors;
-        private float[] _echoIds;
-        private float[] _scanNrs;
+        private List<float3> _vertices;
+        private List<float3> _colors;
+        private List<float> _echoIds;
+        private List<float> _scanNrs;
 
-        public PointCloud(){
+        //constructor
+        public PointCloud() 
+      {
+               _vertices = new List<float3>();
+                _colors = new List<float3>();
+                _echoIds = new List<float>();
+                _scanNrs = new List<float>();
 
-            }
+    }
 
-        public float3[] Vertices
+
+        public List<float3> Vertices
         {
             get { return _vertices; }
             set { _vertices = value; }
         }
 
-        public float3[] Colors
+        public List<float3> Colors
         {
             get { return _colors; }
             set { _colors = value; }
         }
 
-        public float[] EchoIds
+        public List<float> EchoIds
         {
             get { return _echoIds; }
             set { _echoIds = value; }
         }
 
-        public float[] ScanNrs
+        public List<float> ScanNrs
         {
             get { return _scanNrs; }
             set { _scanNrs = value; }
