@@ -1,14 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.IO;
 using Fusee.Base.Core;
 using Fusee.Engine.Common;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using Fusee.Serialization;
 using Fusee.Xene;
-
-
 using static Fusee.Engine.Core.Input;
 
 
@@ -19,11 +18,6 @@ namespace Fusee.Tutorial.Core
     public class PointVisualizationBase : RenderCanvas
     {
         private Mesh _mesh;
-        private float _alpha = 0.0001f;
-        private float _beta = 0.0001f;
-        //public PointCloud pointCloud;
-        
-
 
         public static Mesh LoadMesh(string assetName)
         {
@@ -54,24 +48,31 @@ namespace Fusee.Tutorial.Core
     {
         gl_FragColor = vec4(1, 0, 1, 1);
     }";
+        
 
         void PrintVertices()
         {
            
-         
+            //4 Points per Vertex
+            //Create normals
+            //Index List
+
         }
 
         // Init is called on startup. 
         public override void Init()
         {
             // read point cloud from file
-           
-           // pointCloud = new PointCloud();
+
+            // pointCloud = new PointCloud();
             //pointCloud = AssetStorage.Get<PointCloud>("test_points.ipm");
 
-         
             //var vertsh = AssetStorage.Get<string>("VertexShader.vert");
             //var pixsh = AssetStorage.Get<string>("PixelShader.frag");
+
+            var text = AssetStorage.Get<string>("small_test_points.txt");
+            Debug.WriteLine("assetstorage: " + text);//text stays null TODO find out why
+
           
 
             // Initialize the shader(s)

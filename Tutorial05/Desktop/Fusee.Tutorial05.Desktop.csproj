@@ -106,6 +106,10 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Android\Fusee.Tutorial05.Android.csproj">
+      <Project>{73a74adf-6308-42a0-8ba6-2b5d53238546}</Project>
+      <Name>Fusee.Tutorial05.Android</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Core\Fusee.Tutorial05.Core.csproj">
       <Project>{4e534fdd-a963-448d-b2a6-f3e8b9f0bf69}</Project>
       <Name>Fusee.Tutorial05.Core</Name>

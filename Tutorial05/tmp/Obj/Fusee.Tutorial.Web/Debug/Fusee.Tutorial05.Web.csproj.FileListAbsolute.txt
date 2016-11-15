@@ -25,3 +25,4 @@ C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16
 C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Web\Debug\Fusee.Tutorial05.Web.csprojResolveAssemblyReference.cache
 C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Web\Debug\Fusee.Tutorial.Web.exe
 C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Web\Debug\Fusee.Tutorial.Web.pdb
+C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Web\bin\Debug\Assets\small_test_points.txt

@@ -10,18 +10,32 @@ using Fusee.Math.Core;
 using Fusee.Tutorial.Core;
 using Fusee.Serialization;
 using Path = Fusee.Base.Common.Path;
+using Fusee.Tutorial.Desktop;
+using CrossProject;
+
+namespace CrossProject
+{
+    public partial class StaticVariables
+    {
+        public static PointCloud cloud;
+        public static FileReader reader;
+    }
+}
 
 namespace Fusee.Tutorial.Desktop
 {
     public class Simple
     {
-        public static PointCloud cloud = new PointCloud();
+        //public static PointCloud cloud;
+        //public static FileReader reader;
+      
 
         public static void Main()   
         {
-            //read file
-            FileReader reader = new FileReader(cloud);
-            reader.writePointList();
+
+            StaticVariables.cloud = new PointCloud();
+            StaticVariables.reader = new FileReader(StaticVariables.cloud);
+            StaticVariables.reader.writePointList();
 
             // Inject Fusee.Engine.Base InjectMe dependencies
             IO.IOImp = new Fusee.Base.Imp.Desktop.IOImp();
