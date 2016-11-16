@@ -11,6 +11,7 @@ using Fusee.Xene;
 using static Fusee.Engine.Core.Input;
 using Fusee.Tutorial.Core;
 using System.Globalization;
+using Fusee.Tutorial.Desktop;
 
 namespace Fusee.Tutorial.Core
 {
@@ -19,6 +20,8 @@ namespace Fusee.Tutorial.Core
     public class PointVisualizationBase : RenderCanvas
     {
         private Mesh _mesh;
+        public static PointCloud cloud;
+        public static PointReader preader; 
 
         public static Mesh LoadMesh(string assetName)
         {
@@ -51,33 +54,17 @@ namespace Fusee.Tutorial.Core
     }";
         
 
-        void PrintVertices()
-        {
-           
-            //4 Points per Vertex
-            //Create normals
-            //Index List
-
-        }
-
         // Init is called on startup. 
         public override void Init()
         {
-            // read point cloud from file
+            // read point cloud from file and assign vertices to cloud object
+            cloud = new PointCloud();
+            preader = new PointReader(cloud);
+            preader.readPointList();
 
-            //pointCloud = new PointCloud();
-            //pointCloud = AssetStorage.Get<PointCloud>("test_points.ipm");
-
+            //read shaders from files
             //var vertsh = AssetStorage.Get<string>("VertexShader.vert");
             //var pixsh = AssetStorage.Get<string>("PixelShader.frag");
-
-            var text = AssetStorage.Get<string>("small_test_points.txt");
-            Debug.WriteLine("assetstorage: " + text);//text stays null TODO find out why
-            string[] splitted = text.Split('\t');
-            float x = (float.Parse(splitted[0], CultureInfo.InvariantCulture.NumberFormat));
-            float y = (float.Parse(splitted[1], CultureInfo.InvariantCulture.NumberFormat));
-            float z = (float.Parse(splitted[2], CultureInfo.InvariantCulture.NumberFormat));
-
 
             // Initialize the shader(s)
             var shader = RC.CreateShader(_vertexShader, _pixelShader);

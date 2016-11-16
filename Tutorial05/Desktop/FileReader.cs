@@ -6,6 +6,7 @@ using Fusee.Math.Core;
 using System.Globalization;
 using System.Diagnostics;
 
+////////////////Class not used any more because File.ReadAllLines only works on desktop//////////////////
 namespace Fusee.Tutorial.Desktop
 {
 
