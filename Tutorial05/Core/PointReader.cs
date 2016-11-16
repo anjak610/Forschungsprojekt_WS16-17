@@ -36,10 +36,10 @@ namespace Fusee.Tutorial.Desktop
 
             string path = "Assets/small_test_points.txt";
 
-            string[] readText = File.ReadAllLines(path);
+            string readText = AssetStorage.Get<string>("small_test_points.txt");
             string output;
 
-            for (var i = 0; i < readText.Length; i++)
+            /*for (var i = 0; i < readText.Length; i++)
             {
                 {
                     string line = readText[i];
@@ -51,7 +51,7 @@ namespace Fusee.Tutorial.Desktop
                     _cloud.Vertices.Add(insertvalue);
                     output = ("x: " + splitted[0] + "; y: " + splitted[1] + "; z: " + splitted[2] + "; z2: " + splitted[3]);
                     Debug.WriteLine(output);
-
+                    */
                    
                 }
             }
