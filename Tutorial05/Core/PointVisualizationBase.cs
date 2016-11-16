@@ -9,7 +9,8 @@ using Fusee.Math.Core;
 using Fusee.Serialization;
 using Fusee.Xene;
 using static Fusee.Engine.Core.Input;
-
+using Fusee.Tutorial.Core;
+using System.Globalization;
 
 namespace Fusee.Tutorial.Core
 {
@@ -64,7 +65,7 @@ namespace Fusee.Tutorial.Core
         {
             // read point cloud from file
 
-            // pointCloud = new PointCloud();
+            //pointCloud = new PointCloud();
             //pointCloud = AssetStorage.Get<PointCloud>("test_points.ipm");
 
             //var vertsh = AssetStorage.Get<string>("VertexShader.vert");
@@ -72,13 +73,16 @@ namespace Fusee.Tutorial.Core
 
             var text = AssetStorage.Get<string>("small_test_points.txt");
             Debug.WriteLine("assetstorage: " + text);//text stays null TODO find out why
+            string[] splitted = text.Split('\t');
+            float x = (float.Parse(splitted[0], CultureInfo.InvariantCulture.NumberFormat));
+            float y = (float.Parse(splitted[1], CultureInfo.InvariantCulture.NumberFormat));
+            float z = (float.Parse(splitted[2], CultureInfo.InvariantCulture.NumberFormat));
 
-          
 
             // Initialize the shader(s)
             var shader = RC.CreateShader(_vertexShader, _pixelShader);
             RC.SetShader(shader);
-
+    
             // Load a mesh
             _mesh = new Mesh
             {
