@@ -20,8 +20,7 @@ namespace Fusee.Tutorial.Core
     public class PointVisualizationBase : RenderCanvas
     {
         private Mesh _mesh;
-        List<Mesh> mesh_list;
-
+        IShaderParam _particleSizeParam;
 
         public static PointCloud cloud;
         public static PointReader preader; 
@@ -39,11 +38,15 @@ namespace Fusee.Tutorial.Core
         }
 
         private const string _vertexShader = @"
-     attribute vec3 fuVertex;
-
+        attribute vec3 fuVertex;
+        attribute vec3 fuNormal;
+        uniform vec2 particleSize;
+        uniform mat4 xForm;
     void main()
     {
-        gl_Position = vec4(fuVertex, 1.0);
+        
+        vec4 vScreen = xForm*vec4(fuVertex, 1.0);       
+        gl_Position = vScreen + vec4(fuNormal.xy*particleSize, 0, 0);
     }";
 
         private const string _pixelShader = @"
@@ -55,6 +58,7 @@ namespace Fusee.Tutorial.Core
     {
         gl_FragColor = vec4(1, 0, 1, 1);
     }";
+        private IShaderParam _xFormParam;
 
 
         // Init is called on startup. 
@@ -72,55 +76,49 @@ namespace Fusee.Tutorial.Core
             // Initialize the shader(s)
             var shader = RC.CreateShader(_vertexShader, _pixelShader);
             RC.SetShader(shader);
+            _particleSizeParam = RC.GetShaderParam(shader, "particleSize");
+            RC.SetShaderParam(_particleSizeParam, new float2(0.01f, 0.01f));
 
+            _xFormParam = RC.GetShaderParam(shader, "xForm");
+            RC.SetShaderParam(_xFormParam, float4x4.CreateScale(0.5f)*float4x4.CreateTranslation(-2,-33, 34));
 
-            mesh_list = new List<Mesh>();
-            float[] xyzArray;
+            _mesh = new Mesh();
+          
             float3 pickedvertex;
+            List<float3> vertices = new List<float3>();
+            List<float3> normals = new List<float3>();
+            List<ushort> triangles = new List<ushort>();
 
             for (var i = 0; i< cloud.Vertices.Count; i++)
             {
-                //new Mesh based on each vertex
-
-                pickedvertex = cloud.Vertices[i];
-                xyzArray = pickedvertex.ToArray();
-                Mesh test_mesh;
                 
-                //y-axis: points up, x-axis: points-right, z-axis: points towards viewer
+                //vertex list times 4
+                pickedvertex = cloud.Vertices[i];
+                vertices.Add(pickedvertex);
+                vertices.Add(pickedvertex);
+                vertices.Add(pickedvertex);
+                vertices.Add(pickedvertex);
 
-                test_mesh = new Mesh
-                {
+                normals.Add(new float3(-1, -1, 0));
+                normals.Add(new float3(1, -1, 0));
+                normals.Add(new float3(-1, 1, 0));
+                normals.Add(new float3(1, 1, 0));
 
-                    Vertices = new[]
-                    {
-                //cloud.Vertices[0],
-                new float3((xyzArray[0]*0.01f) , (xyzArray[1]*0.01f), (xyzArray[2]*0.01f) ),
-                new float3(((xyzArray[0]+ 5.00f)*0.01f) , (xyzArray[1]*0.01f), (xyzArray[2]*0.01f) ),
-                new float3(((xyzArray[0]+ 5.00f)*0.01f) , ((xyzArray[1]+ 5.00f)*0.01f), (xyzArray[2]*0.01f) )
-                 },
-                    Triangles = new ushort[] { 0, 1, 2, 3 },
+                triangles.Add((ushort)(0 + i*4));
+                triangles.Add((ushort)(1 + i*4));
+                triangles.Add((ushort)(3 + i*4));
+                triangles.Add((ushort)(0 + i*4));
+                triangles.Add((ushort)(3 + i*4));
+                triangles.Add((ushort)(2 + i*4));
 
-                };
-            
-                mesh_list.Add(test_mesh);
+           
                 
             }
 
-            Debug.WriteLine("Mesh list contains " + mesh_list.Count + " meshes");
+            _mesh.Vertices = vertices.ToArray();
+            _mesh.Normals = normals.ToArray();
+            _mesh.Triangles = triangles.ToArray();
 
-            // Load a mesh
-            /* _mesh = new Mesh
-             {
-                 Vertices = new[]
-             {
-                 new float3(-0.75f, -0.75f, 0),
-                 new float3(0.75f, -0.75f, 0),
-                 new float3(0, 0.75f, 0)
-
-                },
-                 Triangles = new ushort[] { 0, 1, 2, 3 },
-             };
-             */
 
             // Set the clear color for the backbuffer
             RC.ClearColor = new float4(0.50f, 0.80f, 0.65f, 1);
@@ -150,12 +148,12 @@ namespace Fusee.Tutorial.Core
             }*/
             
        
-            foreach(var mesh in mesh_list) {
-                RC.Render(mesh);
          
-            }      
+           RC.Render(_mesh);
+         
+               
             
-
+           
             //RC.Render(_mesh);
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
@@ -172,6 +170,7 @@ namespace Fusee.Tutorial.Core
 
             // Create a new projection matrix generating undistorted images on the new aspect ratio.
             var aspectRatio = Width/(float) Height;
+            RC.SetShaderParam(_particleSizeParam, new float2(0.01f,0.01f*aspectRatio));//set params that can be controlled with arrow keys
 
             // 0.25*PI Rad -> 45° Opening angle along the vertical direction. Horizontal opening angle is calculated based on the aspect ratio
             // Front clipping happens at 1 (Objects nearer than 1 world unit get clipped)
