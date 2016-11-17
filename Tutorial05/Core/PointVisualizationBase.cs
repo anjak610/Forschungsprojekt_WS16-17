@@ -20,6 +20,7 @@ namespace Fusee.Tutorial.Core
     public class PointVisualizationBase : RenderCanvas
     {
         private Mesh _mesh;
+        private Mesh test_mesh;
         public static PointCloud cloud;
         public static PointReader preader; 
 
@@ -52,7 +53,7 @@ namespace Fusee.Tutorial.Core
     {
         gl_FragColor = vec4(1, 0, 1, 1);
     }";
-        
+
 
         // Init is called on startup. 
         public override void Init()
@@ -69,9 +70,29 @@ namespace Fusee.Tutorial.Core
             // Initialize the shader(s)
             var shader = RC.CreateShader(_vertexShader, _pixelShader);
             RC.SetShader(shader);
+
+            //new Mesh around first vertex
+            float3 testvertex = cloud.Vertices[0];
+            float[] xyzArray = testvertex.ToArray();
+
+            //y-axis: points up, x-axis: points-right, z-axis: points towards viewer
+
+            test_mesh = new Mesh
+            {
+
+                Vertices = new[]
+                {
+                cloud.Vertices[0],
+                new float3(xyzArray[0]+ 10.00f , xyzArray[1], xyzArray[2] ),
+                new float3(xyzArray[0]+ 10.00f , xyzArray[1]+ 10.00f, xyzArray[2] )
+                 },
+              Triangles = new ushort[] { 0, 1, 2, 3 },
+
+            };
+
     
             // Load a mesh
-            _mesh = new Mesh
+           /* _mesh = new Mesh
             {
                 Vertices = new[]
             {
@@ -82,10 +103,10 @@ namespace Fusee.Tutorial.Core
                },
                 Triangles = new ushort[] { 0, 1, 2, 3 },
             };
-
+            */
 
             // Set the clear color for the backbuffer
-            RC.ClearColor = new float4(1, 1, 1, 1);
+            RC.ClearColor = new float4(0.50f, 0.80f, 0.65f, 1);
         }
 
         static float4x4 ModelXForm(float3 pos, float3 rot, float3 pivot)
@@ -110,8 +131,9 @@ namespace Fusee.Tutorial.Core
                 _alpha -= speed.x*0.0001f;
                 _beta  -= speed.y*0.0001f;
             }*/
-
-            RC.Render(_mesh);
+            RC.Render(test_mesh);
+            Debug.WriteLine("Testmesh rendered with first Vertex");
+            //RC.Render(_mesh);
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
 
