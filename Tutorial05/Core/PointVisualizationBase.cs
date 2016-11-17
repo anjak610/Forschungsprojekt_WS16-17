@@ -20,7 +20,9 @@ namespace Fusee.Tutorial.Core
     public class PointVisualizationBase : RenderCanvas
     {
         private Mesh _mesh;
-        private Mesh test_mesh;
+        List<Mesh> mesh_list;
+
+
         public static PointCloud cloud;
         public static PointReader preader; 
 
@@ -71,39 +73,54 @@ namespace Fusee.Tutorial.Core
             var shader = RC.CreateShader(_vertexShader, _pixelShader);
             RC.SetShader(shader);
 
-            //new Mesh around first vertex
-            float3 testvertex = cloud.Vertices[0];
-            float[] xyzArray = testvertex.ToArray();
 
-            //y-axis: points up, x-axis: points-right, z-axis: points towards viewer
+            mesh_list = new List<Mesh>();
+            float[] xyzArray;
+            float3 pickedvertex;
 
-            test_mesh = new Mesh
+            for (var i = 0; i< cloud.Vertices.Count; i++)
             {
+                //new Mesh based on each vertex
 
-                Vertices = new[]
+                pickedvertex = cloud.Vertices[i];
+                xyzArray = pickedvertex.ToArray();
+                Mesh test_mesh;
+                
+                //y-axis: points up, x-axis: points-right, z-axis: points towards viewer
+
+                test_mesh = new Mesh
                 {
-                cloud.Vertices[0],
-                new float3(xyzArray[0]+ 10.00f , xyzArray[1], xyzArray[2] ),
-                new float3(xyzArray[0]+ 10.00f , xyzArray[1]+ 10.00f, xyzArray[2] )
+
+                    Vertices = new[]
+                    {
+                //cloud.Vertices[0],
+                new float3((xyzArray[0]*0.01f) , (xyzArray[1]*0.01f), (xyzArray[2]*0.01f) ),
+                new float3(((xyzArray[0]+ 5.00f)*0.01f) , (xyzArray[1]*0.01f), (xyzArray[2]*0.01f) ),
+                new float3(((xyzArray[0]+ 5.00f)*0.01f) , ((xyzArray[1]+ 5.00f)*0.01f), (xyzArray[2]*0.01f) )
                  },
-              Triangles = new ushort[] { 0, 1, 2, 3 },
+                    Triangles = new ushort[] { 0, 1, 2, 3 },
 
-            };
+                };
+            
+                mesh_list.Add(test_mesh);
+                
+            }
 
-    
+            Debug.WriteLine("Mesh list contains " + mesh_list.Count + " meshes");
+
             // Load a mesh
-           /* _mesh = new Mesh
-            {
-                Vertices = new[]
-            {
-                new float3(-0.75f, -0.75f, 0),
-                new float3(0.75f, -0.75f, 0),
-                new float3(0, 0.75f, 0)
+            /* _mesh = new Mesh
+             {
+                 Vertices = new[]
+             {
+                 new float3(-0.75f, -0.75f, 0),
+                 new float3(0.75f, -0.75f, 0),
+                 new float3(0, 0.75f, 0)
 
-               },
-                Triangles = new ushort[] { 0, 1, 2, 3 },
-            };
-            */
+                },
+                 Triangles = new ushort[] { 0, 1, 2, 3 },
+             };
+             */
 
             // Set the clear color for the backbuffer
             RC.ClearColor = new float4(0.50f, 0.80f, 0.65f, 1);
@@ -131,8 +148,14 @@ namespace Fusee.Tutorial.Core
                 _alpha -= speed.x*0.0001f;
                 _beta  -= speed.y*0.0001f;
             }*/
-            RC.Render(test_mesh);
-            Debug.WriteLine("Testmesh rendered with first Vertex");
+            
+       
+            foreach(var mesh in mesh_list) {
+                RC.Render(mesh);
+         
+            }      
+            
+
             //RC.Render(_mesh);
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
