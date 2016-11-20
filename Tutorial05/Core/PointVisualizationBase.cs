@@ -48,19 +48,14 @@ namespace Fusee.Tutorial.Core
         attribute vec3 fuVertex;
         attribute vec3 fuNormal;
         uniform vec2 particleSize;
-        uniform mat4 xForm;
-        varying vec3 modelpos;
-        varying vec3 normal;
+        uniform mat4 xForm;    
 
     void main()
     {
         modelpos = fuVertex;
         normal = fuNormal;
         vec4 vScreen = xForm*vec4(fuVertex, 1.0);       
-        gl_Position = gl_Position = vec4(0.5 * (fuVertex.x * c - fuVertex.z * s), 
-                               0.5 *  fuVertex.y, 
-                               0.5 * (fuVertex.x * s + fuVertex.z * c),
-                               1.0);
+        gl_Position = xform * vec4(fuVertex, 1.0);
     }";
 
         private const string _pixelShader = @"
