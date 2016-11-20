@@ -39,3 +39,5 @@ E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Core\De
 E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Core\Debug\Fusee.Tutorial.Core.pdb
 E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Core\Debug\Fusee.Tutorial.Core.dll.mdb
 E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\bin\Debug\Libraries\Fusee.Tutorial.Core.dll.mdb
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Core\Debug\Fusee.Tutorial.Core.dll.mdb
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\bin\Debug\Libraries\Fusee.Tutorial.Core.dll.mdb
