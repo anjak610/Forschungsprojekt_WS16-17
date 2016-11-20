@@ -104,12 +104,12 @@ class MonoPackageManager_Resources {
 		"Fusee.Base.Imp.Android.dll",
 		"Fusee.Engine.Common.dll",
 		"Fusee.Engine.Core.dll",
-		"Fusee.Engine.Imp.Graphics.Android.dll",
 		"Fusee.Math.Core.dll",
 		"Fusee.Serialization.dll",
 		"Fusee.SerializationSerializer.dll",
 		"Fusee.Xene.dll",
 		"protobuf-net.dll",
+		"Fusee.Engine.Imp.Graphics.Android.dll",
 		"Fusee.Tutorial.Core.dll",
 		"JSIL.Meta.dll",
 		"SharpFont.dll",
@@ -127,5 +127,5 @@ class MonoPackageManager_Resources {
 	};
 	public static final String[] Dependencies = new String[]{
 	};
-	public static final String ApiPackageName = "Mono.Android.Platform.ApiLevel_24";
+	public static final String ApiPackageName = "Mono.Android.Platform.ApiLevel_23";
 }

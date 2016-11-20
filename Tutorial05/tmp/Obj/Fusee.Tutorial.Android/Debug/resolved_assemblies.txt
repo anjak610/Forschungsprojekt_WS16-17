@@ -1,37 +1,37 @@
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Tutorial.Android.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Base.Common.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Base.Core.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Base.Imp.Android.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Engine.Common.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Engine.Core.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Engine.Imp.Graphics.Android.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Math.Core.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Serialization.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.SerializationSerializer.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Xene.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\protobuf-net.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Tutorial.Core.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Java.Interop.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Mono.Android.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\OpenTK.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Core.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\mscorlib.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\JSIL.Meta.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\SharpFont.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Xirkit.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Threading.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Runtime.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.ComponentModel.Composition.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Collections.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Collections.Concurrent.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Diagnostics.Debug.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Reflection.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Linq.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Runtime.InteropServices.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Runtime.Extensions.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Reflection.Extensions.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Xml.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Net.Http.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Runtime.Serialization.dll
-C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.ServiceModel.Internals.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Tutorial.Android.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Base.Common.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Base.Core.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Base.Imp.Android.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Engine.Common.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Engine.Core.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Math.Core.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Serialization.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.SerializationSerializer.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Xene.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\protobuf-net.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Engine.Imp.Graphics.Android.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Tutorial.Core.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Java.Interop.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Mono.Android.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\OpenTK.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Core.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\mscorlib.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\JSIL.Meta.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\SharpFont.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\Fusee.Xirkit.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Threading.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Runtime.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.ComponentModel.Composition.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Collections.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Collections.Concurrent.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Diagnostics.Debug.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Reflection.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Linq.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Runtime.InteropServices.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Runtime.Extensions.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Reflection.Extensions.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Xml.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Net.Http.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.Runtime.Serialization.dll
+E:\Gitkraken\Forschungsprojekt_WS16-17\Tutorial05\tmp\Obj\Fusee.Tutorial.Android\Debug\android\assets\System.ServiceModel.Internals.dll

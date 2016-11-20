@@ -109,9 +109,7 @@ namespace Fusee.Tutorial.Core
                 triangles.Add((ushort)(3 + i*4));
                 triangles.Add((ushort)(0 + i*4));
                 triangles.Add((ushort)(3 + i*4));
-                triangles.Add((ushort)(2 + i*4));
-
-           
+                triangles.Add((ushort)(2 + i*4));           
                 
             }
 
