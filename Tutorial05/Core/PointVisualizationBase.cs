@@ -27,8 +27,6 @@ namespace Fusee.Tutorial.Core
         private float _alpha;
         private float _beta;
 
-        private float3 _cameraPosition = new float3(0, 0, 3); // is used in RenderAFrame()
-
         public static PointCloud cloud;
         public static PointReader preader;
 
@@ -48,26 +46,26 @@ namespace Fusee.Tutorial.Core
         attribute vec3 fuVertex;
         attribute vec3 fuNormal;
         uniform vec2 particleSize;
-        uniform mat4 xForm;    
-
+        uniform mat4 xForm;
+        varying vec3 modelpos;
+        
     void main()
     {
         modelpos = fuVertex;
-        normal = fuNormal;
         vec4 vScreen = xForm*vec4(fuVertex, 1.0);       
-        gl_Position = xform * vec4(fuVertex, 1.0);
+        gl_Position = vScreen + vec4(fuNormal.xy*particleSize, 0, 0);
     }";
 
+        //pixel shader called after vertex shader 
         private const string _pixelShader = @"
     #ifdef GL_ES
-        precision highp float;
+        precision highp float;     
     #endif
-    varying vec3 modelpos;
-    varying vec3 normal;
+        varying vec3 modelpos;
 
     void main()
     {
-        gl_FragColor = vec4(normal*0.5 + 0.5, 1);
+        gl_FragColor = vec4(1, 0.5f, modelpos.z*0.01+ 0.8, 1);
     }";
         private IShaderParam _xFormParam;
 
@@ -79,6 +77,20 @@ namespace Fusee.Tutorial.Core
             cloud = new PointCloud();
             preader = new PointReader(cloud);
             preader.readPointList();
+
+            //read shaders from files
+            //var vertsh = AssetStorage.Get<string>("VertexShader.vert");
+            //var pixsh = AssetStorage.Get<string>("PixelShader.frag");
+
+            // Initialize the shader(s)
+            var shader = RC.CreateShader(_vertexShader, _pixelShader);
+            RC.SetShader(shader);
+            _particleSizeParam = RC.GetShaderParam(shader, "particleSize");
+            RC.SetShaderParam(_particleSizeParam, new float2(0.01f, 0.01f));
+
+            _xFormParam = RC.GetShaderParam(shader, "xForm");
+            _xform = float4x4.Identity;
+            //RC.SetShaderParam(_xFormParam, float4x4.CreateScale(0.5f) * float4x4.CreateTranslation(-2, -33, 34));
 
             _mesh = new Mesh();
 
@@ -109,25 +121,13 @@ namespace Fusee.Tutorial.Core
                 triangles.Add((ushort)(3 + i * 4));
                 triangles.Add((ushort)(2 + i * 4));
 
+
+
             }
 
             _mesh.Vertices = vertices.ToArray();
             _mesh.Normals = normals.ToArray();
             _mesh.Triangles = triangles.ToArray();
-
-            //read shaders from files
-            //var vertsh = AssetStorage.Get<string>("VertexShader.vert");
-            //var pixsh = AssetStorage.Get<string>("PixelShader.frag");
-
-            // Initialize the shader(s)
-            var shader = RC.CreateShader(_vertexShader, _pixelShader);
-            RC.SetShader(shader);
-            _particleSizeParam = RC.GetShaderParam(shader, "particleSize");
-            RC.SetShaderParam(_particleSizeParam, new float2(0.01f, 0.01f));
-
-            _xFormParam = RC.GetShaderParam(shader, "xForm");
-            _xform = float4x4.Identity;
-            //RC.SetShaderParam(_xFormParam, float4x4.CreateScale(0.5f) * float4x4.CreateTranslation(-2, -33, 34));
 
 
             // Set the clear color for the backbuffer
@@ -157,27 +157,19 @@ namespace Fusee.Tutorial.Core
                 _beta -= speed.y * 0.0001f;
             }
 
-            // apply rotation caused by mouse
-            float4x4 mouseRotation = float4x4.CreateRotationY(_alpha) * float4x4.CreateRotationX(_beta);
+            _xform = float4x4.CreateRotationY(_alpha) * float4x4.CreateScale(0.5f);
 
-            // Create transformation matrix which stays the same for all points
-            _xform = RC.Projection * float4x4.CreateTranslation(_cameraPosition.x, _cameraPosition.y, _cameraPosition.z) * mouseRotation;
-
-            // Compute scaling and rotation of quad meshes
-            float4x4 scaling = float4x4.CreateScale(0.05f, 0.05f, 1);
-
-            //Rotation
-
-            // camera vector
-            float3 updatedCameraPosition = float4x4.CreateRotationX(-_beta) * float4x4.CreateRotationY(-_alpha) * _cameraPosition;
-            // var view = float4x4.CreateTranslation(0, 0, 3) * float4x4.CreateRotationY(_alpha) * float4x4.CreateRotationX(_beta);
-
-            RC.Render(_mesh);
             RC.SetShaderParam(_xFormParam, float4x4.CreateScale(0.5f) * float4x4.CreateTranslation(-2, -33, 34));
-            //RC.SetShaderParam(_xformParam, xform);
+            RC.Render(_mesh);
+
+
+
+
             //RC.Render(_mesh);
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
+
+
         }
 
 
@@ -196,7 +188,7 @@ namespace Fusee.Tutorial.Core
             // Back clipping happens at 2000 (Anything further away from the camera than 2000 world units gets clipped, polygons will be cut)
             var projection = float4x4.CreatePerspectiveFieldOfView(3.141592f * 0.25f, aspectRatio, 1, 20000);
             RC.Projection = projection;
-
         }
+
     }
 }
