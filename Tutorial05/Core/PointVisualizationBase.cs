@@ -21,6 +21,8 @@ namespace Fusee.Tutorial.Core
     {
         private Mesh _mesh;
         IShaderParam _particleSizeParam;
+        private float _alpha;
+        private float _beta;
 
         public static PointCloud cloud;
         public static PointReader preader; 
@@ -42,21 +44,25 @@ namespace Fusee.Tutorial.Core
         attribute vec3 fuNormal;
         uniform vec2 particleSize;
         uniform mat4 xForm;
+        varying vec3 modelpos;
+        
     void main()
     {
-        
+        modelpos = fuVertex;
         vec4 vScreen = xForm*vec4(fuVertex, 1.0);       
         gl_Position = vScreen + vec4(fuNormal.xy*particleSize, 0, 0);
     }";
 
+        //pixel shader called after vertex shader 
         private const string _pixelShader = @"
     #ifdef GL_ES
-        precision highp float;
+        precision highp float;     
     #endif
+        varying vec3 modelpos;
 
     void main()
     {
-        gl_FragColor = vec4(1, 0, 1, 1);
+        gl_FragColor = vec4(1, 0.5f, modelpos.z*0.01+ 0.8, 1);
     }";
         private IShaderParam _xFormParam;
 
@@ -140,12 +146,12 @@ namespace Fusee.Tutorial.Core
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
 
-            /*float2 speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);
+            float2 speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);
             if (Mouse.LeftButton || Touch.GetTouchActive(TouchPoints.Touchpoint_0))
             {
                 _alpha -= speed.x*0.0001f;
                 _beta  -= speed.y*0.0001f;
-            }*/
+            }
             
        
          
