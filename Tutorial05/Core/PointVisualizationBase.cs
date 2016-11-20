@@ -12,6 +12,7 @@ using static Fusee.Engine.Core.Input;
 using Fusee.Tutorial.Core;
 using System.Globalization;
 using Fusee.Tutorial.Desktop;
+using System;
 
 namespace Fusee.Tutorial.Core
 {
@@ -21,6 +22,8 @@ namespace Fusee.Tutorial.Core
     {
         private Mesh _mesh;
         IShaderParam _particleSizeParam;
+        private IShaderParam _xFormParam;
+        private IShaderParam _cParam;
         private float _alpha;
         private float _beta;
 
@@ -45,10 +48,15 @@ namespace Fusee.Tutorial.Core
         uniform vec2 particleSize;
         uniform mat4 xForm;
         varying vec3 modelpos;
+        varying vec3 normal;
+        varying vec3 colour; 
         
     void main()
     {
         modelpos = fuVertex;
+        normal = fuNormal;
+        colour = vec3(fuVertex);
+        colour = vec3(fuVertex.x, fuVertex.y*0.5 + 0.5f, fuVertex.z);
         vec4 vScreen = xForm*vec4(fuVertex, 1.0);       
         gl_Position = vScreen + vec4(fuNormal.xy*particleSize, 0, 0);
     }";
@@ -59,13 +67,15 @@ namespace Fusee.Tutorial.Core
         precision highp float;     
     #endif
         varying vec3 modelpos;
+        varying vec3 normal;
+        varying vec3 colour; 
 
     void main()
     {
-        gl_FragColor = vec4(1, 0.5f, modelpos.z*0.01+ 0.8, 1);
+       
+       gl_FragColor = vec4(colour, 1.0);
     }";
-        private IShaderParam _xFormParam;
-
+        // gl_FragColor = vec4(normal*0.5 + 0.5, 1);
 
         // Init is called on startup. 
         public override void Init()
@@ -87,6 +97,11 @@ namespace Fusee.Tutorial.Core
 
             _xFormParam = RC.GetShaderParam(shader, "xForm");
             RC.SetShaderParam(_xFormParam, float4x4.CreateScale(0.5f)*float4x4.CreateTranslation(-2,-33, 34));
+         
+            //colour Param not found and not added ?
+            //Random rnd = new Random();
+            //_cParam = RC.GetShaderParam(shader, "colour");
+            //RC.SetShaderParam(_cParam, new float3(Convert.ToSingle(rnd.NextDouble()), Convert.ToSingle(rnd.NextDouble()), Convert.ToSingle(rnd.NextDouble())));
 
             _mesh = new Mesh();
           
