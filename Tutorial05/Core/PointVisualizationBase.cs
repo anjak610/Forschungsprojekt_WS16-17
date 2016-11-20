@@ -157,9 +157,12 @@ namespace Fusee.Tutorial.Core
                 _beta -= speed.y * 0.0001f;
             }
 
-            _xform = float4x4.CreateRotationY(_alpha) * float4x4.CreateScale(0.5f);
+            var view = float4x4.CreateRotationY(_alpha) * float4x4.CreateRotationX(_beta);
+            //_xform = float4x4.CreateRotationY(_alpha) * float4x4.CreateScale(0.5f);
 
-            RC.SetShaderParam(_xFormParam, float4x4.CreateScale(0.5f) * float4x4.CreateTranslation(-2, -33, 34));
+            _xform = view* float4x4.CreateScale(0.5f) * float4x4.CreateTranslation(-2, -33, 34);
+
+            RC.SetShaderParam(_xFormParam, _xform);
             RC.Render(_mesh);
 
 
