@@ -41,35 +41,9 @@ namespace Fusee.Tutorial.Core
                 Triangles = mc.Triangles
             };
         }
-
-        private const string _vertexShader = @"
-        attribute vec3 fuVertex;
-        attribute vec3 fuNormal;
-        uniform vec2 particleSize;
-        uniform mat4 xForm;
-        varying vec3 modelpos;
-        
-    void main()
-    {
-        modelpos = fuVertex;
-        vec4 vScreen = xForm*vec4(fuVertex, 1.0);       
-        gl_Position = vScreen + vec4(fuNormal.xy*particleSize, 0, 0);
-    }";
-
-        //pixel shader called after vertex shader 
-        private const string _pixelShader = @"
-    #ifdef GL_ES
-        precision highp float;     
-    #endif
-        varying vec3 modelpos;
-
-    void main()
-    {
-        gl_FragColor = vec4(1, 0.5f, modelpos.z*0.01+ 0.8, 1);
-    }";
+      
         private IShaderParam _xFormParam;
-
-
+        
         // Init is called on startup. 
         public override void Init()
         {
@@ -79,11 +53,11 @@ namespace Fusee.Tutorial.Core
             preader.readPointList();
 
             //read shaders from files
-            //var vertsh = AssetStorage.Get<string>("VertexShader.vert");
-            //var pixsh = AssetStorage.Get<string>("PixelShader.frag");
+            var vertsh = AssetStorage.Get<string>("VertexShader.vert");
+            var pixsh = AssetStorage.Get<string>("PixelShader.frag");
 
             // Initialize the shader(s)
-            var shader = RC.CreateShader(_vertexShader, _pixelShader);
+            var shader = RC.CreateShader(vertsh, pixsh);
             RC.SetShader(shader);
             _particleSizeParam = RC.GetShaderParam(shader, "particleSize");
             RC.SetShaderParam(_particleSizeParam, new float2(0.01f, 0.01f));
