@@ -20,29 +20,17 @@ namespace Fusee.Tutorial.Core
     public class PointVisualizationBase : RenderCanvas
     {
         private Mesh _mesh;
-        IShaderParam _particleSizeParam;
+
+        private IShaderParam _particleSizeParam;
+        private IShaderParam _xFormParam;
 
         private float4x4 _xform;
-
+        
         private float _alpha;
         private float _beta;
 
         public static PointCloud cloud;
         public static PointReader preader;
-
-        public static Mesh LoadMesh(string assetName)
-        {
-            SceneContainer sc = AssetStorage.Get<SceneContainer>(assetName);
-            MeshComponent mc = sc.Children.FindComponents<MeshComponent>(c => true).First();
-            return new Mesh
-            {
-                Vertices = mc.Vertices,
-                Normals = mc.Normals,
-                Triangles = mc.Triangles
-            };
-        }
-      
-        private IShaderParam _xFormParam;
         
         // Init is called on startup. 
         public override void Init()
@@ -59,11 +47,13 @@ namespace Fusee.Tutorial.Core
             // Initialize the shader(s)
             var shader = RC.CreateShader(vertsh, pixsh);
             RC.SetShader(shader);
+
             _particleSizeParam = RC.GetShaderParam(shader, "particleSize");
             RC.SetShaderParam(_particleSizeParam, new float2(0.01f, 0.01f));
 
             _xFormParam = RC.GetShaderParam(shader, "xForm");
             _xform = float4x4.Identity;
+            
             //RC.SetShaderParam(_xFormParam, float4x4.CreateScale(0.5f) * float4x4.CreateTranslation(-2, -33, 34));
 
             _mesh = new Mesh();
@@ -94,9 +84,7 @@ namespace Fusee.Tutorial.Core
                 triangles.Add((ushort)(0 + i * 4));
                 triangles.Add((ushort)(3 + i * 4));
                 triangles.Add((ushort)(2 + i * 4));
-
-
-
+                
             }
 
             _mesh.Vertices = vertices.ToArray();
@@ -105,18 +93,8 @@ namespace Fusee.Tutorial.Core
 
 
             // Set the clear color for the backbuffer
-            RC.ClearColor = new float4(0.50f, 0.80f, 0.65f, 1);
+            RC.ClearColor = new float4(0.95f, 0.95f, 0.95f, 1);
         }
-
-        static float4x4 ModelXForm(float3 pos, float3 rot, float3 pivot)
-        {
-            return float4x4.CreateTranslation(pos + pivot)
-                   * float4x4.CreateRotationY(rot.y)
-                   * float4x4.CreateRotationX(rot.x)
-                   * float4x4.CreateRotationZ(rot.z)
-                   * float4x4.CreateTranslation(-pivot);
-        }
-
 
         // RenderAFrame is called once a frame
         public override void RenderAFrame()
@@ -132,21 +110,14 @@ namespace Fusee.Tutorial.Core
             }
 
             var view = float4x4.CreateRotationY(_alpha) * float4x4.CreateRotationX(_beta);
-            //_xform = float4x4.CreateRotationY(_alpha) * float4x4.CreateScale(0.5f);
-
-            _xform = view* float4x4.CreateScale(0.5f) * float4x4.CreateTranslation(-2, -33, 34);
+            _xform = RC.Projection * float4x4.CreateTranslation(0, 0, 5.0f) * view * float4x4.CreateScale(0.5f);
 
             RC.SetShaderParam(_xFormParam, _xform);
             RC.Render(_mesh);
-
-
-
-
+            
             //RC.Render(_mesh);
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
-
-
         }
 
 
@@ -158,7 +129,9 @@ namespace Fusee.Tutorial.Core
 
             // Create a new projection matrix generating undistorted images on the new aspect ratio.
             var aspectRatio = Width / (float)Height;
-            RC.SetShaderParam(_particleSizeParam, new float2(0.01f, 0.01f * aspectRatio));//set params that can be controlled with arrow keys
+            RC.SetShaderParam(_particleSizeParam, new float2(0.01f, 0.01f * aspectRatio)); //set params that can be controlled with arrow keys
+
+            // Question: should we set particleSize depending on aspect ratio or rather define an amount of pixels, thus taking window size into computation?
 
             // 0.25*PI Rad -> 45° Opening angle along the vertical direction. Horizontal opening angle is calculated based on the aspect ratio
             // Front clipping happens at 1 (Objects nearer than 1 world unit get clipped)
