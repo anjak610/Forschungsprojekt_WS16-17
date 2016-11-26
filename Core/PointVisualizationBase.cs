@@ -1,16 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.IO;
 using Fusee.Base.Core;
 using Fusee.Engine.Common;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
-using Fusee.Serialization;
-using Fusee.Xene;
 using static Fusee.Engine.Core.Input;
-using Fusee.Tutorial.Core;
-using System.Globalization;
 using Fusee.Tutorial.Desktop;
 
 namespace Fusee.Tutorial.Core
@@ -31,6 +24,8 @@ namespace Fusee.Tutorial.Core
 
         public static PointCloud cloud;
         public static PointReader preader;
+
+        private const float ParticleSize = 0.05f;
         
         // Init is called on startup. 
         public override void Init()
@@ -49,7 +44,7 @@ namespace Fusee.Tutorial.Core
             RC.SetShader(shader);
 
             _particleSizeParam = RC.GetShaderParam(shader, "particleSize");
-            RC.SetShaderParam(_particleSizeParam, new float2(0.01f, 0.01f));
+            RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize));
 
             _xFormParam = RC.GetShaderParam(shader, "xForm");
             _xform = float4x4.Identity;
@@ -110,7 +105,7 @@ namespace Fusee.Tutorial.Core
             }
 
             var view = float4x4.CreateRotationY(_alpha) * float4x4.CreateRotationX(_beta);
-            _xform = RC.Projection * float4x4.CreateTranslation(0, 0, 5.0f) * view * float4x4.CreateScale(0.5f);
+            _xform = RC.Projection * float4x4.CreateTranslation(0, 0, 5.0f) * view;
 
             RC.SetShaderParam(_xFormParam, _xform);
             RC.Render(_mesh);
@@ -120,7 +115,6 @@ namespace Fusee.Tutorial.Core
             Present();
         }
 
-
         // Is called when the window was resized
         public override void Resize()
         {
@@ -129,7 +123,7 @@ namespace Fusee.Tutorial.Core
 
             // Create a new projection matrix generating undistorted images on the new aspect ratio.
             var aspectRatio = Width / (float)Height;
-            RC.SetShaderParam(_particleSizeParam, new float2(0.01f, 0.01f * aspectRatio)); //set params that can be controlled with arrow keys
+            RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize * aspectRatio)); //set params that can be controlled with arrow keys
 
             // Question: should we set particleSize depending on aspect ratio or rather define an amount of pixels, thus taking window size into computation?
 

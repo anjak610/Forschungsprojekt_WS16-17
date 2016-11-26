@@ -2,10 +2,15 @@
     precision highp float;     
 #endif
 
-varying vec3 modelpos;
+varying float dist;
 
 void main()
 {
-    //gl_FragColor = vec4(1, 0.5, modelpos.z*0.01+ 0.8, 1);
-	gl_FragColor = vec4(1, 0.5, 0.8, 1);
+	vec3 color = vec3(1, 0.5, 0.8);
+	//vec3 color = vec3(1, 1, 1);
+
+	// map from interval [-1, 1] to [0, 1]
+	float _dist = 0.5 * dist + 0.5;
+
+	gl_FragColor = vec4( (1.5-dist) *  color, 1);
 }
