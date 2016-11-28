@@ -16,8 +16,10 @@ namespace Fusee.Tutorial.Core
 
         private IShaderParam _particleSizeParam;
         private IShaderParam _xFormParam;
+        //private IShaderParam _screenSizeParam;
 
         private float4x4 _xform;
+        private float2 _screenSize;
         
         private float _alpha;
         private float _beta;
@@ -48,7 +50,9 @@ namespace Fusee.Tutorial.Core
 
             _xFormParam = RC.GetShaderParam(shader, "xForm");
             _xform = float4x4.Identity;
-            
+
+            //_screenSizeParam = RC.GetShaderParam(shader, "screenSize");
+           // _screenSize = new float2(RC.View.Width, RC.Height); //set screen/window dimensions according to the current viewport
             //RC.SetShaderParam(_xFormParam, float4x4.CreateScale(0.5f) * float4x4.CreateTranslation(-2, -33, 34));
 
             _mesh = new Mesh();
