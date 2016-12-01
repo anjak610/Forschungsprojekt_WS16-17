@@ -5,6 +5,9 @@ using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using static Fusee.Engine.Core.Input;
 using Fusee.Tutorial.Desktop;
+using System.Diagnostics;
+using System.Linq;
+
 
 namespace Fusee.Tutorial.Core
 {
@@ -20,7 +23,16 @@ namespace Fusee.Tutorial.Core
 
         private float4x4 _xform;
         private float2 _screenSize;
-        
+
+        private bool _scaleBig;
+        private bool _scaleSmall;
+        private bool _twoTouchRepeated;
+        private bool _twoTouchPointDistance;
+
+        private List<float3> normals = new List<float3>();
+        List<float3> vertices = new List<float3>();
+        List<ushort> triangles = new List<ushort>();
+
         private float _alpha;
         private float _beta;
 
@@ -37,6 +49,9 @@ namespace Fusee.Tutorial.Core
             preader = new PointReader(cloud);
             preader.readPointList();
 
+            _twoTouchRepeated = false;
+            _twoTouchPointDistance = false;
+    
             //read shaders from files
             var vertsh = AssetStorage.Get<string>("VertexShader.vert");
             var pixsh = AssetStorage.Get<string>("PixelShader.frag");
@@ -58,9 +73,9 @@ namespace Fusee.Tutorial.Core
             _mesh = new Mesh();
 
             float3 pickedvertex;
-            List<float3> vertices = new List<float3>();
-            List<float3> normals = new List<float3>();
-            List<ushort> triangles = new List<ushort>();
+           // List<float3> vertices = new List<float3>();
+            //List<float3> normals = new List<float3>();
+           // List<ushort> triangles = new List<ushort>();
 
             for (var i = 0; i < cloud.Vertices.Count; i++)
             {
@@ -86,9 +101,9 @@ namespace Fusee.Tutorial.Core
                 
             }
 
-            _mesh.Vertices = vertices.ToArray();
+           /* _mesh.Vertices = vertices.ToArray();
             _mesh.Normals = normals.ToArray();
-            _mesh.Triangles = triangles.ToArray();
+            _mesh.Triangles = triangles.ToArray();*/
 
 
             // Set the clear color for the backbuffer
@@ -101,6 +116,10 @@ namespace Fusee.Tutorial.Core
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
 
+            _mesh.Vertices = vertices.ToArray();
+            _mesh.Normals = normals.ToArray();
+            _mesh.Triangles = triangles.ToArray();
+
             float2 speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);
             if (Mouse.LeftButton || Touch.GetTouchActive(TouchPoints.Touchpoint_0))
             {
@@ -110,6 +129,82 @@ namespace Fusee.Tutorial.Core
 
             var view = float4x4.CreateRotationY(_alpha) * float4x4.CreateRotationX(_beta);
             _xform = RC.Projection * float4x4.CreateTranslation(0, 0, 5.0f) * view;
+
+            if (Keyboard.ADAxis != 0 )
+            {
+                _scaleBig = true;
+            }
+            else
+            {
+                _scaleBig = false;
+            }
+
+            if(Keyboard.WSAxis != 0)
+            {
+                _scaleSmall = true;
+            }
+            else
+            {
+                _scaleSmall = false;
+            }
+
+            if (_scaleBig)
+            {
+                for (int i = 0; i < normals.Count; i++)
+                {
+                    normals[i] = normals[i] + (normals[i]/200 );
+                }
+            }
+
+            if(_scaleSmall)
+
+            {
+                for (int i = 0; i < normals.Count; i++)
+                {
+                    normals[i] = normals[i] - (normals[i] / 200);
+                }
+            }
+
+            if (Touch.TwoPoint)
+            {
+                if (!_twoTouchRepeated)
+                {
+                    _twoTouchRepeated = true;
+
+                    for (int i = 0; i < normals.Count; i++)
+                    {
+                        normals[i] = normals[i] + (normals[i] / 20);
+                    }
+                }
+                else
+                {
+                    _twoTouchRepeated = false;
+                }
+            }
+
+          /*  if (Touch.TwoPoint)
+            {
+               if(!_twoTouchPointDistance)
+                {
+                    _twoTouchPointDistance = true;
+                    _zoomVel = Touch.TwoPointDistanceVel * -0.01f;
+
+                }
+            }
+            else
+            {
+                _twoTouchPointDistance = false;
+
+            }
+
+            if(_twoTouchPointDistance)
+            { 
+                for (int i = 0; i < normals.Count; i++)
+                {
+                    normals[i] = normals[i] - (normals[i] / 20);
+                }
+            }*/
+
 
             RC.SetShaderParam(_xFormParam, _xform);
             RC.Render(_mesh);
