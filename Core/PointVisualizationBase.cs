@@ -4,6 +4,7 @@ using Fusee.Engine.Common;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using static Fusee.Engine.Core.Input;
+using static Fusee.Engine.Core.Time;
 using Fusee.Tutorial.Desktop;
 using System.Diagnostics;
 using System.Linq;
@@ -24,10 +25,9 @@ namespace Fusee.Tutorial.Core
         private float4x4 _xform;
         private float2 _screenSize;
 
-        private bool _scaleBig;
-        private bool _scaleSmall;
+        private bool _scaleKey; 
         private bool _twoTouchRepeated;
-        private bool _twoTouchPointDistance;
+        private bool _FirstScale;
 
         private List<float3> normals = new List<float3>();
         List<float3> vertices = new List<float3>();
@@ -50,8 +50,8 @@ namespace Fusee.Tutorial.Core
             preader.readPointList();
 
             _twoTouchRepeated = false;
-            _twoTouchPointDistance = false;
-    
+            _FirstScale = false;
+
             //read shaders from files
             var vertsh = AssetStorage.Get<string>("VertexShader.vert");
             var pixsh = AssetStorage.Get<string>("PixelShader.frag");
@@ -130,81 +130,42 @@ namespace Fusee.Tutorial.Core
             var view = float4x4.CreateRotationY(_alpha) * float4x4.CreateRotationX(_beta);
             _xform = RC.Projection * float4x4.CreateTranslation(0, 0, 5.0f) * view;
 
-            if (Keyboard.ADAxis != 0 )
+
+
+            if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0 )
             {
-                _scaleBig = true;
+                _scaleKey = true;
             }
             else
             {
-                _scaleBig = false;
+                _scaleKey = false;
             }
 
-            if(Keyboard.WSAxis != 0)
-            {
-                _scaleSmall = true;
-            }
-            else
-            {
-                _scaleSmall = false;
-            }
-
-            if (_scaleBig)
+            if (_scaleKey)
             {
                 for (int i = 0; i < normals.Count; i++)
                 {
-                    normals[i] = normals[i] + (normals[i]/200 );
-                }
+                    normals[i] = normals[i] + Keyboard.ADAxis*(normals[i]/200) ;
+                 }
             }
+    
 
-            if(_scaleSmall)
+             if (Touch.TwoPoint)
+             {
+                 if (!_twoTouchRepeated)
+                 {
+                     _twoTouchRepeated = true;
 
-            {
-                for (int i = 0; i < normals.Count; i++)
-                {
-                    normals[i] = normals[i] - (normals[i] / 200);
-                }
-            }
-
-            if (Touch.TwoPoint)
-            {
-                if (!_twoTouchRepeated)
-                {
-                    _twoTouchRepeated = true;
-
-                    for (int i = 0; i < normals.Count; i++)
-                    {
-                        normals[i] = normals[i] + (normals[i] / 20);
-                    }
-                }
-                else
-                {
-                    _twoTouchRepeated = false;
-                }
-            }
-
-          /*  if (Touch.TwoPoint)
-            {
-               if(!_twoTouchPointDistance)
-                {
-                    _twoTouchPointDistance = true;
-                    _zoomVel = Touch.TwoPointDistanceVel * -0.01f;
-
-                }
-            }
-            else
-            {
-                _twoTouchPointDistance = false;
-
-            }
-
-            if(_twoTouchPointDistance)
-            { 
-                for (int i = 0; i < normals.Count; i++)
-                {
-                    normals[i] = normals[i] - (normals[i] / 20);
-                }
-            }*/
-
+                     for (int i = 0; i < normals.Count; i++)
+                     {
+                         normals[i] = normals[i] + (normals[i] / 20);
+                     }
+                 }
+                 else
+                 {
+                     _twoTouchRepeated = false;                
+                 }
+             }
 
             RC.SetShaderParam(_xFormParam, _xform);
             RC.Render(_mesh);
