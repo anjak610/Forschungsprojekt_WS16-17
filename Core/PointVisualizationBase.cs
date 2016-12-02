@@ -19,22 +19,13 @@ namespace Fusee.Tutorial.Core
     {
         private Mesh _mesh;
 
-        //Sceneviewer Parameters
-        private static float _angleHorz = M.PiOver6 * 2.0f, _angleVert = -M.PiOver6 * 0.5f,
-                           _angleVelHorz, _angleVelVert, _angleRoll, _angleRollInit, _zoomVel, _zoom;
-        private static float2 _offset;
-        private static float2 _offsetInit;
+        //Sceneviewer Parameters    
         private float _maxPinchSpeed;
         private float _minPinchSpeed;
         private bool _scaleKey;
         private bool _twoTouchRepeated;
 
-        //End ScneneViewer
-        //New Stuff
-        private const float RotationSpeed = 7;
-        private const float Damping = 0.8f;
-     
-        //End new Stuff
+        //End ScneneViewer      
 
         private IShaderParam _particleSizeParam;
         private IShaderParam _xFormParam;
@@ -64,20 +55,9 @@ namespace Fusee.Tutorial.Core
             preader = new PointReader(cloud);
             preader.readPointList();
 
-            //SceneViewer
-            _twoTouchRepeated = false;
-            _zoom = 400;
-
-            _angleRoll = 0;
-            _angleRollInit = 0;
-            _twoTouchRepeated = false;
-            _offset = float2.Zero;
-            _offsetInit = float2.Zero;
-
-            //End SceneViewer
-            //New Stuff
-       
-            //End new Stuff
+            //For SceneViewer
+            _twoTouchRepeated = false;      
+            _twoTouchRepeated = false; 
 
 
             //read shaders from files
@@ -101,9 +81,6 @@ namespace Fusee.Tutorial.Core
             _mesh = new Mesh();
 
             float3 pickedvertex;
-           // List<float3> vertices = new List<float3>();
-            //List<float3> normals = new List<float3>();
-           // List<ushort> triangles = new List<ushort>();
 
             for (var i = 0; i < cloud.Vertices.Count; i++)
             {
@@ -128,11 +105,6 @@ namespace Fusee.Tutorial.Core
                 triangles.Add((ushort)(2 + i * 4));
                 
             }
-
-           /* _mesh.Vertices = vertices.ToArray();
-            _mesh.Normals = normals.ToArray();
-            _mesh.Triangles = triangles.ToArray();*/
-
 
             // Set the clear color for the backbuffer
             RC.ClearColor = new float4(0.95f, 0.95f, 0.95f, 1);
@@ -175,45 +147,21 @@ namespace Fusee.Tutorial.Core
                 {
                     normals[i] = normals[i] + Keyboard.ADAxis*(normals[i]/200) ;
                  }
-            }
-
-
-            /*  if (Touch.TwoPoint)
-              {
-                  if (!_twoTouchRepeated)
-                  {
-                      _twoTouchRepeated = true;
-
-                      for (int i = 0; i < normals.Count; i++)
-                      {
-                          normals[i] = normals[i] + (normals[i] / 20);
-                      }
-                   }
-
-                  else
-                  {
-                      _twoTouchRepeated = false;                
-                  }
-              }*/
-            var curDamp = (float)System.Math.Exp(-Damping * DeltaTime);
+            }       
 
             if (Touch.TwoPoint)
             {
                 if (!_twoTouchRepeated)
                 {
-                    _twoTouchRepeated = true;
-                   // _angleRollInit = Touch.TwoPointAngle - _angleRoll;
-                    _offsetInit = Touch.TwoPointMidPoint - _offset;
+                    _twoTouchRepeated = true;          
                     _maxPinchSpeed = 0;
                     _minPinchSpeed = 0;
                 }
-                _zoomVel = Touch.TwoPointDistanceVel * -0.01f;
-                _angleRoll = Touch.TwoPointAngle - _angleRollInit;
-                _offset = Touch.TwoPointMidPoint - _offsetInit;
+ 
                 float pinchSpeed = Touch.TwoPointDistanceVel;
                 if (pinchSpeed > _maxPinchSpeed)
                 {
-                    _maxPinchSpeed = pinchSpeed; // _maxPinchSpeed is used for debugging only.
+                    _maxPinchSpeed = pinchSpeed;
                     for (int i = 0; i < normals.Count; i++)
                     {
                         normals[i] = normals[i] + (normals[i] / 10);
@@ -230,33 +178,13 @@ namespace Fusee.Tutorial.Core
             }
             else
             {
-                _twoTouchRepeated = false;
-                _zoomVel = Mouse.WheelVel * -0.5f;
-                _angleRoll *= curDamp * 0.8f;
-                _offset *= curDamp * 0.8f;              
+                _twoTouchRepeated = false;                    
                
-            }
-
-           /* if (_maxPinchSpeed > 0)
-            {
-                _twoTouchRepeated = true;
-                for (int i = 0; i < normals.Count; i++)
-                {
-                    normals[i] = normals[i] + (normals[i] / 20);
-                }
-            }
-            else
-            {
-                _twoTouchRepeated = false;
-                
-            }*/
-
-    
+            }    
 
             RC.SetShaderParam(_xFormParam, _xform);
-            RC.Render(_mesh);
-            
-            //RC.Render(_mesh);
+            RC.Render(_mesh);            
+  
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
         }
