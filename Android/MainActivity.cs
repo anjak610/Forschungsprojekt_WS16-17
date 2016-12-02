@@ -83,7 +83,7 @@ namespace Fusee.Tutorial.Android
 
 		        Engine.Core.Input.AddDriverImp(
 		            new Fusee.Engine.Imp.Graphics.Android.RenderCanvasInputDriverImp(app.CanvasImplementor));
-		        // Engine.Core.Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Android.WindowsTouchInputDriverImp(app.CanvasImplementor));
+		         //Engine.Core.Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Android.WindowsTouchInputDriverImp(app.CanvasImplementor));
 		        // Deleayed into rendercanvas imp....app.Run() - SEE DELEGATE ABOVE;
 		    }
 		    else
