@@ -12,7 +12,7 @@ namespace Fusee.Tutorial.Core
     [FuseeApplication(Name = "Forschungsprojekt", Description = "HFU Wintersemester 16-17")]
     public class PointVisualizationBase : RenderCanvas
     {
-        private Mesh _mesh;
+        private Mesh[] _meshes;
 
         private IShaderParam _particleSizeParam;
         private IShaderParam _xFormParam;
@@ -22,18 +22,32 @@ namespace Fusee.Tutorial.Core
         private float _alpha;
         private float _beta;
 
-        public static PointCloud cloud;
-        public static PointReader preader;
-
         private const float ParticleSize = 0.05f;
         
         // Init is called on startup. 
         public override void Init()
         {
             // read point cloud from file and assign vertices to cloud object
-            cloud = new PointCloud();
-            preader = new PointReader(cloud);
-            preader.readPointList();
+            //PointCloud cloud = AssetStorage.Get<PointCloud>("PointCloud_IPM2.txt");
+            PointCloud cloud = AssetStorage.Get<PointCloud>("TestPoints.txt");
+            PointCloud basicPoints = AssetStorage.Get<PointCloud>("BasicPoints.txt");
+
+            //cloud = PointCloud.Merge(basicPoints, cloud);
+            cloud = PointCloud.Merge(cloud, basicPoints); // does not work?
+
+            //cloud = new PointCloud();
+            //PointReader preader = new PointReader(cloud);
+            //PointReader preader.readPointList();
+
+            // TO-DO:
+            // 1. Warum wird (cloud,basicPoints) nicht angezeigt?
+            // Aus irgendeinem Grund kann OpenGL nur 4096 Punkte (x4) darstellen, d.h. man bräuchte dann ne Art Vertex Buffer
+            // -> mehrere Meshes aus einer PCL -> macht kein Sinn -> Fusee Source Code ändern
+            // 
+            // 2. Verdrehte Achsen
+            // 3. PointCloud lesen auch auf Android
+
+            _meshes = ConvertPointCloudToMeshes(cloud);
 
             //read shaders from files
             var vertsh = AssetStorage.Get<string>("VertexShader.vert");
@@ -48,21 +62,31 @@ namespace Fusee.Tutorial.Core
 
             _xFormParam = RC.GetShaderParam(shader, "xForm");
             _xform = float4x4.Identity;
-            
+
             //RC.SetShaderParam(_xFormParam, float4x4.CreateScale(0.5f) * float4x4.CreateTranslation(-2, -33, 34));
 
-            _mesh = new Mesh();
+            // Set the clear color for the backbuffer
+            RC.ClearColor = new float4(0.95f, 0.95f, 0.95f, 1);
+        }
+
+        // Converts a point cloud into meshes.
+        private Mesh[] ConvertPointCloudToMeshes(PointCloud pointCloud)
+        {
+            // Because 1 mesh can only take up to 65.535 indices in the triangles ushort[] array,
+            // we need multiple meshes.
+
+            List<Mesh> meshesList = new List<Mesh>();
+            Mesh currentMesh = new Mesh();
 
             float3 pickedvertex;
             List<float3> vertices = new List<float3>();
             List<float3> normals = new List<float3>();
             List<ushort> triangles = new List<ushort>();
 
-            for (var i = 0; i < cloud.Vertices.Count; i++)
+            for(var i=0; i<pointCloud.Vertices.Count; i++)
             {
-
                 //vertex list times 4
-                pickedvertex = cloud.Vertices[i];
+                pickedvertex = pointCloud.Vertices[i];
                 vertices.Add(pickedvertex);
                 vertices.Add(pickedvertex);
                 vertices.Add(pickedvertex);
@@ -79,16 +103,26 @@ namespace Fusee.Tutorial.Core
                 triangles.Add((ushort)(0 + i * 4));
                 triangles.Add((ushort)(3 + i * 4));
                 triangles.Add((ushort)(2 + i * 4));
-                
+
+                // regarding that triangles can only take indices up to 65535, we need to place more vertices in another mesh
+
+                var nextLoopMaxIndex = 3 + (vertices.Count + 1) * 4;
+                if (nextLoopMaxIndex > 65535 || i == pointCloud.Vertices.Count - 1)
+                {
+                    currentMesh.Vertices = vertices.ToArray();
+                    currentMesh.Normals = normals.ToArray();
+                    currentMesh.Triangles = triangles.ToArray();
+
+                    vertices = new List<float3>();
+                    normals = new List<float3>();
+                    triangles = new List<ushort>();
+
+                    meshesList.Add(currentMesh);
+                    currentMesh = new Mesh();
+                }
             }
 
-            _mesh.Vertices = vertices.ToArray();
-            _mesh.Normals = normals.ToArray();
-            _mesh.Triangles = triangles.ToArray();
-
-
-            // Set the clear color for the backbuffer
-            RC.ClearColor = new float4(0.95f, 0.95f, 0.95f, 1);
+            return meshesList.ToArray();
         }
 
         // RenderAFrame is called once a frame
@@ -108,7 +142,11 @@ namespace Fusee.Tutorial.Core
             _xform = RC.Projection * float4x4.CreateTranslation(0, 0, 5.0f) * view;
 
             RC.SetShaderParam(_xFormParam, _xform);
-            RC.Render(_mesh);
+
+            foreach (var mesh in _meshes)
+            {
+                RC.Render(mesh);
+            }
             
             //RC.Render(_mesh);
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.

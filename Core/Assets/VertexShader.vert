@@ -7,7 +7,7 @@ varying float dist; // distance
 void main()
 {
 	vec4 newVertex = xForm * vec4(fuVertex, 1.0);
-	dist = newVertex.z/newVertex.w;
+	dist = newVertex.z / newVertex.w;
 
 	vec4 result = newVertex + vec4(fuNormal.xy * particleSize, 0, 0);
 

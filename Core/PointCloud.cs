@@ -19,14 +19,12 @@ namespace Fusee.Tutorial.Core
 
         //constructor
         public PointCloud() 
-      {
-               _vertices = new List<float3>();
-                _colors = new List<float3>();
-                _echoIds = new List<float>();
-                _scanNrs = new List<float>();
-
-    }
-
+        {
+            _vertices = new List<float3>();
+            _colors = new List<float3>();
+            _echoIds = new List<float>();
+            _scanNrs = new List<float>();
+        }
 
         public List<float3> Vertices
         {
@@ -50,6 +48,16 @@ namespace Fusee.Tutorial.Core
         {
             get { return _scanNrs; }
             set { _scanNrs = value; }
+        }
+
+        public static PointCloud Merge(PointCloud cloud1, PointCloud cloud2)
+        {
+            cloud1.Vertices.AddRange(cloud2.Vertices);
+            cloud1.Colors.AddRange(cloud2.Colors);
+            cloud1.EchoIds.AddRange(cloud2.EchoIds);
+            cloud1.ScanNrs.AddRange(cloud2.ScanNrs);
+
+            return cloud1;
         }
     }
 }
