@@ -4,12 +4,7 @@ using Fusee.Engine.Common;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using static Fusee.Engine.Core.Input;
-using static Fusee.Engine.Core.Time;
 using Fusee.Tutorial.Desktop;
-using Fusee.Serialization;
-using System.Diagnostics;
-using System.Linq;
-using System;
 
 namespace Fusee.Tutorial.Core
 {
