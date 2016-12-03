@@ -4,8 +4,9 @@
   <PropertyGroup>
     <RootNamespace>Fusee.Tutorial.Core</RootNamespace>
     <AssemblyName>Fusee.Tutorial.Core</AssemblyName>
+    <!-- <FuseeRoot Condition=" '$(FuseeRoot)' == '' ">L:\Programme\Gitkraken\Fusee\</FuseeRoot> -->
     <FuseeRoot Condition=" '$(FuseeRoot)' == '' ">D:\Alberto\Programmdateien\GitHub\Fusee\</FuseeRoot>
-    <ProjectBuildRoot Condition=" '$(ProjectBuildRoot)' == '' ">..</ProjectBuildRoot>
+    <ProjectBuildRoot Condition=" '$(ProjectBuildRoot)' == '' ">..</ProjectBuildRoot>    
     <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -85,24 +86,16 @@
     <None Include="Assets\AboutFuseeAssets.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Content Include="Assets\TestPoints.txt">
+    <Content Include="Assets\small_test_points.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\BasicPoints.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\PointCloud_IPM.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\PointCloud_IPM2.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\VertexShader.vert">
+    <EmbeddedResource Include="Assets\VertexShader.vert">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\PixelShader.frag">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Assets\PixelShader.frag">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </EmbeddedResource>
+    <None Include="Assets\test_points.ipm" />
   </ItemGroup>
   <!-- ItemGroup>
     <Reference Include="Fusee.SerializationSerializer">
