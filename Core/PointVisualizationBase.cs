@@ -23,13 +23,25 @@ namespace Fusee.Tutorial.Core
         private float _maxPinchSpeed;
         private float _minPinchSpeed;
         private bool _scaleKey;
+        private bool _moveMouseKey;
         private bool _twoTouchRepeated;
+        public static float _zoomVel, _zoom;
+        public bool _mouseWheel;  
+
+        private static float2 _offset;
+        private static float2 _offsetInit;
+        private static float _offsetInitMouseX;
+        private static float _offsetInitMouseY;
+        private static float _offsetMouseX;
+        private static float _offsetMouseY;
 
         //End ScneneViewer      
 
         private IShaderParam _particleSizeParam;
         private IShaderParam _xFormParam;
         private IShaderParam _screenSizeParam;
+
+        private float4x4 projection;
 
         private float4x4 _xform;
         private float2 _screenSize;
@@ -57,8 +69,12 @@ namespace Fusee.Tutorial.Core
 
             //For SceneViewer
             _twoTouchRepeated = false;      
-            _twoTouchRepeated = false; 
-
+            _twoTouchRepeated = false;
+            _zoom = -10;
+            _offsetMouseX = 0f;
+            _offsetMouseY = 0f;
+            _offset = float2.Zero;
+            _offsetInit = float2.Zero;
 
             //read shaders from files
             var vertsh = AssetStorage.Get<string>("VertexShader.vert");
@@ -120,19 +136,37 @@ namespace Fusee.Tutorial.Core
             _mesh.Normals = normals.ToArray();
             _mesh.Triangles = triangles.ToArray();
 
+            MoveInScene();
+
+
+            RC.SetShaderParam(_xFormParam, _xform);
+            RC.Render(_mesh);
+
+            var mtxCam = float4x4.LookAt(0, 0, -_zoom, 0, 0, -50, 0, 1, 0);
+            var mtxOffset = float4x4.CreateTranslation(2 * _offset.x / Width, -2 * _offset.y / Height, 0);
+            var mtxOffsetDesktop = float4x4.CreateTranslation(2 * _offsetMouseX / Width, -2 * _offsetMouseY / Height, 0);
+
+            RC.Projection = projection * mtxOffsetDesktop * mtxOffset * mtxCam;
+
+            // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
+            Present();
+        }
+
+        public void MoveInScene()
+        {
+
+            //rotate around Object
             float2 speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);
             if (Mouse.LeftButton || Touch.GetTouchActive(TouchPoints.Touchpoint_0))
             {
                 _alpha -= speed.x * 0.0001f;
                 _beta -= speed.y * 0.0001f;
             }
-
             var view = float4x4.CreateRotationY(_alpha) * float4x4.CreateRotationX(_beta);
             _xform = RC.Projection * float4x4.CreateTranslation(0, 0, 5.0f) * view;
 
-
-
-            if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0 )
+            //Scale Points with W and A
+            if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0)
             {
                 _scaleKey = true;
             }
@@ -145,19 +179,36 @@ namespace Fusee.Tutorial.Core
             {
                 for (int i = 0; i < normals.Count; i++)
                 {
-                    normals[i] = normals[i] + Keyboard.ADAxis*(normals[i]/200) ;
-                 }
-            }       
+                    normals[i] = normals[i] + Keyboard.ADAxis * (normals[i] / 200);
+                }
+            }
 
-            if (Touch.TwoPoint)
+            //Move Camer on x- and y-axis through scene by click Right MouseButton
+
+
+            if (Mouse.RightButton ==true)
+            {
+                _offsetMouseY = Mouse.YVel - _offsetInitMouseY;
+                _offsetMouseX = Mouse.XVel - _offsetInitMouseX;
+            }
+            else
+            {
+                _offsetInitMouseY = Mouse.YVel - _offsetMouseY;
+                _offsetInitMouseX = Mouse.XVel - _offsetMouseX;
+            }
+
+            // Scale Points with Touch and move camera on x- and y-axis through scene
+            if (Touch.TwoPoint) // TODO: Implement scaling with slide movements on screen 
             {
                 if (!_twoTouchRepeated)
                 {
-                    _twoTouchRepeated = true;          
+                    _twoTouchRepeated = true;
                     _maxPinchSpeed = 0;
                     _minPinchSpeed = 0;
+                    _offsetInit = Touch.TwoPointMidPoint - _offset;
                 }
- 
+
+                _offset = Touch.TwoPointMidPoint - _offsetInit;
                 float pinchSpeed = Touch.TwoPointDistanceVel;
                 if (pinchSpeed > _maxPinchSpeed)
                 {
@@ -167,7 +218,7 @@ namespace Fusee.Tutorial.Core
                         normals[i] = normals[i] + (normals[i] / 10);
                     }
                 }
-                else if(pinchSpeed < _minPinchSpeed)
+                else if (pinchSpeed < _minPinchSpeed)
                 {
                     _minPinchSpeed = pinchSpeed;
                     for (int i = 0; i < normals.Count; i++)
@@ -178,24 +229,35 @@ namespace Fusee.Tutorial.Core
             }
             else
             {
-                _twoTouchRepeated = false;                    
-               
-            }    
+                _twoTouchRepeated = false;
+            }           
 
-            RC.SetShaderParam(_xFormParam, _xform);
-            RC.Render(_mesh);            
-  
-            // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
-            Present();
+            //Zoom with Mousewheel
+            if (Mouse.Wheel != 0)
+            {
+                _mouseWheel = true;
+
+            }
+
+            if (_mouseWheel)
+            {
+                _zoomVel = Mouse.WheelVel * -0.005f;
+            }
+
+            _zoom += _zoomVel;
+            // Limit zoom
+            if (_zoom < -50)
+                _zoom = -50;
+            if (_zoom > 200)
+                _zoom = 200;
+
         }
-
-
         // Is called when the window was resized
         public override void Resize()
         {
             // Set the new rendering area to the entire new windows size
             RC.Viewport(0, 0, Width, Height);
-
+            //var mtxCam = float4x4.LookAt(0, 20, -_zoom, 0, 0, 0, 0, 1, 0);
             // Create a new projection matrix generating undistorted images on the new aspect ratio.
             var aspectRatio = Width / (float)Height;
             RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize * aspectRatio)); //set params that can be controlled with arrow keys
@@ -205,8 +267,8 @@ namespace Fusee.Tutorial.Core
             // 0.25*PI Rad -> 45° Opening angle along the vertical direction. Horizontal opening angle is calculated based on the aspect ratio
             // Front clipping happens at 1 (Objects nearer than 1 world unit get clipped)
             // Back clipping happens at 2000 (Anything further away from the camera than 2000 world units gets clipped, polygons will be cut)
-            var projection = float4x4.CreatePerspectiveFieldOfView(3.141592f * 0.25f, aspectRatio, 1, 20000);
-            RC.Projection = projection;
+            projection = float4x4.CreatePerspectiveFieldOfView(3.141592f * 0.25f, aspectRatio, 1, 20000);
+           // RC.Projection =projection *mtxCam;
         }
 
     }
