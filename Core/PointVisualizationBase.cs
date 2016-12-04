@@ -44,7 +44,7 @@ namespace Fusee.Tutorial.Core
         private float4x4 projection;
 
         private float4x4 _xform;
-        private float2 _screenSize;
+        public float2 _screenSize;
                     
         private List<float3> normals = new List<float3>();
         List<float3> vertices = new List<float3>();
@@ -57,11 +57,15 @@ namespace Fusee.Tutorial.Core
         public static PointReader preader;
 
 
-        private const float ParticleSize = 0.05f;
+        public float ParticleSize;
         
         // Init is called on startup. 
         public override void Init()
         {
+            // screenSize --> now requested from android device and windows screen
+            //_screenSize = new float2(Width, Height);
+           
+
             // read point cloud from file and assign vertices to cloud object
             cloud = new PointCloud();
             preader = new PointReader(cloud);
@@ -90,8 +94,6 @@ namespace Fusee.Tutorial.Core
             _xFormParam = RC.GetShaderParam(shader, "xForm");
             _xform = float4x4.Identity;
 
-            _screenSizeParam = RC.GetShaderParam(shader, "screenSize");
-            _screenSize = new float2(Width, Height); //set screen/window dimensions according to the current viewport
             //RC.SetShaderParam(_xFormParam, float4x4.CreateScale(0.5f) * float4x4.CreateTranslation(-2, -33, 34));
 
             _mesh = new Mesh();
@@ -262,7 +264,8 @@ namespace Fusee.Tutorial.Core
             var aspectRatio = Width / (float)Height;
             RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize * aspectRatio)); //set params that can be controlled with arrow keys
 
-            // Question: should we set particleSize depending on aspect ratio or rather define an amount of pixels, thus taking window size into computation?
+            //Window size 
+            _screenSize = new float2(Width, Height);
 
             // 0.25*PI Rad -> 45° Opening angle along the vertical direction. Horizontal opening angle is calculated based on the aspect ratio
             // Front clipping happens at 1 (Objects nearer than 1 world unit get clipped)
