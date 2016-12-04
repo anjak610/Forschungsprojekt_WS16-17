@@ -23,12 +23,17 @@ namespace Fusee.Tutorial.Core
         private float _maxPinchSpeed;
         private float _minPinchSpeed;
         private bool _scaleKey;
+        private bool _moveMouseKey;
         private bool _twoTouchRepeated;
         public static float _zoomVel, _zoom;
         public bool _mouseWheel;  
 
         private static float2 _offset;
         private static float2 _offsetInit;
+        private static float _offsetInitMouseX;
+        private static float _offsetInitMouseY;
+        private static float _offsetMouseX;
+        private static float _offsetMouseY;
 
         //End ScneneViewer      
 
@@ -66,6 +71,8 @@ namespace Fusee.Tutorial.Core
             _twoTouchRepeated = false;      
             _twoTouchRepeated = false;
             _zoom = -10;
+            _offsetMouseX = 0f;
+            _offsetMouseY = 0f;
             _offset = float2.Zero;
             _offsetInit = float2.Zero;
 
@@ -137,8 +144,9 @@ namespace Fusee.Tutorial.Core
 
             var mtxCam = float4x4.LookAt(0, 0, -_zoom, 0, 0, -50, 0, 1, 0);
             var mtxOffset = float4x4.CreateTranslation(2 * _offset.x / Width, -2 * _offset.y / Height, 0);
+            var mtxOffsetDesktop = float4x4.CreateTranslation(2 * _offsetMouseX / Width, -2 * _offsetMouseY / Height, 0);
 
-            RC.Projection = projection  *mtxOffset * mtxCam;
+            RC.Projection = projection * mtxOffsetDesktop * mtxOffset * mtxCam;
 
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
@@ -154,10 +162,8 @@ namespace Fusee.Tutorial.Core
                 _alpha -= speed.x * 0.0001f;
                 _beta -= speed.y * 0.0001f;
             }
-
             var view = float4x4.CreateRotationY(_alpha) * float4x4.CreateRotationX(_beta);
             _xform = RC.Projection * float4x4.CreateTranslation(0, 0, 5.0f) * view;
-
 
             //Scale Points with W and A
             if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0)
@@ -177,8 +183,19 @@ namespace Fusee.Tutorial.Core
                 }
             }
 
-            //Move Camer on x- and y-axis through scene with arrowkeys
+            //Move Camer on x- and y-axis through scene by click Right MouseButton
 
+
+            if (Mouse.RightButton ==true)
+            {
+                _offsetMouseY = Mouse.YVel - _offsetInitMouseY;
+                _offsetMouseX = Mouse.XVel - _offsetInitMouseX;
+            }
+            else
+            {
+                _offsetInitMouseY = Mouse.YVel - _offsetMouseY;
+                _offsetInitMouseX = Mouse.XVel - _offsetMouseX;
+            }
 
             // Scale Points with Touch and move camera on x- and y-axis through scene
             if (Touch.TwoPoint) // TODO: Implement scaling with slide movements on screen 
