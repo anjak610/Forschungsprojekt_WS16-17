@@ -146,7 +146,8 @@ namespace Fusee.Tutorial.Core
 
             var mtxCam = float4x4.LookAt(0, 0, -_zoom, 0, 0, -50, 0, 1, 0);
             var mtxOffset = float4x4.CreateTranslation(2 * _offset.x / Width, -2 * _offset.y / Height, 0);
-            var mtxOffsetDesktop = float4x4.CreateTranslation(2 * _offsetMouseX / Width, -2 * _offsetMouseY / Height, 0);
+            var mtxOffsetDesktop = float4x4.CreateTranslation(2 * _offsetMouseX / Width, -2 * _offsetMouseY/Height,0);
+            // mtxOffsetDesktop = float4x4.CreateTranslation(2 * _offsetMouseX / Width, -2 * _offsetMouseY / Height, 0);
 
             RC.Projection = projection * mtxOffsetDesktop * mtxOffset * mtxCam;
 
@@ -188,16 +189,12 @@ namespace Fusee.Tutorial.Core
             //Move Camer on x- and y-axis through scene by click Right MouseButton
 
 
-            if (Mouse.RightButton ==true)
+            if (Mouse.RightButton)
             {
-                _offsetMouseY = Mouse.YVel - _offsetInitMouseY;
-                _offsetMouseX = Mouse.XVel - _offsetInitMouseX;
+                _offsetMouseY += Mouse.YVel  -_offsetInitMouseY; //Mouse.YVel;// 
+                _offsetMouseX += Mouse.XVel - _offsetInitMouseX;// Mouse.XVel;// 
             }
-            else
-            {
-                _offsetInitMouseY = Mouse.YVel - _offsetMouseY;
-                _offsetInitMouseX = Mouse.XVel - _offsetMouseX;
-            }
+    
 
             // Scale Points with Touch and move camera on x- and y-axis through scene
             if (Touch.TwoPoint) // TODO: Implement scaling with slide movements on screen 
@@ -238,7 +235,6 @@ namespace Fusee.Tutorial.Core
             if (Mouse.Wheel != 0)
             {
                 _mouseWheel = true;
-
             }
 
             if (_mouseWheel)
