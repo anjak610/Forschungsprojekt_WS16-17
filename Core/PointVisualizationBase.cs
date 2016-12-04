@@ -27,8 +27,8 @@ namespace Fusee.Tutorial.Core
         public static float _zoomVel, _zoom;
         public bool _mouseWheel;  
 
-       /* private static float2 _offset;
-        private static float2 _offsetInit;*/
+        private static float2 _offset;
+        private static float2 _offsetInit;
 
         //End ScneneViewer      
 
@@ -66,6 +66,8 @@ namespace Fusee.Tutorial.Core
             _twoTouchRepeated = false;      
             _twoTouchRepeated = false;
             _zoom = -10;
+            _offset = float2.Zero;
+            _offsetInit = float2.Zero;
 
             //read shaders from files
             var vertsh = AssetStorage.Get<string>("VertexShader.vert");
@@ -134,8 +136,9 @@ namespace Fusee.Tutorial.Core
             RC.Render(_mesh);
 
             var mtxCam = float4x4.LookAt(0, 0, -_zoom, 0, 0, -50, 0, 1, 0);
-          
-            RC.Projection = projection * mtxCam;
+            var mtxOffset = float4x4.CreateTranslation(2 * _offset.x / Width, -2 * _offset.y / Height, 0);
+
+            RC.Projection = projection  *mtxOffset * mtxCam;
 
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
@@ -143,6 +146,8 @@ namespace Fusee.Tutorial.Core
 
         public void MoveInScene()
         {
+
+            //rotate around Object
             float2 speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);
             if (Mouse.LeftButton || Touch.GetTouchActive(TouchPoints.Touchpoint_0))
             {
@@ -172,16 +177,21 @@ namespace Fusee.Tutorial.Core
                 }
             }
 
-            // Scale Points with Touch
-            if (Touch.TwoPoint) // TODO: Doble Tap with both fingers for scaling points  
+            //Move Camer on x- and y-axis through scene with arrowkeys
+
+
+            // Scale Points with Touch and move camera on x- and y-axis through scene
+            if (Touch.TwoPoint) // TODO: Implement scaling with slide movements on screen 
             {
                 if (!_twoTouchRepeated)
                 {
                     _twoTouchRepeated = true;
                     _maxPinchSpeed = 0;
                     _minPinchSpeed = 0;
+                    _offsetInit = Touch.TwoPointMidPoint - _offset;
                 }
 
+                _offset = Touch.TwoPointMidPoint - _offsetInit;
                 float pinchSpeed = Touch.TwoPointDistanceVel;
                 if (pinchSpeed > _maxPinchSpeed)
                 {
@@ -203,7 +213,7 @@ namespace Fusee.Tutorial.Core
             else
             {
                 _twoTouchRepeated = false;
-            }
+            }           
 
             //Zoom with Mousewheel
             if (Mouse.Wheel != 0)
@@ -223,9 +233,6 @@ namespace Fusee.Tutorial.Core
                 _zoom = -50;
             if (_zoom > 200)
                 _zoom = 200;
-
-            //Move Object in Scene 
-
 
         }
         // Is called when the window was resized
