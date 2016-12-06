@@ -88,14 +88,14 @@ namespace Fusee.Tutorial.Android
                 app.ParticleSize =  1 ;
 
                 //show display dimensions for testing
-                IWindowManager wm = ApplicationContext.GetSystemService(WindowService).JavaCast<IWindowManager>() ;
-                Display display = wm.DefaultDisplay;
-                app._screenSize = new float2(display.Width, display.Height);
-                float pixel_height = display.Height;
-                float pixel_width = display.Width;
-                string output = "Width: " + pixel_height + " Height:" + pixel_width;
+                //IWindowManager wm = ApplicationContext.GetSystemService(WindowService).JavaCast<IWindowManager>() ;
+                //Display display = wm.DefaultDisplay;
+                //app._screenSize = new float2(display.Width, display.Height);
+                //float pixel_height = display.Height;
+                //float pixel_width = display.Width;
+                //string output = "Width: " + pixel_height + " Height:" + pixel_width;
                 //Show roasted bread
-                Toast.MakeText(ApplicationContext, output, ToastLength.Short).Show();
+                //Toast.MakeText(ApplicationContext, output, ToastLength.Short).Show();
 
                 Engine.Core.Input.AddDriverImp(
 		            new Fusee.Engine.Imp.Graphics.Android.RenderCanvasInputDriverImp(app.CanvasImplementor));
