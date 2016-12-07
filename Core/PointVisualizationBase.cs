@@ -190,7 +190,7 @@ namespace Fusee.Tutorial.Core
 
             if (_mouseWheel)
             {
-                _zoomVel = Mouse.WheelVel * -0.005f;
+                _zoomVel = Mouse.WheelVel * +0.005f;
             }
 
             _zoom += _zoomVel;
