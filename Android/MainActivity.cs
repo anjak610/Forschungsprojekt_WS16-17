@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using Android.App;
 using Android.Content.PM;
@@ -9,6 +12,7 @@ using Fusee.Base.Common;
 using Fusee.Base.Core;
 using Fusee.Base.Imp.Android;
 using Fusee.Engine.Imp.Graphics.Android;
+using Fusee.Math.Core;
 using Fusee.Serialization;
 using Fusee.Tutorial.Core;
 using Font = Fusee.Base.Core.Font;
@@ -70,6 +74,49 @@ namespace Fusee.Tutorial.Android
                             return Path.GetExtension(id).ToLower().Contains("fus");
                         }
                     });
+                fap.RegisterTypeHandler( // TO-DO: implement on other platforms as well; ending shouldn't be .txt
+                new AssetHandler
+                {
+                    ReturnedType = typeof(PointCloud),
+                    Decoder = delegate (string id, object storage)
+                    {
+                        if (!Path.GetExtension(id).ToLower().Contains("txt")) return null;
+
+                        List<Point> points = new List<Point>();
+
+                        using (var sr = new StreamReader((Stream)storage, System.Text.Encoding.Default, true))
+                        {
+                            string line;
+                            while ((line = sr.ReadLine()) != null) // read per line
+                            {
+                                string delimiter = "\t";
+                                string[] textElements = line.Split(delimiter.ToCharArray());
+
+                                if (textElements.Length == 1) // empty line
+                                    continue;
+
+                                Point point = new Point();
+                                float[] numbers = Array.ConvertAll(textElements, n => float.Parse(n, CultureInfo.InvariantCulture.NumberFormat));
+
+                                point.Position = new float3(numbers[0], numbers[1], numbers[2]);
+
+                                if (numbers.Length == 9)
+                                {
+                                    point.Color = new float3(numbers[3], numbers[4], numbers[5]);
+                                    point.EchoId = numbers[6];
+                                    point.ScanNr = numbers[8];
+                                }
+
+                                points.Add(point);
+                            }
+                        }
+
+                        PointCloud pointCloud = new PointCloud(points);
+                        return pointCloud;
+                    },
+                    Checker = id => Path.GetExtension(id).ToLower().Contains("txt")
+                });
+
                 AssetStorage.RegisterProvider(fap);
 
                 var app = new Core.PointVisualizationBase();

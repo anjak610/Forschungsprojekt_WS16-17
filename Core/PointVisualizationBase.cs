@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Fusee.Base.Core;
 using Fusee.Engine.Common;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using static Fusee.Engine.Core.Input;
-using Fusee.Tutorial.Desktop;
 
 namespace Fusee.Tutorial.Core
 {
@@ -12,7 +12,7 @@ namespace Fusee.Tutorial.Core
     [FuseeApplication(Name = "Forschungsprojekt", Description = "HFU Wintersemester 16-17")]
     public class PointVisualizationBase : RenderCanvas
     {
-        private Mesh _mesh;
+        private Mesh[] _meshes;
 
         //Sceneviewer Parameters    
         private float _maxPinchSpeed;
@@ -36,25 +36,19 @@ namespace Fusee.Tutorial.Core
         private float _alpha;
         private float _beta;
 
-        public static PointCloud cloud;
-        public static PointReader preader;
-
-
         private const float ParticleSize = 0.05f;
         
         // Init is called on startup. 
         public override void Init()
         {
-            // read point cloud from file and assign vertices to cloud object
-            cloud = new PointCloud();
-            preader = new PointReader(cloud);
-            preader.readPointList();
+            // create mesh from pointcloud
+            PointCloud pointCloud = AssetStorage.Get<PointCloud>("PointCloud_IPM2.txt");
+            _meshes = pointCloud.ToMeshArray();
 
             //For SceneViewer
             _twoTouchRepeated = false;      
             _twoTouchRepeated = false; 
-
-
+            
             //read shaders from files
             var vertsh = AssetStorage.Get<string>("VertexShader.vert");
             var pixsh = AssetStorage.Get<string>("PixelShader.frag");
@@ -73,34 +67,6 @@ namespace Fusee.Tutorial.Core
             _screenSize = new float2(Width, Height); //set screen/window dimensions according to the current viewport
             //RC.SetShaderParam(_xFormParam, float4x4.CreateScale(0.5f) * float4x4.CreateTranslation(-2, -33, 34));
 
-            _mesh = new Mesh();
-
-            float3 pickedvertex;
-
-            for (var i = 0; i < cloud.Vertices.Count; i++)
-            {
-
-                //vertex list times 4
-                pickedvertex = cloud.Vertices[i];
-                vertices.Add(pickedvertex);
-                vertices.Add(pickedvertex);
-                vertices.Add(pickedvertex);
-                vertices.Add(pickedvertex);
-
-                normals.Add(new float3(-1, -1, 0));
-                normals.Add(new float3(1, -1, 0));
-                normals.Add(new float3(-1, 1, 0));
-                normals.Add(new float3(1, 1, 0));
-
-                triangles.Add((ushort)(0 + i * 4));
-                triangles.Add((ushort)(1 + i * 4));
-                triangles.Add((ushort)(3 + i * 4));
-                triangles.Add((ushort)(0 + i * 4));
-                triangles.Add((ushort)(3 + i * 4));
-                triangles.Add((ushort)(2 + i * 4));
-                
-            }
-
             // Set the clear color for the backbuffer
             RC.ClearColor = new float4(0.95f, 0.95f, 0.95f, 1);
         }
@@ -111,9 +77,7 @@ namespace Fusee.Tutorial.Core
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
 
-            _mesh.Vertices = vertices.ToArray();
-            _mesh.Normals = normals.ToArray();
-            _mesh.Triangles = triangles.ToArray();
+            List<float3> normals = _meshes[0].Normals.ToList();
 
             float2 speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);
             if (Mouse.LeftButton || Touch.GetTouchActive(TouchPoints.Touchpoint_0))
@@ -124,7 +88,6 @@ namespace Fusee.Tutorial.Core
 
             var view = float4x4.CreateRotationY(_alpha) * float4x4.CreateRotationX(_beta);
             _xform = RC.Projection * float4x4.CreateTranslation(0, 0, 5.0f) * view;
-
             
             if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0 )
             {
@@ -175,10 +138,14 @@ namespace Fusee.Tutorial.Core
                 _twoTouchRepeated = false;                    
                
             }    
-
+            
             RC.SetShaderParam(_xFormParam, _xform);
-            RC.Render(_mesh);            
-  
+
+            foreach (var mesh in _meshes)
+            {
+                RC.Render(mesh);
+            }
+
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
         }

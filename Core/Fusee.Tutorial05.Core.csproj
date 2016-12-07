@@ -44,11 +44,11 @@
     <OutputRoot>$(ProjectBuildRoot)\bin\$(Configuration)\</OutputRoot>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="PointReader.cs" />
+    <Compile Include="Point.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Compile>
     <Compile Include="PointCloud.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Renderer.cs" />
-    <Compile Include="SceneOb.cs" />
     <Compile Include="PointVisualizationBase.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -82,10 +82,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\BasicPoints.txt" />
-    <Content Include="Assets\PointCloud_IPM.txt" />
-    <Content Include="Assets\PointCloud_IPM2.txt" />
-    <Content Include="Assets\TestPoints.txt" />
+    <Content Include="Assets\BasicPoints.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\PointCloud_IPM.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\PointCloud_IPM2.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\TestPoints.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\AboutFuseeAssets.txt">
@@ -95,7 +103,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Assets\PixelShader.frag">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
   <!-- ItemGroup>

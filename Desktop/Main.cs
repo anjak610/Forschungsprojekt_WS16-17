@@ -48,7 +48,7 @@ namespace Fusee.Tutorial.Desktop
                     },
                     Checker = id => Path.GetExtension(id).ToLower().Contains("fus")
                 });
-            fap.RegisterTypeHandler( // TO-DO: implement on other platforms as well
+            fap.RegisterTypeHandler( // TO-DO: implement on other platforms as well; ending shouldn't be .txt
                 new AssetHandler
                 {
                     ReturnedType = typeof(PointCloud),
@@ -56,10 +56,7 @@ namespace Fusee.Tutorial.Desktop
                     {
                         if (!Path.GetExtension(id).ToLower().Contains("txt")) return null;
 
-                        List<float3> vertices = new List<float3>();
-                        List<float3> colors = new List<float3>();
-                        List<float> echoIds = new List<float>();
-                        List<float> scanNrs = new List<float>();
+                        List<Point> points = new List<Point>();
 
                         using (var sr = new StreamReader((Stream)storage, System.Text.Encoding.Default, true))
                         {
@@ -69,34 +66,26 @@ namespace Fusee.Tutorial.Desktop
                                 string delimiter = "\t";
                                 string[] textElements = line.Split(delimiter.ToCharArray());
 
-                                if (textElements.Length == 1) // end of file
-                                    break;
+                                if (textElements.Length == 1) // empty line
+                                    continue;
 
+                                Point point = new Point();
                                 float[] numbers = Array.ConvertAll(textElements, n => float.Parse(n, CultureInfo.InvariantCulture.NumberFormat));
 
-                                vertices.Add(new float3(numbers[0], numbers[1], numbers[2]));
+                                point.Position = new float3(numbers[0], numbers[1], numbers[2]);
 
                                 if (numbers.Length == 9)
                                 {
-                                    colors.Add(new float3(numbers[3], numbers[4], numbers[5]));
-                                    echoIds.Add(numbers[6]);
-                                    scanNrs.Add(numbers[8]);
+                                    point.Color = new float3(numbers[3], numbers[4], numbers[5]);
+                                    point.EchoId = numbers[6];
+                                    point.ScanNr = numbers[8];
                                 }
+
+                                points.Add(point);
                             }
                         }
 
-                        PointCloud pointCloud = new PointCloud
-                        {
-                            Vertices = vertices,
-                            Colors = colors
-                        };
-
-                        if (echoIds.Count > 0)
-                        {
-                            pointCloud.EchoIds = echoIds;
-                            pointCloud.ScanNrs = scanNrs;
-                        }
-
+                        PointCloud pointCloud = new PointCloud(points);
                         return pointCloud;
                     },
                     Checker = id => Path.GetExtension(id).ToLower().Contains("txt")

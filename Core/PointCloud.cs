@@ -1,63 +1,97 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
+using Fusee.Engine.Core;
 using Fusee.Math.Core;
-
 
 namespace Fusee.Tutorial.Core
 {
     /// <summary>
-    /// Provides a class for holding points in a point cloud, especially regarding the format of those from IPM.
-    /// Format_A: X Y Z Z
-    /// Format_B: X Y Z Red(0..1) Green(0..1) Blue(0..1) ECHO_ID Y SCAN_NR
+    /// PointCloud holds basically an array of Points. In this class methods are defined which
+    /// operate on the whole point cloud.
     /// </summary>
 
     public class PointCloud
     {
-        private List<float3> _vertices;
-        private List<float3> _colors;
-        private List<float> _echoIds;
-        private List<float> _scanNrs;
+        private List<Point> _points;
 
-        //constructor
-        public PointCloud() 
+        public List<Point> GetPoints()
         {
-            _vertices = new List<float3>();
-            _colors = new List<float3>();
-            _echoIds = new List<float>();
-            _scanNrs = new List<float>();
+            return _points;
         }
 
-        public List<float3> Vertices
+        public PointCloud()
         {
-            get { return _vertices; }
-            set { _vertices = value; }
+            _points = new List<Point>();
         }
 
-        public List<float3> Colors
+        public PointCloud(List<Point> points)
         {
-            get { return _colors; }
-            set { _colors = value; }
+            _points = new List<Point>();
+            AddPoints(points);
         }
 
-        public List<float> EchoIds
+        public void AddPoints(List<Point> points)
         {
-            get { return _echoIds; }
-            set { _echoIds = value; }
+            _points.AddRange(points);
         }
 
-        public List<float> ScanNrs
+        // Takes another pointcloud and adds its points to the point array
+        public void Merge(PointCloud pointCloud)
         {
-            get { return _scanNrs; }
-            set { _scanNrs = value; }
+            AddPoints(pointCloud.GetPoints());
         }
 
-        public static PointCloud Merge(PointCloud cloud1, PointCloud cloud2)
+        // Converts point array into an array of meshes
+        // and adds for each point four vertices in order to display a quad mesh.
+        // Because 1 mesh can only take up to 65.535 indices in the triangles ushort[] array,
+        // we need multiple meshes.
+        public Mesh[] ToMeshArray()
         {
-            cloud1.Vertices.AddRange(cloud2.Vertices);
-            cloud1.Colors.AddRange(cloud2.Colors);
-            cloud1.EchoIds.AddRange(cloud2.EchoIds);
-            cloud1.ScanNrs.AddRange(cloud2.ScanNrs);
+            int meshCount = _points.Count * 4 / 65000 + 1; // how many meshes will be generated?
+            Mesh[] meshArray = new Mesh[meshCount];
 
-            return cloud1;
+            var pointIndex = 0; // pointer to the index of the current point in the point cloud
+
+            for (var i = 0; i < meshCount; i++) // for each mesh
+            {
+                Mesh mesh = new Mesh();
+
+                List<float3> vertices = new List<float3>();
+                List<float3> normals = new List<float3>();
+                List<ushort> triangles = new List<ushort>();
+
+                for(var j=0; 3 + (j + 1) * 4 < 65000 && pointIndex < _points.Count; j++) // for each point
+                {
+                    float3 pickedvertex = _points[pointIndex].Position;
+
+                    vertices.Add(pickedvertex);
+                    vertices.Add(pickedvertex);
+                    vertices.Add(pickedvertex);
+                    vertices.Add(pickedvertex);
+
+                    normals.Add(new float3(-1, -1, 0));
+                    normals.Add(new float3(1, -1, 0));
+                    normals.Add(new float3(-1, 1, 0));
+                    normals.Add(new float3(1, 1, 0));
+
+                    triangles.Add((ushort)(0 + j * 4));
+                    triangles.Add((ushort)(1 + j * 4));
+                    triangles.Add((ushort)(3 + j * 4));
+                    triangles.Add((ushort)(0 + j * 4));
+                    triangles.Add((ushort)(3 + j * 4));
+                    triangles.Add((ushort)(2 + j * 4));
+
+                    pointIndex++;
+                }
+
+                mesh.Vertices = vertices.ToArray();
+                mesh.Normals = normals.ToArray();
+                mesh.Triangles = triangles.ToArray();
+
+                meshArray[i] = mesh;
+            }
+            
+            return meshArray;
         }
     }
 }

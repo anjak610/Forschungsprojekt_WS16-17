@@ -49,6 +49,8 @@ namespace Fusee.Tutorial.Web
                         return Path.GetExtension(id).ToLower().Contains("fus");
                     }
                 });
+
+
             AssetStorage.RegisterProvider(fap);
 
             var app = new Fusee.Tutorial.Core.PointVisualizationBase();
