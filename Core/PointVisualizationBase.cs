@@ -100,10 +100,12 @@ namespace Fusee.Tutorial.Core
                 RC.Render(mesh);
             }
 
-            var mtxCam = float4x4.LookAt(0, 0, -_zoom, 0, 0, -50, 0, 1, 0);
+          
+            RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize));
+
+            var mtxCam = float4x4.LookAt(55, 0, -_zoom, 55, 0, 0, 0, 1, 0);
             var mtxOffset = float4x4.CreateTranslation(2 * _offset.x / Width, -2 * _offset.y / Height, 0);
-            var mtxOffsetDesktop = float4x4.CreateTranslation(2 * _offsetMouseX / Width, -2 * _offsetMouseY / Height, 0);
-            // mtxOffsetDesktop = float4x4.CreateTranslation(2 * _offsetMouseX / Width, -2 * _offsetMouseY / Height, 0);
+            var mtxOffsetDesktop = float4x4.CreateTranslation(2 * _offsetMouseX / Width, -2 * _offsetMouseY / Height, 0);            
 
             RC.Projection = projection * mtxOffsetDesktop * mtxOffset * mtxCam;
 
@@ -137,10 +139,7 @@ namespace Fusee.Tutorial.Core
 
             if (_scaleKey)
             {
-                for (int i = 0; i < normals.Count; i++)
-                {
-                    normals[i] = normals[i] + Keyboard.ADAxis * (normals[i] / 200);
-                }
+                ParticleSize = ParticleSize + Keyboard.ADAxis *ParticleSize/20 ;            
             }
 
             //Move Camer on x- and y-axis through scene by click Right MouseButton
@@ -169,18 +168,13 @@ namespace Fusee.Tutorial.Core
                 if (pinchSpeed > _maxPinchSpeed)
                 {
                     _maxPinchSpeed = pinchSpeed;
-                    for (int i = 0; i < normals.Count; i++)
-                    {
-                        normals[i] = normals[i] + (normals[i] / 10);
-                    }
+                    ParticleSize = ParticleSize + ParticleSize/2;               
                 }
                 else if (pinchSpeed < _minPinchSpeed)
-                {
+                {                   
                     _minPinchSpeed = pinchSpeed;
-                    for (int i = 0; i < normals.Count; i++)
-                    {
-                        normals[i] = normals[i] - (normals[i] / 10);
-                    }
+                    ParticleSize = ParticleSize - ParticleSize / 2;
+
                 }
             }
             else
@@ -201,8 +195,8 @@ namespace Fusee.Tutorial.Core
 
             _zoom += _zoomVel;
             // Limit zoom
-            if (_zoom < -50)
-                _zoom = -50;
+            if (_zoom < -200)
+                _zoom = -200;
             if (_zoom > 200)
                 _zoom = 200;
 
