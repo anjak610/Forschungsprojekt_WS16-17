@@ -3,7 +3,6 @@ attribute vec3 fuNormal;
 varying vec3 modelpos;
 uniform vec2 particleSize;
 uniform mat4 xForm;
-uniform vec2 screenSize;
 varying vec3 normal;
 varying float dist; // distance
         

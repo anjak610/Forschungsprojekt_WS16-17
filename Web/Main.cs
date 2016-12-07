@@ -64,6 +64,8 @@ namespace Fusee.Tutorial.Web
             // app.InputDriverImplementor = new Fusee.Engine.Imp.Input.Web.InputDriverImp();
             // app.VideoManagerImplementor = ImpFactory.CreateIVideoManagerImp();
 
+            //set starting particle size
+            app.ParticleSize = 0.2f;
             // Start the app
             app.Run();
         }

@@ -8,15 +8,16 @@ using Android.OS;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
+using Android.Runtime;
 using Fusee.Base.Common;
 using Fusee.Base.Core;
 using Fusee.Base.Imp.Android;
 using Fusee.Engine.Imp.Graphics.Android;
-using Fusee.Math.Core;
 using Fusee.Serialization;
 using Fusee.Tutorial.Core;
 using Font = Fusee.Base.Core.Font;
 using Path = Fusee.Base.Common.Path;
+using Fusee.Math.Core;
 
 namespace Fusee.Tutorial.Android
 {
@@ -120,6 +121,7 @@ namespace Fusee.Tutorial.Android
                 AssetStorage.RegisterProvider(fap);
 
                 var app = new Core.PointVisualizationBase();
+                
 
 		        // Inject Fusee.Engine InjectMe dependencies (hard coded)
 		        RenderCanvasImp rci = new RenderCanvasImp(ApplicationContext, null, delegate { app.Run(); });
@@ -128,7 +130,20 @@ namespace Fusee.Tutorial.Android
 
 		        SetContentView(rci.View);
 
-		        Engine.Core.Input.AddDriverImp(
+                //set particle size bigger
+                app.ParticleSize =  1 ;
+
+                //show display dimensions for testing
+                IWindowManager wm = ApplicationContext.GetSystemService(WindowService).JavaCast<IWindowManager>() ;
+                Display display = wm.DefaultDisplay;
+                app._screenSize = new float2(display.Width, display.Height);
+                float pixel_height = display.Height;
+                float pixel_width = display.Width;
+                string output = "Width: " + pixel_height + " Height:" + pixel_width;
+                //Show roasted bread
+                Toast.MakeText(ApplicationContext, output, ToastLength.Short).Show();
+
+                Engine.Core.Input.AddDriverImp(
 		            new Fusee.Engine.Imp.Graphics.Android.RenderCanvasInputDriverImp(app.CanvasImplementor));
 		         //Engine.Core.Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Android.WindowsTouchInputDriverImp(app.CanvasImplementor));
 		        // Deleayed into rendercanvas imp....app.Run() - SEE DELEGATE ABOVE;
