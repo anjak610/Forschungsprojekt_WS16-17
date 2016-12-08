@@ -48,14 +48,13 @@ namespace Fusee.Tutorial.Core
   
         private float _alpha;
         private float _beta;
+        private float2 speed = new float2();
 
         public float ParticleSize;
         
         // Init is called on startup. 
         public override void Init()
         {
-            // screenSize --> now requested from android device and windows screen
-            //_screenSize = new float2(Width, Height);
 
             // create mesh from pointcloud
             PointCloud pointCloud = AssetStorage.Get<PointCloud>("PointCloud_IPM2.txt");
@@ -128,7 +127,7 @@ namespace Fusee.Tutorial.Core
             List<float3> normals = _meshes[0].Normals.ToList();
 
             //rotate around Object
-            float2 speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);
+            speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);
             if (Mouse.LeftButton || Touch.GetTouchActive(TouchPoints.Touchpoint_0))
             {
                 _alpha -= speed.x * 0.0001f;
