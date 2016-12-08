@@ -6,7 +6,7 @@
     <AssemblyName>Fusee.Tutorial.Core</AssemblyName>
     <FuseeRoot Condition=" '$(FuseeRoot)' == '' ">L:\Programme\Gitkraken\Fusee\</FuseeRoot>
     <FuseeRoot Condition=" '$(FuseeRoot)' == '' ">D:\Alberto\Programmdateien\GitHub\Fusee\</FuseeRoot>
-    <ProjectBuildRoot Condition=" '$(ProjectBuildRoot)' == '' ">..</ProjectBuildRoot>    
+    <ProjectBuildRoot Condition=" '$(ProjectBuildRoot)' == '' ">..</ProjectBuildRoot>
     <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -44,11 +44,11 @@
     <OutputRoot>$(ProjectBuildRoot)\bin\$(Configuration)\</OutputRoot>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="PointReader.cs" />
+    <Compile Include="Point.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Compile>
     <Compile Include="PointCloud.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Renderer.cs" />
-    <Compile Include="SceneOb.cs" />
     <Compile Include="PointVisualizationBase.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -81,21 +81,34 @@
       <HintPath>$(FuseeRoot)bin\$(Configuration)\Libraries\Fusee.Engine.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Assets\BasicPoints.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Black_hole.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Planet1.png" />
+    <Content Include="Assets\PointCloud_IPM.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\PointCloud_IPM2.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\TestPoints.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <ItemGroup>
     <None Include="Assets\AboutFuseeAssets.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Content Include="Assets\small_test_points.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <EmbeddedResource Include="Assets\VertexShader.vert">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Assets\PixelShader.frag">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <None Include="Assets\test_points.ipm" />
   </ItemGroup>
   <!-- ItemGroup>
     <Reference Include="Fusee.SerializationSerializer">

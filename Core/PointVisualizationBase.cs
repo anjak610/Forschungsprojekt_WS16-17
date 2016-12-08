@@ -1,15 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Fusee.Base.Core;
+using Fusee.Base.Common;
 using Fusee.Engine.Common;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using static Fusee.Engine.Core.Input;
-using static Fusee.Engine.Core.Time;
-using Fusee.Tutorial.Desktop;
-using Fusee.Serialization;
-using System.Diagnostics;
-using System.Linq;
-using System;
+
 
 namespace Fusee.Tutorial.Core
 {
@@ -17,7 +14,7 @@ namespace Fusee.Tutorial.Core
     [FuseeApplication(Name = "Forschungsprojekt", Description = "HFU Wintersemester 16-17")]
     public class PointVisualizationBase : RenderCanvas
     {
-        private Mesh _mesh;
+        private Mesh[] _meshes;
 
         //Sceneviewer Parameters    
         private float _maxPinchSpeed;
@@ -26,7 +23,7 @@ namespace Fusee.Tutorial.Core
         private bool _moveMouseKey;
         private bool _twoTouchRepeated;
         public static float _zoomVel, _zoom;
-        public bool _mouseWheel;  
+        public bool _mouseWheel;
 
         private static float2 _offset;
         private static float2 _offsetInit;
@@ -34,28 +31,22 @@ namespace Fusee.Tutorial.Core
         private static float _offsetInitMouseY;
         private static float _offsetMouseX;
         private static float _offsetMouseY;
-
         //End ScneneViewer      
 
+        //Get Shader Parameters
         private IShaderParam _particleSizeParam;
         private IShaderParam _xFormParam;
         private IShaderParam _screenSizeParam;
+        private IShaderParam _tex;
+        private ITexture _newTex;
 
         private float4x4 projection;
 
         private float4x4 _xform;
         public float2 _screenSize;
-                    
-        private List<float3> normals = new List<float3>();
-        List<float3> vertices = new List<float3>();
-        List<ushort> triangles = new List<ushort>();
-
+  
         private float _alpha;
         private float _beta;
-
-        public static PointCloud cloud;
-        public static PointReader preader;
-
 
         public float ParticleSize;
         
@@ -64,15 +55,13 @@ namespace Fusee.Tutorial.Core
         {
             // screenSize --> now requested from android device and windows screen
             //_screenSize = new float2(Width, Height);
-           
 
-            // read point cloud from file and assign vertices to cloud object
-            cloud = new PointCloud();
-            preader = new PointReader(cloud);
-            preader.readPointList();
+            // create mesh from pointcloud
+            PointCloud pointCloud = AssetStorage.Get<PointCloud>("PointCloud_IPM2.txt");
+            _meshes = pointCloud.ToMeshArray();
 
             //For SceneViewer
-            _twoTouchRepeated = false;      
+            _twoTouchRepeated = false;
             _twoTouchRepeated = false;
             _zoom = -10;
             _offsetMouseX = 0f;
@@ -83,10 +72,12 @@ namespace Fusee.Tutorial.Core
             //read shaders from files
             var vertsh = AssetStorage.Get<string>("VertexShader.vert");
             var pixsh = AssetStorage.Get<string>("PixelShader.frag");
+            var texture = AssetStorage.Get<ImageData>("Black_hole.png");
+
 
             // Initialize the shader(s)
             var shader = RC.CreateShader(vertsh, pixsh);
-            RC.SetShader(shader);
+            RC.SetShader(shader);             
 
             _particleSizeParam = RC.GetShaderParam(shader, "particleSize");
             RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize));
@@ -94,35 +85,12 @@ namespace Fusee.Tutorial.Core
             _xFormParam = RC.GetShaderParam(shader, "xForm");
             _xform = float4x4.Identity;
 
+            //Load texture and save into ITexture _newTex           
+            _newTex = RC.CreateTexture(texture, true);
+            _tex = RC.GetShaderParam(shader, "tex");
+            RC.SetShaderParamTexture(_tex, _newTex);
+
             //RC.SetShaderParam(_xFormParam, float4x4.CreateScale(0.5f) * float4x4.CreateTranslation(-2, -33, 34));
-
-            _mesh = new Mesh();
-
-            float3 pickedvertex;
-
-            for (var i = 0; i < cloud.Vertices.Count; i++)
-            {
-
-                //vertex list times 4
-                pickedvertex = cloud.Vertices[i];
-                vertices.Add(pickedvertex);
-                vertices.Add(pickedvertex);
-                vertices.Add(pickedvertex);
-                vertices.Add(pickedvertex);
-
-                normals.Add(new float3(-1, -1, 0));
-                normals.Add(new float3(1, -1, 0));
-                normals.Add(new float3(-1, 1, 0));
-                normals.Add(new float3(1, 1, 0));
-
-                triangles.Add((ushort)(0 + i * 4));
-                triangles.Add((ushort)(1 + i * 4));
-                triangles.Add((ushort)(3 + i * 4));
-                triangles.Add((ushort)(0 + i * 4));
-                triangles.Add((ushort)(3 + i * 4));
-                triangles.Add((ushort)(2 + i * 4));
-                
-            }
 
             // Set the clear color for the backbuffer
             RC.ClearColor = new float4(0.95f, 0.95f, 0.95f, 1);
@@ -133,21 +101,22 @@ namespace Fusee.Tutorial.Core
         {
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
-
-            _mesh.Vertices = vertices.ToArray();
-            _mesh.Normals = normals.ToArray();
-            _mesh.Triangles = triangles.ToArray();
-
+            
             MoveInScene();
-
-
+            
             RC.SetShaderParam(_xFormParam, _xform);
-            RC.Render(_mesh);
+            
 
-            var mtxCam = float4x4.LookAt(0, 0, -_zoom, 0, 0, -50, 0, 1, 0);
+            foreach (var mesh in _meshes)
+            {
+                RC.Render(mesh);
+            }
+          
+            RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize));
+
+            var mtxCam = float4x4.LookAt(55, 0, -_zoom, 55, 0, 0, 0, 1, 0);
             var mtxOffset = float4x4.CreateTranslation(2 * _offset.x / Width, -2 * _offset.y / Height, 0);
-            var mtxOffsetDesktop = float4x4.CreateTranslation(2 * _offsetMouseX / Width, -2 * _offsetMouseY/Height,0);
-            // mtxOffsetDesktop = float4x4.CreateTranslation(2 * _offsetMouseX / Width, -2 * _offsetMouseY / Height, 0);
+            var mtxOffsetDesktop = float4x4.CreateTranslation(2 * _offsetMouseX / Width, -2 * _offsetMouseY / Height, 0);            
 
             RC.Projection = projection * mtxOffsetDesktop * mtxOffset * mtxCam;
 
@@ -157,6 +126,7 @@ namespace Fusee.Tutorial.Core
 
         public void MoveInScene()
         {
+            List<float3> normals = _meshes[0].Normals.ToList();
 
             //rotate around Object
             float2 speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);
@@ -180,10 +150,7 @@ namespace Fusee.Tutorial.Core
 
             if (_scaleKey)
             {
-                for (int i = 0; i < normals.Count; i++)
-                {
-                    normals[i] = normals[i] + Keyboard.ADAxis * (normals[i] / 200);
-                }
+                ParticleSize = ParticleSize + Keyboard.ADAxis *ParticleSize/20 ;            
             }
 
             //Move Camer on x- and y-axis through scene by click Right MouseButton
@@ -191,10 +158,10 @@ namespace Fusee.Tutorial.Core
 
             if (Mouse.RightButton)
             {
-                _offsetMouseY += Mouse.YVel  -_offsetInitMouseY; //Mouse.YVel;// 
+                _offsetMouseY += Mouse.YVel - _offsetInitMouseY; //Mouse.YVel;// 
                 _offsetMouseX += Mouse.XVel - _offsetInitMouseX;// Mouse.XVel;// 
             }
-    
+
 
             // Scale Points with Touch and move camera on x- and y-axis through scene
             if (Touch.TwoPoint) // TODO: Implement scaling with slide movements on screen 
@@ -212,24 +179,19 @@ namespace Fusee.Tutorial.Core
                 if (pinchSpeed > _maxPinchSpeed)
                 {
                     _maxPinchSpeed = pinchSpeed;
-                    for (int i = 0; i < normals.Count; i++)
-                    {
-                        normals[i] = normals[i] + (normals[i] / 10);
-                    }
+                    ParticleSize = ParticleSize + ParticleSize/2;               
                 }
                 else if (pinchSpeed < _minPinchSpeed)
-                {
+                {                   
                     _minPinchSpeed = pinchSpeed;
-                    for (int i = 0; i < normals.Count; i++)
-                    {
-                        normals[i] = normals[i] - (normals[i] / 10);
-                    }
+                    ParticleSize = ParticleSize - ParticleSize / 2;
+
                 }
             }
             else
             {
                 _twoTouchRepeated = false;
-            }           
+            }
 
             //Zoom with Mousewheel
             if (Mouse.Wheel != 0)
@@ -239,35 +201,35 @@ namespace Fusee.Tutorial.Core
 
             if (_mouseWheel)
             {
-                _zoomVel = Mouse.WheelVel * -0.005f;
+                _zoomVel = Mouse.WheelVel * +0.008f;
             }
 
             _zoom += _zoomVel;
             // Limit zoom
-            if (_zoom < -50)
-                _zoom = -50;
+            if (_zoom < -200)
+                _zoom = -200;
             if (_zoom > 200)
                 _zoom = 200;
 
         }
+
         // Is called when the window was resized
         public override void Resize()
         {
             // Set the new rendering area to the entire new windows size
             RC.Viewport(0, 0, Width, Height);
-            //var mtxCam = float4x4.LookAt(0, 20, -_zoom, 0, 0, 0, 0, 1, 0);
+
             // Create a new projection matrix generating undistorted images on the new aspect ratio.
             var aspectRatio = Width / (float)Height;
             RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize * aspectRatio)); //set params that can be controlled with arrow keys
 
-            //Window size 
-            _screenSize = new float2(Width, Height);
+            // Question: should we set particleSize depending on aspect ratio or rather define an amount of pixels, thus taking window size into computation?
 
             // 0.25*PI Rad -> 45° Opening angle along the vertical direction. Horizontal opening angle is calculated based on the aspect ratio
             // Front clipping happens at 1 (Objects nearer than 1 world unit get clipped)
             // Back clipping happens at 2000 (Anything further away from the camera than 2000 world units gets clipped, polygons will be cut)
             projection = float4x4.CreatePerspectiveFieldOfView(3.141592f * 0.25f, aspectRatio, 1, 20000);
-           // RC.Projection =projection *mtxCam;
+            RC.Projection = projection;
         }
 
     }
