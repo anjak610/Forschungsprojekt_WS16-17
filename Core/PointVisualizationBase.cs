@@ -14,7 +14,7 @@ namespace Fusee.Tutorial.Core
     [FuseeApplication(Name = "Forschungsprojekt", Description = "HFU Wintersemester 16-17")]
     public class PointVisualizationBase : RenderCanvas
     {
-        private Mesh[] _meshes;
+        private Mesh[] _meshes;  
 
         //Sceneviewer Parameters    
         private float _maxPinchSpeed;
@@ -31,12 +31,13 @@ namespace Fusee.Tutorial.Core
         private static float _offsetInitMouseY;
         private static float _offsetMouseX;
         private static float _offsetMouseY;
-        //End ScneneViewer      
+        //End ScneneViewer 
 
         //Get Shader Parameters
         private IShaderParam _particleSizeParam;
         private IShaderParam _xFormParam;
         private IShaderParam _screenSizeParam;
+
         private IShaderParam _tex;
         private ITexture _newTex;
 
@@ -62,7 +63,7 @@ namespace Fusee.Tutorial.Core
 
             //For SceneViewer
             _twoTouchRepeated = false;
-            _twoTouchRepeated = false;
+           // _twoTouchRepeated = false;
             _zoom = -10;
             _offsetMouseX = 0f;
             _offsetMouseY = 0f;
@@ -72,8 +73,7 @@ namespace Fusee.Tutorial.Core
             //read shaders from files
             var vertsh = AssetStorage.Get<string>("VertexShader.vert");
             var pixsh = AssetStorage.Get<string>("PixelShader.frag");
-            var texture = AssetStorage.Get<ImageData>("Black_hole.png");
-
+            var texture = AssetStorage.Get<ImageData>("Planet1.png");
 
             // Initialize the shader(s)
             var shader = RC.CreateShader(vertsh, pixsh);
@@ -86,7 +86,7 @@ namespace Fusee.Tutorial.Core
             _xform = float4x4.Identity;
 
             //Load texture and save into ITexture _newTex           
-            _newTex = RC.CreateTexture(texture, true);
+            _newTex = RC.CreateTexture(texture);
             _tex = RC.GetShaderParam(shader, "tex");
             RC.SetShaderParamTexture(_tex, _newTex);
 
@@ -104,8 +104,7 @@ namespace Fusee.Tutorial.Core
             
             MoveInScene();
             
-            RC.SetShaderParam(_xFormParam, _xform);
-            
+            RC.SetShaderParam(_xFormParam, _xform);            
 
             foreach (var mesh in _meshes)
             {
@@ -155,13 +154,11 @@ namespace Fusee.Tutorial.Core
 
             //Move Camer on x- and y-axis through scene by click Right MouseButton
 
-
             if (Mouse.RightButton)
             {
                 _offsetMouseY += Mouse.YVel - _offsetInitMouseY; //Mouse.YVel;// 
-                _offsetMouseX += Mouse.XVel - _offsetInitMouseX;// Mouse.XVel;// 
+                _offsetMouseX += Mouse.XVel - _offsetInitMouseX; //Mouse.XVel;// 
             }
-
 
             // Scale Points with Touch and move camera on x- and y-axis through scene
             if (Touch.TwoPoint) // TODO: Implement scaling with slide movements on screen 
@@ -185,7 +182,6 @@ namespace Fusee.Tutorial.Core
                 {                   
                     _minPinchSpeed = pinchSpeed;
                     ParticleSize = ParticleSize - ParticleSize / 2;
-
                 }
             }
             else
@@ -210,7 +206,6 @@ namespace Fusee.Tutorial.Core
                 _zoom = -200;
             if (_zoom > 200)
                 _zoom = 200;
-
         }
 
         // Is called when the window was resized
