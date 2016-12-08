@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Fusee.Base.Core;
+using Fusee.Base.Common;
 using Fusee.Engine.Common;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using static Fusee.Engine.Core.Input;
+
 
 namespace Fusee.Tutorial.Core
 {
@@ -29,18 +31,20 @@ namespace Fusee.Tutorial.Core
         private static float _offsetInitMouseY;
         private static float _offsetMouseX;
         private static float _offsetMouseY;
-
         //End ScneneViewer      
 
+        //Get Shader Parameters
         private IShaderParam _particleSizeParam;
         private IShaderParam _xFormParam;
         private IShaderParam _screenSizeParam;
+        private IShaderParam _tex;
+        private ITexture _newTex;
 
         private float4x4 projection;
 
         private float4x4 _xform;
         public float2 _screenSize;
-
+  
         private float _alpha;
         private float _beta;
 
@@ -68,17 +72,24 @@ namespace Fusee.Tutorial.Core
             //read shaders from files
             var vertsh = AssetStorage.Get<string>("VertexShader.vert");
             var pixsh = AssetStorage.Get<string>("PixelShader.frag");
+            var texture = AssetStorage.Get<ImageData>("Black_hole.png");
+
 
             // Initialize the shader(s)
             var shader = RC.CreateShader(vertsh, pixsh);
-            RC.SetShader(shader);
+            RC.SetShader(shader);             
 
             _particleSizeParam = RC.GetShaderParam(shader, "particleSize");
             RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize));
 
             _xFormParam = RC.GetShaderParam(shader, "xForm");
             _xform = float4x4.Identity;
-            
+
+            //Load texture and save into ITexture _newTex           
+            _newTex = RC.CreateTexture(texture, true);
+            _tex = RC.GetShaderParam(shader, "tex");
+            RC.SetShaderParamTexture(_tex, _newTex);
+
             //RC.SetShaderParam(_xFormParam, float4x4.CreateScale(0.5f) * float4x4.CreateTranslation(-2, -33, 34));
 
             // Set the clear color for the backbuffer
@@ -94,12 +105,12 @@ namespace Fusee.Tutorial.Core
             MoveInScene();
             
             RC.SetShaderParam(_xFormParam, _xform);
+            
 
             foreach (var mesh in _meshes)
             {
                 RC.Render(mesh);
             }
-
           
             RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize));
 
@@ -190,7 +201,7 @@ namespace Fusee.Tutorial.Core
 
             if (_mouseWheel)
             {
-                _zoomVel = Mouse.WheelVel * +0.005f;
+                _zoomVel = Mouse.WheelVel * +0.008f;
             }
 
             _zoom += _zoomVel;
