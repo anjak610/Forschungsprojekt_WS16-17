@@ -6,10 +6,11 @@ varying float dist;
 varying vec3 modelpos;
 varying vec3 normal;
 uniform vec2 screenSize;
+varying vec2 UV;
 
 //varying vec2 texCoords;
 
-varying sampler2D tex;
+uniform sampler2D tex;
 
 
 void main()
@@ -29,6 +30,6 @@ void main()
 	//gl_FragColor = vec4(((gl_FragCoord.x)/width), (gl_FragCoord.y/height), (1.5-dist),  1);
 	//gl_FragColor = vec4( (1.5-dist) *  color , 1);
 
-	vec4 color = texture2D(tex,gl_TexCoord[0].st);
-	gl_FragColor = color;
+	vec3 color = texture2D(tex,UV).rgb;
+	gl_FragColor = vec4(color,1.0);
 }
