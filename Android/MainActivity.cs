@@ -1,22 +1,4 @@
 
-using System.IO;
-using Android.App;
-using Android.Content.PM;
-using Android.OS;
-using Android.Util;
-using Android.Views;
-using Android.Widget;
-using Android.Runtime;
-using Fusee.Base.Common;
-using Fusee.Base.Core;
-using Fusee.Base.Imp.Android;
-using Fusee.Engine.Imp.Graphics.Android;
-using Fusee.Serialization;
-using Fusee.Tutorial.Core;
-using Font = Fusee.Base.Core.Font;
-using Path = Fusee.Base.Common.Path;
-using Fusee.Math.Core;
-
 namespace Fusee.Tutorial.Android
 {
 	[Activity (Label = "@string/app_name", MainLauncher = true, Icon = "@drawable/icon",
@@ -73,6 +55,48 @@ namespace Fusee.Tutorial.Android
                             return Path.GetExtension(id).ToLower().Contains("fus");
                         }
                     });
+                fap.RegisterTypeHandler( // TO-DO: ending shouldn't be .txt
+                new AssetHandler
+                {
+                    ReturnedType = typeof(PointCloud),
+                    Decoder = delegate (string id, object storage)
+                    {
+                        if (!Path.GetExtension(id).ToLower().Contains("txt")) return null;
+
+                        PointCloud pointCloud = new PointCloud();
+
+                        using (var sr = new StreamReader((Stream)storage, System.Text.Encoding.Default, true))
+                        {
+                            string line;
+                            while ((line = sr.ReadLine()) != null) // read per line
+                            {
+                                string delimiter = "\t";
+                                string[] textElements = line.Split(delimiter.ToCharArray());
+
+                                if (textElements.Length == 1) // empty line
+                                    continue;
+
+                                Point point = new Point();
+                                float[] numbers = Array.ConvertAll(textElements, n => float.Parse(n, CultureInfo.InvariantCulture.NumberFormat));
+
+                                point.Position = new float3(numbers[0], numbers[1], numbers[2]);
+
+                                if (numbers.Length == 9)
+                                {
+                                    point.Color = new float3(numbers[3], numbers[4], numbers[5]);
+                                    point.EchoId = numbers[6];
+                                    point.ScanNr = numbers[8];
+                                }
+
+                                pointCloud.AddPoint(point);
+                            }
+                        }
+
+                        return pointCloud;
+                    },
+                    Checker = id => Path.GetExtension(id).ToLower().Contains("txt")
+                });
+
                 AssetStorage.RegisterProvider(fap);
 
                 var app = new Core.PointVisualizationBase();
@@ -89,14 +113,14 @@ namespace Fusee.Tutorial.Android
                 app.ParticleSize =  1 ;
 
                 //show display dimensions for testing
-                //IWindowManager wm = ApplicationContext.GetSystemService(WindowService).JavaCast<IWindowManager>() ;
-                //Display display = wm.DefaultDisplay;
-                //app._screenSize = new float2(display.Width, display.Height);
-                //float pixel_height = display.Height;
-                //float pixel_width = display.Width;
-                //string output = "Width: " + pixel_height + " Height:" + pixel_width;
+                IWindowManager wm = ApplicationContext.GetSystemService(WindowService).JavaCast<IWindowManager>() ;
+                Display display = wm.DefaultDisplay;
+                app._screenSize = new float2(display.Width, display.Height);
+                float pixel_height = display.Height;
+                float pixel_width = display.Width;
+                string output = "Width: " + pixel_height + " Height:" + pixel_width;
                 //Show roasted bread
-                //Toast.MakeText(ApplicationContext, output, ToastLength.Short).Show();
+                Toast.MakeText(ApplicationContext, output, ToastLength.Short).Show();
 
                 Engine.Core.Input.AddDriverImp(
 		            new Fusee.Engine.Imp.Graphics.Android.RenderCanvasInputDriverImp(app.CanvasImplementor));
@@ -145,4 +169,4 @@ namespace Fusee.Tutorial.Android
         }
 
     }
-}
+}

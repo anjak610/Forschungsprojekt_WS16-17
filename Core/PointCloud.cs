@@ -1,106 +1,106 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
+using System.Linq;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
 
 namespace Fusee.Tutorial.Core
 {
     /// <summary>
-    /// PointCloud holds basically an array of Points. In this class methods are defined which
-    /// operate on the whole point cloud.
+    /// PointCloud holds the meshes which will be pushed through the rendering pipeline. It acts as a data structure 
+    /// where points can be dynamically loaded into.
     /// </summary>
 
     public class PointCloud
     {
-        private List<Point> _points;       
-        
-        public List<Point> GetPoints()
-        {
-            return _points;
-        }
+        // Because 1 mesh can only take up to 65.535 indices in the triangles ushort[] array,
+        // we need multiple meshes.
+        private List<Mesh> _meshes;
+
+        // those lists refer to the properties of one mesh
+        private List<float3> _vertices;
+        private List<float3> _normals;
+        private List<ushort> _triangles;
+        private List<float2> _uvs;
+
+        private int _currentIndex = 0; // index of the current point
 
         public PointCloud()
         {
-            _points = new List<Point>();
+            _meshes = new List<Mesh>();
+            ResetMesh();
         }
 
-        public PointCloud(List<Point> points)
+        public List<Mesh> GetMeshes()
         {
-            _points = new List<Point>();
-            AddPoints(points);
+            return _meshes;
         }
-
-        public void AddPoints(List<Point> points)
+        
+        // Instantiate a new mesh with full capacity of maximum 65000 points
+        private void ResetMesh()
         {
-            _points.AddRange(points);
+            _currentIndex = 0;
+
+            _vertices = new List<float3>();
+            _normals = new List<float3>();
+            _triangles = new List<ushort>();
+            _uvs = new List<float2>();
         }
 
-        // Takes another pointcloud and adds its points to the point array
+        // Creates a mesh by the current vertices, normals and triangles and adds it to the mesh list.
+        private void AddCurrentToMeshes()
+        {
+            Mesh mesh = new Mesh();
+
+            mesh.Vertices = _vertices.ToArray();
+            mesh.Normals = _normals.ToArray();
+            mesh.Triangles = _triangles.ToArray();
+            mesh.UVs = _uvs.ToArray();
+            //UVs = mc.UVs;
+
+            _meshes.Add(mesh);
+
+            ResetMesh();
+        }
+
+        public void AddPoint(Point point)
+        {
+            if (3 + _currentIndex * 4 > 65000)
+            {
+                AddCurrentToMeshes();
+            }
+
+            float3 pickedvertex = point.Position;
+
+            _vertices.Add(pickedvertex);
+            _vertices.Add(pickedvertex);
+            _vertices.Add(pickedvertex);
+            _vertices.Add(pickedvertex);
+            
+            _normals.Add(new float3(-1, -1, 0));
+            _normals.Add(new float3(1, -1, 0));
+            _normals.Add(new float3(-1, 1, 0));
+            _normals.Add(new float3(1, 1, 0));
+            
+            _triangles.Add((ushort)(0 + _currentIndex * 4));
+            _triangles.Add((ushort)(1 + _currentIndex * 4));
+            _triangles.Add((ushort)(3 + _currentIndex * 4));
+            _triangles.Add((ushort)(0 + _currentIndex * 4));
+            _triangles.Add((ushort)(3 + _currentIndex * 4));
+            _triangles.Add((ushort)(2 + _currentIndex * 4));
+
+            _uvs.Add(new float2(0, 1));
+            _uvs.Add(new float2(0, 0));
+            _uvs.Add(new float2(1, 0));
+            _uvs.Add(new float2(1, 1));
+            _uvs.Add(new float2(0, 1));                   
+
+            _currentIndex++;
+        }
+
+        // Takes another pointcloud and adds its meshes to the mesh array
         public void Merge(PointCloud pointCloud)
         {
-            AddPoints(pointCloud.GetPoints());
-        }
-
-        // Converts point array into an array of meshes
-        // and adds for each point four vertices in order to display a quad mesh.
-        // Because 1 mesh can only take up to 65.535 indices in the triangles ushort[] array,
-        // we need multiple meshes.
-        public Mesh[] ToMeshArray()
-        {
-            int meshCount = _points.Count * 4 / 65000 + 1; // how many meshes will be generated?
-            Mesh[] meshArray = new Mesh[meshCount];
-
-            var pointIndex = 0; // pointer to the index of the current point in the point cloud
-
-            for (var i = 0; i < meshCount; i++) // for each mesh
-            {
-                Mesh mesh = new Mesh();  
-                                
-                List<float3> vertices = new List<float3>();
-                List<float3> normals = new List<float3>();
-                List<ushort> triangles = new List<ushort>();
-                List<float2> uvs = new List<float2>();               
-
-                for(var j=0; 3 + (j + 1) * 4 < 65000 && pointIndex < _points.Count; j++) // for each point
-                {
-                    float3 pickedvertex = _points[pointIndex].Position;
-
-                    vertices.Add(pickedvertex);
-                    vertices.Add(pickedvertex);
-                    vertices.Add(pickedvertex);
-                    vertices.Add(pickedvertex);
-
-                    normals.Add(new float3(-1, -1, 0));
-                    normals.Add(new float3(1, -1, 0));
-                    normals.Add(new float3(-1, 1, 0));
-                    normals.Add(new float3(1, 1, 0));                        
-
-                    triangles.Add((ushort)(0 + j * 4));
-                    triangles.Add((ushort)(1 + j * 4));
-                    triangles.Add((ushort)(3 + j * 4));
-                    triangles.Add((ushort)(0 + j * 4));
-                    triangles.Add((ushort)(3 + j * 4));
-                    triangles.Add((ushort)(2 + j * 4));
-
-                    uvs.Add(new float2(0, 1));
-                    uvs.Add(new float2(0, 0));
-                    uvs.Add(new float2(1, 0));
-                    uvs.Add(new float2(1, 1));
-                    uvs.Add(new float2(0, 1));                   
-
-                    pointIndex++;
-                }
-
-                mesh.Vertices = vertices.ToArray();
-                mesh.Normals = normals.ToArray();
-                mesh.Triangles = triangles.ToArray();
-                mesh.UVs = uvs.ToArray(); 
-                //UVs = mc.UVs;
-
-                meshArray[i] = mesh;
-            }
-            
-            return meshArray;
+            _meshes.AddRange(pointCloud.GetMeshes());
         }
     }
 }

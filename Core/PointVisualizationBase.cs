@@ -1,12 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Fusee.Base.Core;
+﻿using Fusee.Base.Core;
 using Fusee.Base.Common;
 using Fusee.Engine.Common;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using static Fusee.Engine.Core.Input;
-
 
 namespace Fusee.Tutorial.Core
 {
@@ -14,7 +11,7 @@ namespace Fusee.Tutorial.Core
     [FuseeApplication(Name = "Forschungsprojekt", Description = "HFU Wintersemester 16-17")]
     public class PointVisualizationBase : RenderCanvas
     {
-        private Mesh[] _meshes;  
+        private PointCloud _pointCloud;
 
         //Sceneviewer Parameters    
         private float _maxPinchSpeed;
@@ -45,24 +42,24 @@ namespace Fusee.Tutorial.Core
 
         private float4x4 _xform;
         public float2 _screenSize;
-  
+
         private float _alpha;
         private float _beta;
         private float2 speed = new float2();
 
         public float ParticleSize;
-        
+
         // Init is called on startup. 
         public override void Init()
         {
-
-            // create mesh from pointcloud
-            PointCloud pointCloud = AssetStorage.Get<PointCloud>("PointCloud_IPM2.txt");
-            _meshes = pointCloud.ToMeshArray();
+            // screenSize --> now requested from android device and windows screen
+            //_screenSize = new float2(Width, Height);
+            
+            _pointCloud = AssetStorage.Get<PointCloud>("PointCloud_IPM2.txt");
 
             //For SceneViewer
             _twoTouchRepeated = false;
-           // _twoTouchRepeated = false;
+            // _twoTouchRepeated = false;
             _zoom = -10;
             _offsetMouseX = 0f;
             _offsetMouseY = 0f;
@@ -76,7 +73,7 @@ namespace Fusee.Tutorial.Core
 
             // Initialize the shader(s)
             var shader = RC.CreateShader(vertsh, pixsh);
-            RC.SetShader(shader);             
+            RC.SetShader(shader);
 
             _particleSizeParam = RC.GetShaderParam(shader, "particleSize");
             RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize));
@@ -100,21 +97,21 @@ namespace Fusee.Tutorial.Core
         {
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
-            
-            MoveInScene();
-            
-            RC.SetShaderParam(_xFormParam, _xform);            
 
-            foreach (var mesh in _meshes)
+            MoveInScene();
+
+            RC.SetShaderParam(_xFormParam, _xform);
+
+            foreach (var mesh in _pointCloud.GetMeshes())
             {
                 RC.Render(mesh);
             }
-          
+
             RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize));
 
             var mtxCam = float4x4.LookAt(55, 0, -_zoom, 55, 0, 0, 0, 1, 0);
             var mtxOffset = float4x4.CreateTranslation(2 * _offset.x / Width, -2 * _offset.y / Height, 0);
-            var mtxOffsetDesktop = float4x4.CreateTranslation(2 * _offsetMouseX / Width, -2 * _offsetMouseY / Height, 0);            
+            var mtxOffsetDesktop = float4x4.CreateTranslation(2 * _offsetMouseX / Width, -2 * _offsetMouseY / Height, 0);
 
             RC.Projection = projection * mtxOffsetDesktop * mtxOffset * mtxCam;
 
@@ -124,8 +121,6 @@ namespace Fusee.Tutorial.Core
 
         public void MoveInScene()
         {
-            List<float3> normals = _meshes[0].Normals.ToList();
-
             //rotate around Object
             speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);
             if (Mouse.LeftButton || Touch.GetTouchActive(TouchPoints.Touchpoint_0))
@@ -148,7 +143,7 @@ namespace Fusee.Tutorial.Core
 
             if (_scaleKey)
             {
-                ParticleSize = ParticleSize + Keyboard.ADAxis *ParticleSize/20 ;            
+                ParticleSize = ParticleSize + Keyboard.ADAxis * ParticleSize / 20;
             }
 
             //Move Camer on x- and y-axis through scene by click Right MouseButton
@@ -175,10 +170,10 @@ namespace Fusee.Tutorial.Core
                 if (pinchSpeed > _maxPinchSpeed)
                 {
                     _maxPinchSpeed = pinchSpeed;
-                    ParticleSize = ParticleSize + ParticleSize/2;               
+                    ParticleSize = ParticleSize + ParticleSize / 2;
                 }
                 else if (pinchSpeed < _minPinchSpeed)
-                {                   
+                {
                     _minPinchSpeed = pinchSpeed;
                     ParticleSize = ParticleSize - ParticleSize / 2;
                 }
