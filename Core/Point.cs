@@ -12,9 +12,9 @@ namespace Fusee.Tutorial.Core
 {
     public class Point
     {
-        public float3 Position { get; set; }
-        public float3 Color { get; set; }
-        public float EchoId { get; set; }
-        public float ScanNr { get; set; }
+        public float3 Position;
+        public float3 Color;
+        public float EchoId;
+        public float ScanNr;
     }
 }

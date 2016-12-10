@@ -12,7 +12,7 @@ namespace Fusee.Tutorial.Core
     [FuseeApplication(Name = "Forschungsprojekt", Description = "HFU Wintersemester 16-17")]
     public class PointVisualizationBase : RenderCanvas
     {
-        private Mesh[] _meshes;
+        private PointCloud _pointCloud;
 
         //Sceneviewer Parameters    
         private float _maxPinchSpeed;
@@ -35,10 +35,12 @@ namespace Fusee.Tutorial.Core
         private IShaderParam _particleSizeParam;
         private IShaderParam _xFormParam;
         private IShaderParam _screenSizeParam;
+        private IShaderParam _normalScaleParam;
 
         private float4x4 projection;
 
         private float4x4 _xform;
+        private float _normalScale = 1.0f;
         public float2 _screenSize;
 
         private float _alpha;
@@ -51,10 +53,8 @@ namespace Fusee.Tutorial.Core
         {
             // screenSize --> now requested from android device and windows screen
             //_screenSize = new float2(Width, Height);
-
-            // create mesh from pointcloud
-            PointCloud pointCloud = AssetStorage.Get<PointCloud>("PointCloud_IPM2.txt");
-            _meshes = pointCloud.ToMeshArray();
+            
+            _pointCloud = AssetStorage.Get<PointCloud>("PointCloud_IPM.txt");
 
             //For SceneViewer
             _twoTouchRepeated = false;
@@ -76,6 +76,9 @@ namespace Fusee.Tutorial.Core
             _particleSizeParam = RC.GetShaderParam(shader, "particleSize");
             RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize));
 
+            _normalScaleParam = RC.GetShaderParam(shader, "normalScale");
+            RC.SetShaderParam(_normalScaleParam, _normalScale);
+
             _xFormParam = RC.GetShaderParam(shader, "xForm");
             _xform = float4x4.Identity;
             
@@ -94,8 +97,8 @@ namespace Fusee.Tutorial.Core
             MoveInScene();
             
             RC.SetShaderParam(_xFormParam, _xform);
-
-            foreach (var mesh in _meshes)
+            
+            foreach(var mesh in _pointCloud.GetMeshes())
             {
                 RC.Render(mesh);
             }
@@ -113,8 +116,6 @@ namespace Fusee.Tutorial.Core
 
         public void MoveInScene()
         {
-            List<float3> normals = _meshes[0].Normals.ToList();
-
             //rotate around Object
             float2 speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);
             if (Mouse.LeftButton || Touch.GetTouchActive(TouchPoints.Touchpoint_0))
@@ -122,6 +123,7 @@ namespace Fusee.Tutorial.Core
                 _alpha -= speed.x * 0.0001f;
                 _beta -= speed.y * 0.0001f;
             }
+
             var view = float4x4.CreateRotationY(_alpha) * float4x4.CreateRotationX(_beta);
             _xform = RC.Projection * float4x4.CreateTranslation(0, 0, 5.0f) * view;
 
@@ -137,10 +139,8 @@ namespace Fusee.Tutorial.Core
 
             if (_scaleKey)
             {
-                for (int i = 0; i < normals.Count; i++)
-                {
-                    normals[i] = normals[i] + Keyboard.ADAxis * (normals[i] / 200);
-                }
+                _normalScale = _normalScale + Keyboard.ADAxis*(_normalScale/200);
+                RC.SetShaderParam(_normalScaleParam, _normalScale);
             }
 
             //Move Camer on x- and y-axis through scene by click Right MouseButton
@@ -169,18 +169,16 @@ namespace Fusee.Tutorial.Core
                 if (pinchSpeed > _maxPinchSpeed)
                 {
                     _maxPinchSpeed = pinchSpeed;
-                    for (int i = 0; i < normals.Count; i++)
-                    {
-                        normals[i] = normals[i] + (normals[i] / 10);
-                    }
+
+                    _normalScale = _normalScale + (_normalScale / 10);
+                    RC.SetShaderParam(_normalScaleParam, _normalScale);
                 }
                 else if (pinchSpeed < _minPinchSpeed)
                 {
                     _minPinchSpeed = pinchSpeed;
-                    for (int i = 0; i < normals.Count; i++)
-                    {
-                        normals[i] = normals[i] - (normals[i] / 10);
-                    }
+
+                    _normalScale = _normalScale - (_normalScale / 10);
+                    RC.SetShaderParam(_normalScaleParam, _normalScale);
                 }
             }
             else
@@ -226,6 +224,5 @@ namespace Fusee.Tutorial.Core
             projection = float4x4.CreatePerspectiveFieldOfView(3.141592f * 0.25f, aspectRatio, 1, 20000);
             RC.Projection = projection;
         }
-
     }
 }

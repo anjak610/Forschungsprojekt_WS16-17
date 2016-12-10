@@ -75,7 +75,7 @@ namespace Fusee.Tutorial.Android
                             return Path.GetExtension(id).ToLower().Contains("fus");
                         }
                     });
-                fap.RegisterTypeHandler( // TO-DO: implement on other platforms as well; ending shouldn't be .txt
+                fap.RegisterTypeHandler( // TO-DO: ending shouldn't be .txt
                 new AssetHandler
                 {
                     ReturnedType = typeof(PointCloud),
@@ -83,7 +83,7 @@ namespace Fusee.Tutorial.Android
                     {
                         if (!Path.GetExtension(id).ToLower().Contains("txt")) return null;
 
-                        List<Point> points = new List<Point>();
+                        PointCloud pointCloud = new PointCloud();
 
                         using (var sr = new StreamReader((Stream)storage, System.Text.Encoding.Default, true))
                         {
@@ -108,11 +108,10 @@ namespace Fusee.Tutorial.Android
                                     point.ScanNr = numbers[8];
                                 }
 
-                                points.Add(point);
+                                pointCloud.AddPoint(point);
                             }
                         }
 
-                        PointCloud pointCloud = new PointCloud(points);
                         return pointCloud;
                     },
                     Checker = id => Path.GetExtension(id).ToLower().Contains("txt")

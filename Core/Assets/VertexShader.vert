@@ -2,6 +2,7 @@ attribute vec3 fuVertex;
 attribute vec3 fuNormal;
 varying vec3 modelpos;
 uniform vec2 particleSize;
+uniform float normalScale;
 uniform mat4 xForm;
 varying vec3 normal;
 varying float dist; // distance
@@ -13,9 +14,10 @@ void main()
 
 	dist = newVertex.z/newVertex.w;
 	modelpos = fuVertex; 
+
 	normal = fuNormal;
 
-	vec4 result = newVertex + vec4(fuNormal.xy * particleSize, 0, 0);
+	vec4 result = newVertex + vec4(fuNormal.xy * particleSize * normalScale, 0, 0);
 
 	gl_Position = result;
 }
