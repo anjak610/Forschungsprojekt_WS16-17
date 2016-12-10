@@ -20,6 +20,7 @@ namespace Fusee.Tutorial.Core
         private List<float3> _vertices;
         private List<float3> _normals;
         private List<ushort> _triangles;
+        private List<float2> _uvs;
 
         private int _currentIndex = 0; // index of the current point
 
@@ -42,6 +43,7 @@ namespace Fusee.Tutorial.Core
             _vertices = new List<float3>();
             _normals = new List<float3>();
             _triangles = new List<ushort>();
+            _uvs = new List<float2>();
         }
 
         // Creates a mesh by the current vertices, normals and triangles and adds it to the mesh list.
@@ -52,6 +54,8 @@ namespace Fusee.Tutorial.Core
             mesh.Vertices = _vertices.ToArray();
             mesh.Normals = _normals.ToArray();
             mesh.Triangles = _triangles.ToArray();
+            mesh.UVs = _uvs.ToArray();
+            //UVs = mc.UVs;
 
             _meshes.Add(mesh);
 
@@ -83,6 +87,12 @@ namespace Fusee.Tutorial.Core
             _triangles.Add((ushort)(0 + _currentIndex * 4));
             _triangles.Add((ushort)(3 + _currentIndex * 4));
             _triangles.Add((ushort)(2 + _currentIndex * 4));
+
+            _uvs.Add(new float2(0, 1));
+            _uvs.Add(new float2(0, 0));
+            _uvs.Add(new float2(1, 0));
+            _uvs.Add(new float2(1, 1));
+            _uvs.Add(new float2(0, 1));                   
 
             _currentIndex++;
         }

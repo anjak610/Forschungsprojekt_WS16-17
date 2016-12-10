@@ -3,8 +3,8 @@
   <PropertyGroup>
     <RootNamespace>Fusee.Tutorial.Android</RootNamespace>
     <AssemblyName>Fusee.Tutorial.Android</AssemblyName>
-    <!-- <FuseeRoot Condition=" '$(FuseeRoot)' == '' ">L:\Programme\Gitkraken\Fusee\</FuseeRoot> -->
     <FuseeRoot Condition=" '$(FuseeRoot)' == '' ">D:\Alberto\Programmdateien\GitHub\Fusee\</FuseeRoot>
+    <FuseeRoot Condition=" '$(FuseeRoot)' == '' ">L:\Programme\Gitkraken\Fusee\</FuseeRoot>
     <ProjectBuildRoot Condition=" '$(ProjectBuildRoot)' == '' ">..</ProjectBuildRoot>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>

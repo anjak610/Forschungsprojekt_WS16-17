@@ -4,8 +4,8 @@
   <PropertyGroup>
     <RootNamespace>Fusee.Tutorial.Core</RootNamespace>
     <AssemblyName>Fusee.Tutorial.Core</AssemblyName>
-    <!-- <FuseeRoot Condition=" '$(FuseeRoot)' == '' ">L:\Programme\Gitkraken\Fusee\</FuseeRoot> -->
     <FuseeRoot Condition=" '$(FuseeRoot)' == '' ">D:\Alberto\Programmdateien\GitHub\Fusee\</FuseeRoot>
+    <FuseeRoot Condition=" '$(FuseeRoot)' == '' ">L:\Programme\Gitkraken\Fusee\</FuseeRoot>
     <ProjectBuildRoot Condition=" '$(ProjectBuildRoot)' == '' ">..</ProjectBuildRoot>
     <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -83,6 +83,15 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\BasicPoints.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Black_hole.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Black_hole.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Planet1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\PointCloud_IPM.txt">
