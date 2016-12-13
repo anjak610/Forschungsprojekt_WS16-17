@@ -11,8 +11,6 @@ using Fusee.Serialization;
 using Fusee.Tutorial.Core;
 using Path = Fusee.Base.Common.Path;
 
-
-
 namespace Fusee.Tutorial.Desktop
 {
     public class Simple

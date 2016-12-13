@@ -1,3 +1,21 @@
+using System;
+using System.Globalization;
+using System.IO;
+using Android.App;
+using Android.Content.PM;
+using Android.OS;
+using Android.Util;
+using Android.Views;
+using Android.Widget;
+using Fusee.Base.Common;
+using Fusee.Base.Core;
+using Fusee.Base.Imp.Android;
+using Fusee.Engine.Imp.Graphics.Android;
+using Fusee.Math.Core;
+using Fusee.Serialization;
+using Fusee.Tutorial.Core;
+using Path = Fusee.Base.Common.Path;
+using Android.Runtime;
 
 namespace Fusee.Tutorial.Android
 {
