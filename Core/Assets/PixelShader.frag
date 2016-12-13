@@ -21,7 +21,7 @@ void main()
 	float width=1920.0;
 	float height=1080.0;
 
-	// map from interval [-1, 1] to [0, 1]
+	//map from interval [-1, 1] to [0, 1]
 	float _dist = 0.5 * dist + 0.5;
 
 	//gl_FragColor = texture(tex,texCoords);

@@ -10,7 +10,7 @@ varying float dist; // distance
 
 //varying vec2 texCoords;
 
-uniform mat4 gl_TextureMatrix[gl_MaxTextureCoords];
+//uniform mat4 gl_TextureMatrix[gl_MaxTextureCoords];
         
 void main()
 {
