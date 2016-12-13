@@ -1,4 +1,5 @@
-﻿using Fusee.Base.Core;
+﻿using System.Threading.Tasks;
+using Fusee.Base.Core;
 using Fusee.Base.Common;
 using Fusee.Engine.Common;
 using Fusee.Engine.Core;
@@ -53,9 +54,13 @@ namespace Fusee.Tutorial.Core
         {
             // screenSize --> now requested from android device and windows screen
             //_screenSize = new float2(Width, Height);
-            
-            _pointCloud = AssetStorage.Get<PointCloud>("PointCloud_IPM2.txt");
 
+            _pointCloud = new PointCloud();
+            Task readTask = Task.Factory.StartNew(() =>
+            {
+                _pointCloud = PointCloudReader.ReadFromAsset("PointCloud_IPM2.txt");
+            });
+            
             //For SceneViewer
             _twoTouchRepeated = false;
             // _twoTouchRepeated = false;
@@ -89,6 +94,11 @@ namespace Fusee.Tutorial.Core
 
             // Set the clear color for the backbuffer
             RC.ClearColor = new float4(0.95f, 0.95f, 0.95f, 1);
+        }
+
+        private void ReadPointCloud()
+        {
+            _pointCloud = PointCloudReader.ReadFromAsset("PointCloud_IPM2.txt");
         }
 
         // RenderAFrame is called once a frame

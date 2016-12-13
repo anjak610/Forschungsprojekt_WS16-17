@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using Fusee.Base.Common;
@@ -10,8 +9,6 @@ using Fusee.Math.Core;
 using Fusee.Serialization;
 using Fusee.Tutorial.Core;
 using Path = Fusee.Base.Common.Path;
-
-
 
 namespace Fusee.Tutorial.Desktop
 {
@@ -85,11 +82,11 @@ namespace Fusee.Tutorial.Desktop
                             }
                         }
 
+                        pointCloud.FlushPoints();
                         return pointCloud;
                     },
                     Checker = id => Path.GetExtension(id).ToLower().Contains("txt")
                 });
-
 
             AssetStorage.RegisterProvider(fap);
 

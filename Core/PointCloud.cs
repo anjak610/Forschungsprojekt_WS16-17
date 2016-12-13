@@ -22,7 +22,7 @@ namespace Fusee.Tutorial.Core
         private List<ushort> _triangles;
         private List<float2> _uvs;
 
-        private int _currentIndex = 0; // index of the current point
+        private int _currentIndex; // index of the current point
 
         public PointCloud()
         {
@@ -34,8 +34,15 @@ namespace Fusee.Tutorial.Core
         {
             return _meshes;
         }
+
+        // When the last point is added, this method will take the remaining vertices, normals, etc. and
+        // add them to the mesh list.
+        public void FlushPoints()
+        {
+            AddCurrentToMeshes();
+        }
         
-        // Instantiate a new mesh with full capacity of maximum 65000 points
+        // Instantiate a new mesh
         private void ResetMesh()
         {
             _currentIndex = 0;
