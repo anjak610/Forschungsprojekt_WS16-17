@@ -68,7 +68,7 @@ namespace Fusee.Tutorial.Core
             //read shaders from files
             var vertsh = AssetStorage.Get<string>("VertexShader.vert");
             var pixsh = AssetStorage.Get<string>("PixelShader.frag");
-            var texture = AssetStorage.Get<ImageData>("smoked_oak.png");
+            var texture = AssetStorage.Get<ImageData>("Black_hole.png");
 
             // Initialize the shader(s)
             var shader = RC.CreateShader(vertsh, pixsh);

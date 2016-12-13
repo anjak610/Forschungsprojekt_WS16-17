@@ -10,7 +10,6 @@ varying float dist; // distance
 
 //varying vec2 texCoords;
 
-//uniform mat4 gl_TextureMatrix[gl_MaxTextureCoords];
         
 void main()
 {
@@ -28,5 +27,5 @@ void main()
 	gl_Position = result;
 
 	//texCoords = gl_MultiTexCoord0.st;
-	gl_TexCoord[0]  = gl_MultiTexCoord0;
+	//gl_TexCoord[0]  = gl_MultiTexCoord0;
 }
