@@ -96,6 +96,11 @@ namespace Fusee.Tutorial.Core
             RC.ClearColor = new float4(0.95f, 0.95f, 0.95f, 1);
         }
 
+        private void ReadPointCloud()
+        {
+            _pointCloud = PointCloudReader.ReadFromAsset("PointCloud_IPM2.txt");
+        }
+
         // RenderAFrame is called once a frame
         public override void RenderAFrame()
         {
