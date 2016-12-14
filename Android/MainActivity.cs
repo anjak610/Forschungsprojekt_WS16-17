@@ -1,5 +1,3 @@
-using System;
-using System.Globalization;
 using System.IO;
 using Android.App;
 using Android.Content.PM;
@@ -7,15 +5,18 @@ using Android.OS;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
+using Android.Runtime;
 using Fusee.Base.Common;
 using Fusee.Base.Core;
 using Fusee.Base.Imp.Android;
 using Fusee.Engine.Imp.Graphics.Android;
-using Fusee.Math.Core;
 using Fusee.Serialization;
 using Fusee.Tutorial.Core;
+using Font = Fusee.Base.Core.Font;
 using Path = Fusee.Base.Common.Path;
-using Android.Runtime;
+using Fusee.Math.Core;
+using System;
+using System.Globalization;
 
 namespace Fusee.Tutorial.Android
 {
