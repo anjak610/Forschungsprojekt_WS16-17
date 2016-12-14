@@ -17,8 +17,7 @@ namespace Fusee.Tutorial.Core
         //Sceneviewer Parameters    
         private float _maxPinchSpeed;
         private float _minPinchSpeed;
-        private bool _scaleKey;
-        private bool _moveMouseKey;
+        private bool _scaleKey;       
         private bool _twoTouchRepeated;
         public static float _zoomVel, _zoom;
         public bool _mouseWheel;
@@ -46,6 +45,7 @@ namespace Fusee.Tutorial.Core
 
         private float _alpha;
         private float _beta;
+        private float2 speed = new float2();
 
         public float ParticleSize;
 
@@ -73,7 +73,7 @@ namespace Fusee.Tutorial.Core
             //read shaders from files
             var vertsh = AssetStorage.Get<string>("VertexShader.vert");
             var pixsh = AssetStorage.Get<string>("PixelShader.frag");
-            var texture = AssetStorage.Get<ImageData>("Planet1.png");
+            var texture = AssetStorage.Get<ImageData>("Black_hole.png");
 
             // Initialize the shader(s)
             var shader = RC.CreateShader(vertsh, pixsh);
@@ -116,7 +116,9 @@ namespace Fusee.Tutorial.Core
                 RC.Render(mesh);
             }
 
-            RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize));
+            var aspectRatio = Width / (float)Height;
+
+            RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize * aspectRatio));
 
             var mtxCam = float4x4.LookAt(55, 0, -_zoom, 55, 0, 0, 0, 1, 0);
             var mtxOffset = float4x4.CreateTranslation(2 * _offset.x / Width, -2 * _offset.y / Height, 0);
@@ -131,7 +133,7 @@ namespace Fusee.Tutorial.Core
         public void MoveInScene()
         {
             //rotate around Object
-            float2 speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);
+            speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);
             if (Mouse.LeftButton || Touch.GetTouchActive(TouchPoints.Touchpoint_0))
             {
                 _alpha -= speed.x * 0.0001f;
@@ -226,8 +228,13 @@ namespace Fusee.Tutorial.Core
             // 0.25*PI Rad -> 45° Opening angle along the vertical direction. Horizontal opening angle is calculated based on the aspect ratio
             // Front clipping happens at 1 (Objects nearer than 1 world unit get clipped)
             // Back clipping happens at 2000 (Anything further away from the camera than 2000 world units gets clipped, polygons will be cut)
+
+            //RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize));
+
+            // RC.Projection = projection * mtxOffsetDesktop * mtxOffset * mtxCam;
+
             projection = float4x4.CreatePerspectiveFieldOfView(3.141592f * 0.25f, aspectRatio, 1, 20000);
-            RC.Projection = projection;
+           // RC.Projection = projection;
         }
 
     }

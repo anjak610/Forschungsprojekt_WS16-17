@@ -16,7 +16,7 @@ namespace Fusee.Tutorial.Core
         // we need multiple meshes.
         private List<Mesh> _meshes;
 
-        // those lists refer to the properties of one mesh
+        //those lists refer to the properties of one mesh
         private List<float3> _vertices;
         private List<float3> _normals;
         private List<ushort> _triangles;
@@ -93,13 +93,12 @@ namespace Fusee.Tutorial.Core
             _triangles.Add((ushort)(3 + _currentIndex * 4));
             _triangles.Add((ushort)(0 + _currentIndex * 4));
             _triangles.Add((ushort)(3 + _currentIndex * 4));
-            _triangles.Add((ushort)(2 + _currentIndex * 4));
+            _triangles.Add((ushort)(2 + _currentIndex * 4));      
 
-            _uvs.Add(new float2(0, 1));
             _uvs.Add(new float2(0, 0));
+            _uvs.Add(new float2(0, 1));
             _uvs.Add(new float2(1, 0));
             _uvs.Add(new float2(1, 1));
-            _uvs.Add(new float2(0, 1));                   
 
             _currentIndex++;
         }

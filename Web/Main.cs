@@ -1,8 +1,15 @@
-﻿using Fusee.Base.Common;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using Fusee.Base.Common;
 using Fusee.Base.Core;
+//using Fusee.Base.Imp.Desktop;
 using Fusee.Engine.Core;
+using Fusee.Math.Core;
 using Fusee.Serialization;
-
+using Fusee.Tutorial.Core;
+using Path = Fusee.Base.Common.Path;
 namespace Fusee.Tutorial.Web
 {
     public class Tutorial
@@ -40,7 +47,7 @@ namespace Fusee.Tutorial.Web
                         if (Path.GetExtension(id).ToLower().Contains("fus"))
                         {
                             var ser = new Serializer();
-                            return ser.Deserialize(IO.StreamFromFile("Assets/" + id, FileMode.Open), null, typeof(SceneContainer)) as SceneContainer;
+                            return ser.Deserialize(IO.StreamFromFile("Assets/" + id, Base.Common.FileMode.Open), null, typeof(SceneContainer)) as SceneContainer;
                         }
                         return null;
                     },
@@ -56,9 +63,10 @@ namespace Fusee.Tutorial.Web
             var app = new Fusee.Tutorial.Core.PointVisualizationBase();
 
             // Inject Fusee.Engine InjectMe dependencies (hard coded)
-            app.CanvasImplementor = new Fusee.Engine.Imp.Graphics.Web.RenderCanvasImp();
-            app.ContextImplementor = new Fusee.Engine.Imp.Graphics.Web.RenderContextImp(app.CanvasImplementor);
-            Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Web.RenderCanvasInputDriverImp(app.CanvasImplementor));
+           // app.CanvasImplementor = new Fusee.Engine.Imp.Graphics.Web.RenderCanvasImp();
+           /// app.ContextImplementor = new Fusee.Engine.Imp.Graphics.Web.RenderContextImp(app.CanvasImplementor);
+           // Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Web.RenderCanvasInputDriverImp(app.CanvasImplementor));
+          //  Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Desktop.WindowsTouchInputDriverImp(app.CanvasImplementor));
             // app.AudioImplementor = new Fusee.Engine.Imp.Sound.Web.AudioImp();
             // app.NetworkImplementor = new Fusee.Engine.Imp.Network.Web.NetworkImp();
             // app.InputDriverImplementor = new Fusee.Engine.Imp.Input.Web.InputDriverImp();
