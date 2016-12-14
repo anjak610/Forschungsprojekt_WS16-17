@@ -5,6 +5,7 @@
     <AssemblyName>Fusee.Tutorial.Desktop</AssemblyName>
     <FuseeRoot Condition=" '$(FuseeRoot)' == '' ">D:\Alberto\Programmdateien\GitHub\Fusee\</FuseeRoot>
     <FuseeRoot Condition=" '$(FuseeRoot)' == '' ">L:\Programme\Gitkraken\Fusee\</FuseeRoot>
+    <FuseeRoot Condition=" '$(FuseeRoot)' == '' ">E:\Gitkraken\Fusee\</FuseeRoot>
     <ProjectBuildRoot Condition=" '$(ProjectBuildRoot)' == '' ">..</ProjectBuildRoot>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
