@@ -27,11 +27,36 @@ namespace Fusee.Tutorial.Android
 		ConfigurationChanges = ConfigChanges.KeyboardHidden, LaunchMode = LaunchMode.SingleTask)]
 	public class MainActivity : Activity
 	{
-		protected override void OnCreate (Bundle savedInstanceState)
+        private RelativeLayout canvas_view;
+        private Button plusButton;
+        private Button minusButton;
+        private Core.PointVisualizationBase app;
+
+        protected override void OnCreate (Bundle savedInstanceState)
 		{
 			base.OnCreate (savedInstanceState);
             RequestWindowFeature(WindowFeatures.NoTitle);
-		    if (SupportedOpenGLVersion() >= 3)
+            //Setup Layout
+            // SetContentView(new LibPaintingView(ApplicationContext, null));
+            SetContentView(Resource.Layout.main_activity_layout);
+            canvas_view = FindViewById<RelativeLayout>(Resource.Id.canvas_container);
+            plusButton = FindViewById<Button>(Resource.Id.plus_btn);
+            minusButton = FindViewById<Button>(Resource.Id.minus_btn);
+
+            //onclick: increase or decrease size of particles    
+            plusButton.Click += (sender, e) =>
+            {
+                app.ParticleSize = app.ParticleSize + app.ParticleSize / 2;
+            };
+
+            minusButton.Click += (sender, e) =>
+            {
+                app.ParticleSize = app.ParticleSize - app.ParticleSize / 2;
+            };
+
+
+
+            if (SupportedOpenGLVersion() >= 3)
 		    {
 		        // SetContentView(new LibPaintingView(ApplicationContext, null));
 
