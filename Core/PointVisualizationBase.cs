@@ -4,6 +4,8 @@ using Fusee.Engine.Common;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using static Fusee.Engine.Core.Input;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Fusee.Tutorial.Core
 {
@@ -16,11 +18,11 @@ namespace Fusee.Tutorial.Core
         //Sceneviewer Parameters    
         private float _maxPinchSpeed;
         private float _minPinchSpeed;
-        private bool _scaleKey;       
+        private bool _scaleKey;
         private bool _twoTouchRepeated;
-        public static float _zoomVel, _zoom;
-        public bool _mouseWheel;
-
+        private static float _zoomVel, _zoom;
+        private bool _mouseWheel;
+        
         private static float2 _offset;
         private static float2 _offsetInit;
         private static float _offsetInitMouseX;
@@ -36,6 +38,8 @@ namespace Fusee.Tutorial.Core
 
         private IShaderParam _tex;
         private ITexture _newTex;
+
+        private Dictionary<string, ITexture> _textueLookUp =  new Dictionary<string, ITexture>();
 
         private float4x4 projection;
 
@@ -53,7 +57,7 @@ namespace Fusee.Tutorial.Core
         {
             // screenSize --> now requested from android device and windows screen
             //_screenSize = new float2(Width, Height);
-            
+
             _pointCloud = AssetStorage.Get<PointCloud>("PointCloud_IPM2.txt");
 
             //For SceneViewer
@@ -68,8 +72,8 @@ namespace Fusee.Tutorial.Core
             //read shaders from files
             var vertsh = AssetStorage.Get<string>("VertexShader.vert");
             var pixsh = AssetStorage.Get<string>("PixelShader.frag");
-            var texture = AssetStorage.Get<ImageData>("Black_hole.png");
-
+            var texture = AssetStorage.Get<ImageData>("Black_hole.png");            
+            
             // Initialize the shader(s)
             var shader = RC.CreateShader(vertsh, pixsh);
             RC.SetShader(shader);
@@ -85,6 +89,7 @@ namespace Fusee.Tutorial.Core
             _tex = RC.GetShaderParam(shader, "tex");
             RC.SetShaderParamTexture(_tex, _newTex);
 
+            _textueLookUp.Add("Black_hole.png", _newTex);        
             //RC.SetShaderParam(_xFormParam, float4x4.CreateScale(0.5f) * float4x4.CreateTranslation(-2, -33, 34));
 
             // Set the clear color for the backbuffer
@@ -114,7 +119,18 @@ namespace Fusee.Tutorial.Core
             var mtxOffset = float4x4.CreateTranslation(2 * _offset.x / Width, -2 * _offset.y / Height, 0);
             var mtxOffsetDesktop = float4x4.CreateTranslation(2 * _offsetMouseX / Width, -2 * _offsetMouseY / Height, 0);
 
-            RC.Projection = projection * mtxOffsetDesktop * mtxOffset * mtxCam;
+            RC.Projection = projection * mtxOffsetDesktop * mtxOffset * mtxCam;  
+
+            RC.SetRenderState(new RenderStateSet
+            {
+                AlphaBlendEnable = true,
+                SourceBlend = Blend.SourceAlpha,
+                DestinationBlend = Blend.InverseSourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                // In case of particles:
+                ZEnable = false,
+                ZWriteEnable = false,
+            });
 
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
@@ -123,12 +139,14 @@ namespace Fusee.Tutorial.Core
         public void MoveInScene()
         {
             //rotate around Object
-            speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);
+            speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);            
             if (Mouse.LeftButton || Touch.GetTouchActive(TouchPoints.Touchpoint_0))
             {
+               // _oneTouch = true;
                 _alpha -= speed.x * 0.0001f;
                 _beta -= speed.y * 0.0001f;
             }
+                    
             var view = float4x4.CreateRotationY(_alpha) * float4x4.CreateRotationX(_beta);
             _xform = RC.Projection * float4x4.CreateTranslation(0, 0, 5.0f) * view;
 
@@ -165,24 +183,42 @@ namespace Fusee.Tutorial.Core
                     _minPinchSpeed = 0;
                     _offsetInit = Touch.TwoPointMidPoint - _offset;
                 }
-
+                //_oneTouch = false;
                 _offset = Touch.TwoPointMidPoint - _offsetInit;
-                float pinchSpeed = Touch.TwoPointDistanceVel;
+
+                float pinchSpeed = Touch.TwoPointDistanceVel; // Bolean einbauen für stop des zooms
                 if (pinchSpeed > _maxPinchSpeed)
-                {
+                {           
                     _maxPinchSpeed = pinchSpeed;
-                    ParticleSize = ParticleSize + ParticleSize / 2;
+                    _zoomVel = pinchSpeed * +0.008f;            
                 }
-                else if (pinchSpeed < _minPinchSpeed)
+                else
+                {
+                   // _maxPinchSpeed = 0;
+                    //_maxPinchSpeed = pinchSpeed;
+                    _zoomVel = pinchSpeed * +0.008f;
+                }           
+
+                if (pinchSpeed < _minPinchSpeed)
                 {
                     _minPinchSpeed = pinchSpeed;
-                    ParticleSize = ParticleSize - ParticleSize / 2;
+                    _zoomVel = pinchSpeed * -0.008f;
                 }
+                else
+                {
+                    //_minPinchSpeed = 0;
+                    //_minPinchSpeed = pinchSpeed;
+                    _zoomVel = pinchSpeed * -0.008f;
+                }
+
             }
             else
             {
                 _twoTouchRepeated = false;
             }
+
+
+
 
             //Zoom with Mousewheel
             if (Mouse.Wheel != 0)
@@ -224,7 +260,7 @@ namespace Fusee.Tutorial.Core
             // RC.Projection = projection * mtxOffsetDesktop * mtxOffset * mtxCam;
 
             projection = float4x4.CreatePerspectiveFieldOfView(3.141592f * 0.25f, aspectRatio, 1, 20000);
-           // RC.Projection = projection;
+            // RC.Projection = projection;
         }
 
     }

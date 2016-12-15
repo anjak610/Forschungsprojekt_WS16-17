@@ -20,22 +20,25 @@ using System.Globalization;
 
 namespace Fusee.Tutorial.Android
 {
-	[Activity (Label = "@string/app_name", MainLauncher = true, Icon = "@drawable/icon",
+    [Activity(Label = "@string/app_name", MainLauncher = true, Icon = "@drawable/icon",
 #if __ANDROID_11__
-		HardwareAccelerated=false,
+        HardwareAccelerated = false,
 #endif
-		ConfigurationChanges = ConfigChanges.KeyboardHidden, LaunchMode = LaunchMode.SingleTask)]
-	public class MainActivity : Activity
-	{
+        ConfigurationChanges = ConfigChanges.KeyboardHidden, LaunchMode = LaunchMode.SingleTask)]
+    public class MainActivity : Activity
+    {
         private RelativeLayout canvas_view;
         private Button plusButton;
         private Button minusButton;
         private Core.PointVisualizationBase app;
 
-        protected override void OnCreate (Bundle savedInstanceState)
-		{
-			base.OnCreate (savedInstanceState);
+
+        //on create
+        protected override void OnCreate(Bundle savedInstanceState)
+        {
+            base.OnCreate(savedInstanceState);
             RequestWindowFeature(WindowFeatures.NoTitle);
+
             //Setup Layout
             // SetContentView(new LibPaintingView(ApplicationContext, null));
             SetContentView(Resource.Layout.main_activity_layout);
@@ -54,14 +57,12 @@ namespace Fusee.Tutorial.Android
                 app.ParticleSize = app.ParticleSize - app.ParticleSize / 2;
             };
 
-
-
+            //setup asset storage
             if (SupportedOpenGLVersion() >= 3)
-		    {
-		        // SetContentView(new LibPaintingView(ApplicationContext, null));
+            {
 
-		        // Inject Fusee.Engine.Base InjectMe dependencies
-		        IO.IOImp = new IOImp(ApplicationContext);
+                // Inject Fusee.Engine.Base InjectMe dependencies
+                IO.IOImp = new IOImp(ApplicationContext);
 
                 var fap = new Fusee.Base.Imp.Android.ApkAssetProvider(ApplicationContext);
                 fap.RegisterTypeHandler(
@@ -143,40 +144,42 @@ namespace Fusee.Tutorial.Android
 
                 AssetStorage.RegisterProvider(fap);
 
-                var app = new Core.PointVisualizationBase();
-                
+                app = new Core.PointVisualizationBase();
 
-		        // Inject Fusee.Engine InjectMe dependencies (hard coded)
-		        RenderCanvasImp rci = new RenderCanvasImp(ApplicationContext, null, delegate { app.Run(); });
-		        app.CanvasImplementor = rci;
-		        app.ContextImplementor = new RenderContextImp(rci, ApplicationContext);
 
-		        SetContentView(rci.View);
+
+                // Inject Fusee.Engine InjectMe dependencies (hard coded)
+                RenderCanvasImp rci = new RenderCanvasImp(ApplicationContext, null, delegate { app.Run(); });
+                app.CanvasImplementor = rci;
+                app.ContextImplementor = new RenderContextImp(rci, ApplicationContext);
+
+                canvas_view.AddView(rci.View);
+                //SetContentView(rci.View);
 
                 //set particle size bigger
-                app.ParticleSize =  1 ;
+                app.ParticleSize = 0.05f;
 
                 //show display dimensions for testing
-                IWindowManager wm = ApplicationContext.GetSystemService(WindowService).JavaCast<IWindowManager>() ;
-                Display display = wm.DefaultDisplay;
-                app._screenSize = new float2(display.Width, display.Height);
-                float pixel_height = display.Height;
-                float pixel_width = display.Width;
-                string output = "Width: " + pixel_height + " Height:" + pixel_width;
-                //Show roasted bread
-                Toast.MakeText(ApplicationContext, output, ToastLength.Short).Show();
+                //IWindowManager wm = ApplicationContext.GetSystemService(WindowService).JavaCast<IWindowManager>() ;
+                //Display display = wm.DefaultDisplay;
+                //app._screenSize = new float2(display.Width, display.Height);
+                //float pixel_height = display.Height;
+                //float pixel_width = display.Width;
+                //string output = "Width: " + pixel_height + " Height:" + pixel_width;
+                ////Show roasted bread
+                //Toast.MakeText(ApplicationContext, output, ToastLength.Short).Show();
 
                 Engine.Core.Input.AddDriverImp(
-		            new Fusee.Engine.Imp.Graphics.Android.RenderCanvasInputDriverImp(app.CanvasImplementor));
-		         //Engine.Core.Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Android.WindowsTouchInputDriverImp(app.CanvasImplementor));
-		        // Deleayed into rendercanvas imp....app.Run() - SEE DELEGATE ABOVE;
-		    }
-		    else
-		    {
+                    new Fusee.Engine.Imp.Graphics.Android.RenderCanvasInputDriverImp(app.CanvasImplementor));
+                //Engine.Core.Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Android.WindowsTouchInputDriverImp(app.CanvasImplementor));
+                // Deleayed into rendercanvas imp....app.Run() - SEE DELEGATE ABOVE;
+            }
+            else
+            {
                 Toast.MakeText(ApplicationContext, "Hardware does not support OpenGL ES 3.0 - Aborting...", ToastLength.Long);
                 Log.Info("@string/app_name", "Hardware does not support OpenGL ES 3.0 - Aborting...");
             }
-        }
+        }//end on create
 
 
         /// <summary>
