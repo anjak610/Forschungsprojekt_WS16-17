@@ -1,3 +1,5 @@
+//#version 120
+
 attribute vec3 fuVertex;
 attribute vec3 fuNormal;
 attribute vec2 fuUV;
@@ -9,7 +11,6 @@ varying vec3 normal;
 varying float dist; // distance
 
 //varying vec2 texCoords;
-
         
 void main()
 {
@@ -23,9 +24,5 @@ void main()
 
 	vec4 result = newVertex  + vec4(fuNormal.xy* particleSize, 0, 0);
 
-	//gl_Position = ftransform();
 	gl_Position = result;
-
-	//texCoords = gl_MultiTexCoord0.st;
-	//gl_TexCoord[0]  = gl_MultiTexCoord0;
 }
