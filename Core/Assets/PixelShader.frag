@@ -26,7 +26,7 @@ void main()
 
 	vec3 colorA = texture2D(tex,UV).a;
 
-	gl_FragColor =  vec4(color,1.0)* vec4(colorA,0.5); //change last value to set trancparancy
+	gl_FragColor =  vec4(color,colorA); 
 
 	 if (gl_FragColor.a < 0.5)        
     {

@@ -72,7 +72,7 @@ namespace Fusee.Tutorial.Core
             //read shaders from files
             var vertsh = AssetStorage.Get<string>("VertexShader.vert");
             var pixsh = AssetStorage.Get<string>("PixelShader.frag");
-            var texture = AssetStorage.Get<ImageData>("smoked_oak.png");            
+            var texture = AssetStorage.Get<ImageData>("Black_hole.png");            
             
             // Initialize the shader(s)
             var shader = RC.CreateShader(vertsh, pixsh);
@@ -86,10 +86,10 @@ namespace Fusee.Tutorial.Core
 
             //Load texture and save into ITexture _newTex           
             _newTex = RC.CreateTexture(texture);
+           // _textueLookUp.Add("black_sphere.png", _newTex);
             _tex = RC.GetShaderParam(shader, "tex");
             RC.SetShaderParamTexture(_tex, _newTex);
 
-            _textueLookUp.Add("Black_hole.png", _newTex);        
             //RC.SetShaderParam(_xFormParam, float4x4.CreateScale(0.5f) * float4x4.CreateTranslation(-2, -33, 34));
 
             // Set the clear color for the backbuffer
@@ -123,10 +123,10 @@ namespace Fusee.Tutorial.Core
 
              RC.SetRenderState(new RenderStateSet
             {
-               AlphaBlendEnable = true,
-               SourceBlend = Blend.SourceAlpha,
-               DestinationBlend = Blend.InverseSourceAlpha,
-               BlendOperation = BlendOperation.Add,
+                AlphaBlendEnable = true,
+                SourceBlend = Blend.SourceAlpha,
+                DestinationBlend = Blend.InverseSourceAlpha,
+                BlendOperation = BlendOperation.Add,
                 // In case of particles:
                 ZEnable = false,
                 ZWriteEnable = false,
@@ -216,9 +216,6 @@ namespace Fusee.Tutorial.Core
             {
                 _twoTouchRepeated = false;
             }
-
-
-
 
             //Zoom with Mousewheel
             if (Mouse.Wheel != 0)
