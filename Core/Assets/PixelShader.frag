@@ -24,12 +24,14 @@ void main()
 	
 	vec3 color = texture2D(tex,UV).rgba;
 
-	gl_FragColor = vec4(color,0.5);
+	vec3 colorA = texture2D(tex,UV).a;
 
-	 if (gl_FragColor.a < 0.4)        
+	gl_FragColor =  vec4(color,1.0)* vec4(colorA,0.5); //change last value to set trancparancy
+
+	 if (gl_FragColor.a < 0.5)        
     {
        discard; // yes: discard this fragment
-   }
+    }
 
 	// map from interval [-1, 1] to [0, 1]
 	//vec3 color = vec3(1, 0.3, 1);

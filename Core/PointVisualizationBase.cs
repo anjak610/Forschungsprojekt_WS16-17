@@ -72,7 +72,7 @@ namespace Fusee.Tutorial.Core
             //read shaders from files
             var vertsh = AssetStorage.Get<string>("VertexShader.vert");
             var pixsh = AssetStorage.Get<string>("PixelShader.frag");
-            var texture = AssetStorage.Get<ImageData>("Black_hole.png");            
+            var texture = AssetStorage.Get<ImageData>("smoked_oak.png");            
             
             // Initialize the shader(s)
             var shader = RC.CreateShader(vertsh, pixsh);
@@ -121,12 +121,12 @@ namespace Fusee.Tutorial.Core
 
             RC.Projection = projection * mtxOffsetDesktop * mtxOffset * mtxCam;  
 
-            RC.SetRenderState(new RenderStateSet
+             RC.SetRenderState(new RenderStateSet
             {
-                AlphaBlendEnable = true,
-                SourceBlend = Blend.SourceAlpha,
-                DestinationBlend = Blend.InverseSourceAlpha,
-                BlendOperation = BlendOperation.Add,
+               AlphaBlendEnable = true,
+               SourceBlend = Blend.SourceAlpha,
+               DestinationBlend = Blend.InverseSourceAlpha,
+               BlendOperation = BlendOperation.Add,
                 // In case of particles:
                 ZEnable = false,
                 ZWriteEnable = false,
