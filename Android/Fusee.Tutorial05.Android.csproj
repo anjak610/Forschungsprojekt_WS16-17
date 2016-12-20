@@ -3,10 +3,9 @@
   <PropertyGroup>
     <RootNamespace>Fusee.Tutorial.Android</RootNamespace>
     <AssemblyName>Fusee.Tutorial.Android</AssemblyName>
-    <FuseeRoot Condition=" '$(FuseeRoot)' == '' ">L:\Programme\Gitkraken\Fusee\</FuseeRoot>
-    <FuseeRoot Condition=" '$(FuseeRoot)' == '' ">E:\Gitkraken\Fusee\</FuseeRoot>
     <FuseeRoot Condition=" '$(FuseeRoot)' == '' ">D:\Alberto\Programmdateien\GitHub\Fusee\</FuseeRoot>
-	<ProjectBuildRoot Condition=" '$(ProjectBuildRoot)' == '' ">..</ProjectBuildRoot>
+    <FuseeRoot Condition=" '$(FuseeRoot)' == '' ">E:\Gitkraken\Fusee\</FuseeRoot>
+    <ProjectBuildRoot Condition=" '$(ProjectBuildRoot)' == '' ">..</ProjectBuildRoot>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
@@ -70,6 +69,7 @@
     <Reference Include="OpenTK" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FrameRateLogger.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
   </ItemGroup>

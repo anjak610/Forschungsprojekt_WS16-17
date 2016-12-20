@@ -15,9 +15,11 @@ namespace Fusee.Tutorial.Desktop
 {
     public class Simple
     {
+        private static FrameRateLogger _fRL;
 
         public static void Main()
         {
+            _fRL = new FrameRateLogger(); // start logging frame rate on console
 
             // Inject Fusee.Engine.Base InjectMe dependencies
             IO.IOImp = new Fusee.Base.Imp.Desktop.IOImp();

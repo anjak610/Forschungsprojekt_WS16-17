@@ -12,6 +12,7 @@ using Fusee.Base.Imp.Android;
 using Fusee.Engine.Imp.Graphics.Android;
 using Fusee.Serialization;
 using Fusee.Tutorial.Core;
+using static Fusee.Engine.Core.Time; // frame rate
 using Font = Fusee.Base.Core.Font;
 using Path = Fusee.Base.Common.Path;
 using Fusee.Math.Core;
@@ -27,16 +28,20 @@ namespace Fusee.Tutorial.Android
 		ConfigurationChanges = ConfigChanges.KeyboardHidden, LaunchMode = LaunchMode.SingleTask)]
 	public class MainActivity : Activity
 	{
+	    private FrameRateLogger _fRL;
+
 		protected override void OnCreate (Bundle savedInstanceState)
 		{
 			base.OnCreate (savedInstanceState);
             RequestWindowFeature(WindowFeatures.NoTitle);
 		    if (SupportedOpenGLVersion() >= 3)
 		    {
-		        // SetContentView(new LibPaintingView(ApplicationContext, null));
+                _fRL = new FrameRateLogger(); // start logging frame rate on console
 
-		        // Inject Fusee.Engine.Base InjectMe dependencies
-		        IO.IOImp = new IOImp(ApplicationContext);
+                // SetContentView(new LibPaintingView(ApplicationContext, null));
+
+                // Inject Fusee.Engine.Base InjectMe dependencies
+                IO.IOImp = new IOImp(ApplicationContext);
 
                 var fap = new Fusee.Base.Imp.Android.ApkAssetProvider(ApplicationContext);
                 fap.RegisterTypeHandler(
@@ -144,9 +149,9 @@ namespace Fusee.Tutorial.Android
 
                 Engine.Core.Input.AddDriverImp(
 		            new Fusee.Engine.Imp.Graphics.Android.RenderCanvasInputDriverImp(app.CanvasImplementor));
-		         //Engine.Core.Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Android.WindowsTouchInputDriverImp(app.CanvasImplementor));
-		        // Deleayed into rendercanvas imp....app.Run() - SEE DELEGATE ABOVE;
-		    }
+                //Engine.Core.Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Android.WindowsTouchInputDriverImp(app.CanvasImplementor));
+                // Deleayed into rendercanvas imp....app.Run() - SEE DELEGATE ABOVE;
+            }
 		    else
 		    {
                 Toast.MakeText(ApplicationContext, "Hardware does not support OpenGL ES 3.0 - Aborting...", ToastLength.Long);

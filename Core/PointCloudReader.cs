@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using Fusee.Base.Common;
 using Fusee.Base.Core;
 using Fusee.Math.Core;
 using Fusee.Tutorial.Core;
@@ -16,6 +17,8 @@ namespace Fusee.Tutorial.Core
     {
         public static PointCloud ReadFromAsset(string assetName)
         {
+            // Stream storage = IO.StreamFromFile("Assets/" + assetName, FileMode.Open);
+
             return AssetStorage.Get<PointCloud>(assetName);
         }
     }
