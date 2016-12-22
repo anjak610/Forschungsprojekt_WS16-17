@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using Fusee.Base.Common;
@@ -107,14 +106,9 @@ namespace Fusee.Tutorial.Desktop
             //app.NetworkImplementor = new Fusee.Engine.Imp.Network.Desktop.NetworkImp();
             //app.InputDriverImplementor = new Fusee.Engine.Imp.Input.Desktop.InputDriverImp();
             // app.VideoManagerImplementor = ImpFactory.CreateIVideoManagerImp();
-
-            //set starting particle size
-
-            app.ParticleSize = 0.2f;
-
+            
             // Start the app
             app.Run();
-
         }
 
     }

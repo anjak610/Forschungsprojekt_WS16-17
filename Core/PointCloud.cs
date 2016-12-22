@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
 
@@ -12,6 +11,9 @@ namespace Fusee.Tutorial.Core
 
     public class PointCloud
     {
+        // maximum number of points
+        private long _limit = 0;
+
         // Because 1 mesh can only take up to 65.535 indices in the triangles ushort[] array,
         // we need multiple meshes.
         private List<Mesh> _meshes;
@@ -23,9 +25,20 @@ namespace Fusee.Tutorial.Core
         private List<float2> _uvs;
 
         private int _currentIndex; // index of the current point
+        private long _totalNumberOfPoints = 0; // counts all points
 
         public PointCloud()
         {
+            _limit = 0;
+
+            _meshes = new List<Mesh>();
+            ResetMesh();
+        }
+
+        public PointCloud(long limit)
+        {
+            _limit = limit; // limit needs to be set at start
+
             _meshes = new List<Mesh>();
             ResetMesh();
         }
@@ -33,6 +46,11 @@ namespace Fusee.Tutorial.Core
         public List<Mesh> GetMeshes()
         {
             return _meshes;
+        }
+
+        public long GetNumberOfPoints()
+        {
+            return _totalNumberOfPoints;
         }
 
         // When the last point is added, this method will take the remaining vertices, normals, etc. and
@@ -64,13 +82,19 @@ namespace Fusee.Tutorial.Core
             mesh.UVs = _uvs.ToArray();
             //UVs = mc.UVs;
 
-            _meshes.Add(mesh);
+            lock (_meshes)
+            {
+                _meshes.Add(mesh);
+            }
 
             ResetMesh();
         }
 
         public void AddPoint(Point point)
         {
+            if (_limit > 0 && _totalNumberOfPoints <= _limit)
+                return;
+
             if (3 + _currentIndex * 4 > 65000)
             {
                 AddCurrentToMeshes();
@@ -101,6 +125,7 @@ namespace Fusee.Tutorial.Core
             _uvs.Add(new float2(1, 1));
 
             _currentIndex++;
+            _totalNumberOfPoints++;
         }
 
         // Takes another pointcloud and adds its meshes to the mesh array

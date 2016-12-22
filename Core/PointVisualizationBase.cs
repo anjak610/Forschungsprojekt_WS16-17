@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Fusee.Base.Core;
+﻿using Fusee.Base.Core;
 using Fusee.Base.Common;
 using Fusee.Engine.Common;
 using Fusee.Engine.Core;
@@ -13,6 +12,7 @@ namespace Fusee.Tutorial.Core
     public class PointVisualizationBase : RenderCanvas
     {
         private PointCloud _pointCloud;
+        private PointCloudReader _pointCloudReader;
 
         //Sceneviewer Parameters    
         private float _maxPinchSpeed;
@@ -47,7 +47,7 @@ namespace Fusee.Tutorial.Core
         private float _beta;
         private float2 speed = new float2();
 
-        public float ParticleSize;
+        public float ParticleSize = 0.015f;
 
         // Init is called on startup. 
         public override void Init()
@@ -55,11 +55,9 @@ namespace Fusee.Tutorial.Core
             // screenSize --> now requested from android device and windows screen
             //_screenSize = new float2(Width, Height);
 
-            _pointCloud = new PointCloud();
-            Task readTask = Task.Factory.StartNew(() =>
-            {
-                _pointCloud = PointCloudReader.ReadFromAsset("PointCloud_IPM2.txt");
-            });
+            _pointCloud = new PointCloud(100000);
+            _pointCloudReader = new PointCloudReader(ref _pointCloud);
+            _pointCloudReader.ReadFromAsset("PointCloud_IPM.txt", ref _pointCloud);
             
             //For SceneViewer
             _twoTouchRepeated = false;

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.Threading.Tasks;
 using Fusee.Base.Common;
 using Fusee.Base.Core;
 using Fusee.Math.Core;
-using Fusee.Tutorial.Core;
 
 namespace Fusee.Tutorial.Core
 {
@@ -15,11 +15,53 @@ namespace Fusee.Tutorial.Core
     
     public class PointCloudReader
     {
-        public static PointCloud ReadFromAsset(string assetName)
-        {
-            // Stream storage = IO.StreamFromFile("Assets/" + assetName, FileMode.Open);
+        private PointCloud _pointCloud; // reference to the main point cloud
 
-            return AssetStorage.Get<PointCloud>(assetName);
+        public PointCloudReader(ref PointCloud pointCloud)
+        {
+            _pointCloud = pointCloud;
+        }
+
+        public void ReadFromAsset(string assetName, ref PointCloud pointCloud)
+        {
+            Task readTask = Task.Factory.StartNew(() =>
+            {
+                Stream storage = IO.StreamFromFile("Assets/" + assetName, FileMode.Open);
+                using (var sr = new StreamReader(storage))
+                {
+                    string line;
+                    while ((line = sr.ReadLine()) != null) // read per line
+                    {
+                        string delimiter = "\t";
+                        string[] textElements = line.Split(delimiter.ToCharArray());
+
+                        if (textElements.Length == 1) // empty line
+                            continue;
+
+                        Point point = new Point();
+
+                        // convert each string to float
+                        float[] numbers = new float[textElements.Length];
+                        for (var i=0; i<numbers.Length; i++)
+                        {
+                            numbers[i] = float.Parse(textElements[i], CultureInfo.InvariantCulture.NumberFormat);
+                        }
+
+                        point.Position = new float3(numbers[0], numbers[1], numbers[2]);
+
+                        if (numbers.Length == 9)
+                        {
+                            point.Color = new float3(numbers[3], numbers[4], numbers[5]);
+                            point.EchoId = numbers[6];
+                            point.ScanNr = numbers[8];
+                        }
+
+                        pointCloud.AddPoint(point);
+                    }
+                }
+
+                pointCloud.FlushPoints();
+            });
         }
     }
 }
