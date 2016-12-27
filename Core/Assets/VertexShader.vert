@@ -10,7 +10,8 @@ uniform mat4 xForm;
 varying vec3 normal;
 varying float dist; // distance
 
-//varying vec2 texCoords;
+
+//varying vec2 texcoords;
         
 void main()
 {

@@ -2,6 +2,7 @@
 using System.Linq;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
+using System.Diagnostics;
 
 namespace Fusee.Tutorial.Core
 {
@@ -94,6 +95,7 @@ namespace Fusee.Tutorial.Core
             _uvs.Add(new float2(1, 1));
 
             _currentIndex++;
+            
         }
 
         // Takes another pointcloud and adds its meshes to the mesh array

@@ -6,29 +6,65 @@
 varying float dist;
 varying vec3 modelpos;
 varying vec3 normal;
-uniform vec2 screenSize;
+//varying vec2 screenSize;
 varying vec2 UV;
 
 uniform sampler2D tex;
-varying vec2 texcoord;
-
+uniform vec2 camerarange;
+ 
+varying vec2 texCoord;
+ 
 void main()
-{
-	
-	float width=1920.0;
-	float height=1080.0;
-	
-	float _dist = 0.5 * dist + 0.5;
-	
-	vec3 color = texture2D(tex,UV).rgb;
+{	
 
+
+	//float _dist = 0.5 * dist + 0.5;
+/*if (texture2D(tex,UV).z <= nearestZ)
+{
+  nearestZ = texture2D(tex,UV).z;
+}*/
+    float Min = 0;
+	float Max = 20000;
+    float depthColorValue =texture2D(tex,UV).z / gl_FragCoord.w; //sollte nicht von w abhängig sein sondern vom am nächsten liegenden z
+	
+	float nearZ = 1000;
+
+    float colorR = texture2D(tex,UV).r;
+	float colorG = texture2D(tex,UV).g;
+    float colorB = texture2D(tex,UV).b;
+
+	//float color = texture2D(tex,UV).rgb;
 	float colorA = texture2D(tex,UV).a;
 
-	gl_FragColor =  vec4(color,colorA); 
+/*if(texture2D(tex,UV).z < nearZ)
+{
+	nearZ = texture2D(tex,UV).z;
+}*/
 
-	 if (gl_FragColor.a < 0.5)        
+  //float depthColorValue = texture2D(tex,UV).z - nearZ;
+
+colorB = 0;
+colorR = 0; 
+
+
+//float ndcDepth= (2.0 * gl_FragCoord.z - Min - Max) /   (Max - Min);
+//float clipDepth = ndcDepth / gl_FragCoord.w;
+ 
+float z = 1.0 - (gl_FragCoord.z / gl_FragCoord.w) /80;
+//colorG = 1/clipDepth;
+//gl_FragColor = vec4((clipDepth / 0.5) + 0.5); 
+	//
+ gl_FragColor =  vec4(z, z ,z,colorA);
+ //gl_FragColor = vec4((clipDepth * 0.5) + 0.5); 
+
+	if (gl_FragColor.a < 0.5)        
     {
        discard; // yes: discard this fragment
+	   //gl_FragColor.a = 0.0;
     }
+
+
+
+//gl_FragColor = vec4((clipDepth * 0.5) + 0.5,colorA); 
 }
 

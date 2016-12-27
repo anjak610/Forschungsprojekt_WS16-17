@@ -34,12 +34,13 @@ namespace Fusee.Tutorial.Core
         //Get Shader Parameters
         private IShaderParam _particleSizeParam;
         private IShaderParam _xFormParam;
-        private IShaderParam _screenSizeParam;
+        private IShaderParam _cameraRangeParam;
+        private IShaderParam _gProjParam;
 
         private IShaderParam _tex;
         private ITexture _newTex;
 
-        private Dictionary<string, ITexture> _textueLookUp =  new Dictionary<string, ITexture>();
+       // private Dictionary<string, ITexture> _textueLookUp =  new Dictionary<string, ITexture>();
 
         private float4x4 projection;
 
@@ -56,8 +57,10 @@ namespace Fusee.Tutorial.Core
         public override void Init()
         {
             // screenSize --> now requested from android device and windows screen
-            //_screenSize = new float2(Width, Height);
+            _screenSize = new float2(Width, Height);
 
+            //Width = 1920.0f;
+            //Height = 1080.0f;
             _pointCloud = AssetStorage.Get<PointCloud>("PointCloud_IPM2.txt");
 
             //For SceneViewer
@@ -77,6 +80,8 @@ namespace Fusee.Tutorial.Core
             // Initialize the shader(s)
             var shader = RC.CreateShader(vertsh, pixsh);
             RC.SetShader(shader);
+
+            var mtxCam = float4x4.LookAt(55, 0, -_zoom, 55, 0, 0, 0, 1, 0);
 
             _particleSizeParam = RC.GetShaderParam(shader, "particleSize");
             RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize));
@@ -108,14 +113,14 @@ namespace Fusee.Tutorial.Core
 
             foreach (var mesh in _pointCloud.GetMeshes())
             {
-                RC.Render(mesh);
+                RC.Render(mesh);                
             }
 
             var aspectRatio = Width / (float)Height;
 
             RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize * aspectRatio));
 
-            var mtxCam = float4x4.LookAt(55, 0, -_zoom, 55, 0, 0, 0, 1, 0);
+            var mtxCam = float4x4.LookAt(0, 0, -_zoom, 55, 0, 0, 0, 1, 0);
             var mtxOffset = float4x4.CreateTranslation(2 * _offset.x / Width, -2 * _offset.y / Height, 0);
             var mtxOffsetDesktop = float4x4.CreateTranslation(2 * _offsetMouseX / Width, -2 * _offsetMouseY / Height, 0);
 
@@ -256,7 +261,7 @@ namespace Fusee.Tutorial.Core
 
             // RC.Projection = projection * mtxOffsetDesktop * mtxOffset * mtxCam;
 
-            projection = float4x4.CreatePerspectiveFieldOfView(3.141592f * 0.25f, aspectRatio, 1, 20000);
+            projection = float4x4.CreatePerspectiveFieldOfView(3.141592f * 0.25f, aspectRatio, 1, 2000);
             // RC.Projection = projection;
         }
 
