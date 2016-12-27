@@ -24,7 +24,7 @@ void main()
   nearestZ = texture2D(tex,UV).z;
 }*/
     float Min = 0;
-	float Max = 20000;
+	float Max = 2000;
     float depthColorValue =texture2D(tex,UV).z / gl_FragCoord.w; //sollte nicht von w abhängig sein sondern vom am nächsten liegenden z
 	
 	float nearZ = 1000;
