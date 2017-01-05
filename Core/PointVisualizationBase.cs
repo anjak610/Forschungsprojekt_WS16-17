@@ -21,7 +21,7 @@ namespace Fusee.Tutorial.Core
         private bool _scaleKey;
         private bool _twoTouchRepeated;
         private static float _zoomVel, _zoom;
-        private bool _mouseWheel;
+        private bool _mouseWheel;               
         
         private static float2 _offset;
         private static float2 _offsetInit;
@@ -66,7 +66,7 @@ namespace Fusee.Tutorial.Core
             //For SceneViewer
             _twoTouchRepeated = false;
             // _twoTouchRepeated = false;
-            _zoom = -10;
+            _zoom = -40;
             _offsetMouseX = 0f;
             _offsetMouseY = 0f;
             _offset = float2.Zero;
@@ -81,7 +81,7 @@ namespace Fusee.Tutorial.Core
             var shader = RC.CreateShader(vertsh, pixsh);
             RC.SetShader(shader);
 
-            var mtxCam = float4x4.LookAt(55, 0, -_zoom, 55, 0, 0, 0, 1, 0);
+            //var mtxCam = float4x4.LookAt(0, 0, -_zoom, 0, 0, 0, 0, 1, 0);
 
             _particleSizeParam = RC.GetShaderParam(shader, "particleSize");
             RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize));
@@ -103,11 +103,10 @@ namespace Fusee.Tutorial.Core
 
         // RenderAFrame is called once a frame
         public override void RenderAFrame()
-        {
+        {            
+            
             // Clear the backbuffer
-            RC.Clear(ClearFlags.Color | ClearFlags.Depth);
-
-            MoveInScene();
+            RC.Clear(ClearFlags.Color | ClearFlags.Depth);            
 
             RC.SetShaderParam(_xFormParam, _xform);
 
@@ -118,15 +117,21 @@ namespace Fusee.Tutorial.Core
 
             var aspectRatio = Width / (float)Height;
 
+            MoveInScene();
+           
+
+            //var mtxRot = float4x4.CreateRotationY(_alpha) * float4x4.CreateRotationX(_beta);
             RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize * aspectRatio));
 
-            var mtxCam = float4x4.LookAt(55, 0, -_zoom, 55, 0, 0, 0, 1, 0);
+            var mtxCam = float4x4.LookAt(50, 0, -_zoom, 50, 0, 0, 0, 1, 0); // both x = 55 
             var mtxOffset = float4x4.CreateTranslation(2 * _offset.x / Width, -2 * _offset.y / Height, 0);
-            var mtxOffsetDesktop = float4x4.CreateTranslation(2 * _offsetMouseX / Width, -2 * _offsetMouseY / Height, 0);
+            var mtxOffsetDesktop = float4x4.CreateTranslation(_offsetMouseX / Width, -1* _offsetMouseY / Height, 0);
 
-            RC.Projection = projection * mtxOffsetDesktop * mtxOffset * mtxCam;  
+           // RC.ModelView = mtxCam * mtxRot;
 
-             RC.SetRenderState(new RenderStateSet
+            RC.Projection =  mtxOffsetDesktop * mtxOffset * projection * mtxCam;
+            
+            RC.SetRenderState(new RenderStateSet
             {
                 AlphaBlendEnable = true,
                 SourceBlend = Blend.SourceAlpha,
@@ -144,17 +149,16 @@ namespace Fusee.Tutorial.Core
         public void MoveInScene()
         {
             //rotate around Object
-            speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);            
+            speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);
             if (Mouse.LeftButton || Touch.GetTouchActive(TouchPoints.Touchpoint_0))
             {
-               // _oneTouch = true;
+                // _oneTouch = true;
                 _alpha -= speed.x * 0.0001f;
                 _beta -= speed.y * 0.0001f;
             }
-                    
-            var view = float4x4.CreateRotationY(_alpha) * float4x4.CreateRotationX(_beta);
-            _xform = RC.Projection * float4x4.CreateTranslation(0, 0, 5.0f) * view;
 
+            var mtxRot = float4x4.CreateRotationY(_alpha) * float4x4.CreateRotationX(_beta);
+            _xform = RC.Projection * float4x4.CreateTranslation(0, 0, 0) * mtxRot; // RC.Projection*  float4x4.CreateTranslation(0, 0,0f) *view;
             //Scale Points with W and A
             if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0)
             {
@@ -215,7 +219,6 @@ namespace Fusee.Tutorial.Core
                     //_minPinchSpeed = pinchSpeed;
                     _zoomVel = pinchSpeed * -0.008f;
                 }
-
             }
             else
             {
@@ -230,7 +233,7 @@ namespace Fusee.Tutorial.Core
 
             if (_mouseWheel)
             {
-                _zoomVel = Mouse.WheelVel * +0.008f;
+                _zoomVel = Mouse.WheelVel * +0.08f;
             }
 
             _zoom += _zoomVel;
