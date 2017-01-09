@@ -43,7 +43,7 @@ colorG = 0;
 //float ndcDepth= (2.0 * gl_FragCoord.z - Min - Max) /   (Max - Min);
 //float clipDepth = ndcDepth / gl_FragCoord.w;
  
-float z = (gl_FragCoord.w / gl_FragCoord.z)*30; // 1-(gl_FragCoord.z / gl_FragCoord.w)/ 80; 
+float z = (gl_FragCoord.w / gl_FragCoord.z); // 1-(gl_FragCoord.z / gl_FragCoord.w)/ 80; 
 
 float b = (ColorMax - ColorMin)* pow(z,0.2); 
 //colorG = 1/clipDepth;
