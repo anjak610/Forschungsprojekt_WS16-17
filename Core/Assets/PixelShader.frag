@@ -10,7 +10,6 @@ varying vec3 normal;
 varying vec2 UV;
 
 uniform sampler2D tex;
-uniform vec2 camerarange;
  
 varying vec2 texCoord;
  
@@ -51,7 +50,7 @@ float b = (ColorMax - ColorMin)* pow(z,0.2);
 //gl_FragColor = vec4((clipDepth / 0.5) + 0.5); 
 	//
  //gl_FragColor =  vec4(b, b ,b,colorA);
- gl_FragColor = vec4 (z,z,z,colorA);
+ gl_FragColor = vec4 (b,b,b,colorA);
  //gl_FragColor = vec4((clipDepth * 0.5) + 0.5); 
 
 	if (gl_FragColor.a < 0.5)        
