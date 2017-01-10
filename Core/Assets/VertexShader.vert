@@ -6,6 +6,8 @@ attribute vec2 fuUV;
 varying vec2 UV;
 varying vec3 modelpos;
 uniform vec2 particleSize;
+uniform mat4 FUSEE_MV;
+uniform mat4 FUSEE_P;
 uniform mat4 xForm;
 varying vec3 normal;
 varying float dist; // distance
@@ -15,8 +17,11 @@ varying float dist; // distance
         
 void main()
 {
+	//Replace:
 	vec4 newVertex = xForm * vec4(fuVertex, 1.0);
-
+	//with
+	//vec4 VView = FUSEE_MV * vec4(fuVertex, 1.0);
+	//vec4 newVertex = FUSEE_P * VView;
 	dist = newVertex.z/newVertex.w;
 	modelpos = fuVertex; 
 	normal = fuNormal;
