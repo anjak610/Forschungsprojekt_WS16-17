@@ -133,14 +133,11 @@ namespace Fusee.Tutorial.Android
 		        app.ContextImplementor = new RenderContextImp(rci, ApplicationContext);
 
 		        SetContentView(rci.View);
-
-                //set particle size bigger
-                app.ParticleSize =  1 ;
-
+                
                 //show display dimensions for testing
                 IWindowManager wm = ApplicationContext.GetSystemService(WindowService).JavaCast<IWindowManager>() ;
                 Display display = wm.DefaultDisplay;
-                app._screenSize = new float2(display.Width, display.Height);
+                //app._screenSize = new float2(display.Width, display.Height);
                 float pixel_height = display.Height;
                 float pixel_width = display.Width;
                 string output = "Width: " + pixel_height + " Height:" + pixel_width;

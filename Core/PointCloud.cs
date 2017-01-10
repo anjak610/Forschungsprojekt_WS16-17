@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
 
@@ -82,22 +83,22 @@ namespace Fusee.Tutorial.Core
             mesh.UVs = _uvs.ToArray();
             //UVs = mc.UVs;
 
-            lock (_meshes)
-            {
-                _meshes.Add(mesh);
-            }
-
+            _meshes.Add(mesh);
+            
             ResetMesh();
         }
 
-        public void AddPoint(Point point)
+        public bool AddPoint(Point point)
         {
+            bool newMeshCreated = false;
+
             if (_limit > 0 && _totalNumberOfPoints <= _limit)
-                return;
+                return false;
 
             if (3 + _currentIndex * 4 > 65000)
             {
                 AddCurrentToMeshes();
+                newMeshCreated = true;
             }
 
             float3 pickedvertex = point.Position;
@@ -126,12 +127,17 @@ namespace Fusee.Tutorial.Core
 
             _currentIndex++;
             _totalNumberOfPoints++;
+
+            return newMeshCreated;
         }
 
         // Takes another pointcloud and adds its meshes to the mesh array
         public void Merge(PointCloud pointCloud)
         {
-            _meshes.AddRange(pointCloud.GetMeshes());
+            lock (_meshes)
+            {
+                _meshes.AddRange(pointCloud.GetMeshes());
+            }
         }
     }
 }

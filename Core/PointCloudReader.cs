@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Fusee.Base.Common;
 using Fusee.Base.Core;
+using Fusee.Engine.Core;
 using Fusee.Math.Core;
 
 namespace Fusee.Tutorial.Core
@@ -15,53 +17,63 @@ namespace Fusee.Tutorial.Core
     
     public class PointCloudReader
     {
-        private PointCloud _pointCloud; // reference to the main point cloud
+        public delegate void AddPointCloud(PointCloud pointCloud); // use this as callback
 
-        public PointCloudReader(ref PointCloud pointCloud)
+        private static string _assetName;
+        private static AddPointCloud _callback;
+        
+        public static void ReadFromAsset(string assetName, AddPointCloud callback)
         {
-            _pointCloud = pointCloud;
+            _assetName = assetName;
+            _callback = callback;
+
+            Task task = new Task(StreamFromAsset);
+            task.Start();
         }
 
-        public void ReadFromAsset(string assetName, ref PointCloud pointCloud)
+        private static void StreamFromAsset()
         {
-            Task readTask = Task.Factory.StartNew(() =>
+            PointCloud pointCloud = new PointCloud();
+
+            Stream storage = IO.StreamFromFile("Assets/" + _assetName, FileMode.Open);
+            using (var sr = new StreamReader(storage))
             {
-                Stream storage = IO.StreamFromFile("Assets/" + assetName, FileMode.Open);
-                using (var sr = new StreamReader(storage))
+                string line;
+                while ((line = sr.ReadLine()) != null) // read per line
                 {
-                    string line;
-                    while ((line = sr.ReadLine()) != null) // read per line
+                    string delimiter = "\t";
+                    string[] textElements = line.Split(delimiter.ToCharArray());
+
+                    if (textElements.Length == 1) // empty line
+                        continue;
+
+                    Point point = new Point();
+
+                    // convert each string to float
+                    float[] numbers = new float[textElements.Length];
+                    for (var i = 0; i < numbers.Length; i++)
                     {
-                        string delimiter = "\t";
-                        string[] textElements = line.Split(delimiter.ToCharArray());
+                        numbers[i] = float.Parse(textElements[i], CultureInfo.InvariantCulture.NumberFormat);
+                    }
 
-                        if (textElements.Length == 1) // empty line
-                            continue;
+                    point.Position = new float3(numbers[0], numbers[2], numbers[1]);
 
-                        Point point = new Point();
+                    if (numbers.Length == 9)
+                    {
+                        point.Color = new float3(numbers[3], numbers[4], numbers[5]);
+                        point.EchoId = numbers[6];
+                        point.ScanNr = numbers[8];
+                    }
 
-                        // convert each string to float
-                        float[] numbers = new float[textElements.Length];
-                        for (var i=0; i<numbers.Length; i++)
-                        {
-                            numbers[i] = float.Parse(textElements[i], CultureInfo.InvariantCulture.NumberFormat);
-                        }
+                    bool newMeshCreated = pointCloud.AddPoint(point);
 
-                        point.Position = new float3(numbers[0], numbers[1], numbers[2]);
-
-                        if (numbers.Length == 9)
-                        {
-                            point.Color = new float3(numbers[3], numbers[4], numbers[5]);
-                            point.EchoId = numbers[6];
-                            point.ScanNr = numbers[8];
-                        }
-
-                        pointCloud.AddPoint(point);
+                    if (newMeshCreated)
+                    {
+                        _callback(pointCloud);
+                        pointCloud = new PointCloud();
                     }
                 }
-
-                pointCloud.FlushPoints();
-            });
+            }
         }
     }
 }
