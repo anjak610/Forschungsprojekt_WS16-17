@@ -22,11 +22,15 @@ void main()
 {
   nearestZ = texture2D(tex,UV).z;
 }*/
+
+	float width=1920.0;
+	float height=1080.0;
+	float _dist = 0.5 * dist + 0.5;
     float ColorMin = 0;
 	float ColorMax = 1;
     //float depthColorValue =texture2D(tex,UV).z / gl_FragCoord.w; //sollte nicht von w abhängig sein sondern vom am nächsten liegenden z
 	
-	float nearZ = 1000;
+	//float nearZ = 1000;
 
     float colorR = texture2D(tex,UV).r;
 	float colorG = texture2D(tex,UV).g;
@@ -43,14 +47,14 @@ colorG = 0;
 //float ndcDepth= (2.0 * gl_FragCoord.z - Min - Max) /   (Max - Min);
 //float clipDepth = ndcDepth / gl_FragCoord.w;
  
-float z = (gl_FragCoord.w / gl_FragCoord.z); // 1-(gl_FragCoord.z / gl_FragCoord.w)/ 80; 
+float z = (gl_FragCoord.z / gl_FragCoord.w)/100; // 1-(gl_FragCoord.z / gl_FragCoord.w)/ 80; 
 
 float b = (ColorMax - ColorMin)* pow(z,0.2); 
 //colorG = 1/clipDepth;
 //gl_FragColor = vec4((clipDepth / 0.5) + 0.5); 
 	//
  //gl_FragColor =  vec4(b, b ,b,colorA);
- gl_FragColor = vec4 (b,b,b,colorA);
+ gl_FragColor = vec4 (z,z,z,colorA);
  //gl_FragColor = vec4((clipDepth * 0.5) + 0.5); 
 
 	if (gl_FragColor.a < 0.5)        
