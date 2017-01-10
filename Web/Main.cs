@@ -73,7 +73,7 @@ namespace Fusee.Tutorial.Web
             // app.VideoManagerImplementor = ImpFactory.CreateIVideoManagerImp();
 
             //set starting particle size
-            app.ParticleSize = 0.2f;
+            //app.ParticleSize = 0.2f;
             // Start the app
             app.Run();
         }
