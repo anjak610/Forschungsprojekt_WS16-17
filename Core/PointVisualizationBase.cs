@@ -41,18 +41,16 @@ namespace Fusee.Tutorial.Core
 
         //Get Shader Parameters
         private IShaderParam _particleSizeParam;
-        private IShaderParam _xFormParam;
-        private IShaderParam _cameraRangeParam;
-        private IShaderParam _gProjParam;
+       // private IShaderParam _xFormParam;
 
         private IShaderParam _tex;
         private ITexture _newTex;
 
        // private Dictionary<string, ITexture> _textueLookUp =  new Dictionary<string, ITexture>();
 
-        private float4x4 projection;
+       // private float4x4 projection;
 
-        private float4x4 _xform;
+       // private float4x4 _xform;
         public float2 _screenSize;
 
         private float _alpha;
@@ -87,15 +85,13 @@ namespace Fusee.Tutorial.Core
             
             // Initialize the shader(s)
             var shader = RC.CreateShader(vertsh, pixsh);
-            RC.SetShader(shader);
-
-            //var mtxCam = float4x4.LookAt(0, 0, -_zoom, 0, 0, 0, 0, 1, 0);
+            RC.SetShader(shader);        
 
             _particleSizeParam = RC.GetShaderParam(shader, "particleSize");
             RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize));
 
-            _xFormParam = RC.GetShaderParam(shader, "xForm");
-            _xform = float4x4.Identity;
+           // _xFormParam = RC.GetShaderParam(shader, "xForm");
+           // _xform = float4x4.Identity;
 
             //Load texture and save into ITexture _newTex           
             _newTex = RC.CreateTexture(texture);
@@ -118,26 +114,19 @@ namespace Fusee.Tutorial.Core
 
             MoveInScene();
 
-            RC.SetShaderParam(_xFormParam, _xform);
+            var rotation = float4x4.CreateRotationX(_rotationX) * float4x4.CreateRotationY(_rotationY);
+            RC.ModelView = rotation * float4x4.CreateScale(0.5f, 0.1f, 0.1f);
+            // RC.SetShaderParam(_xFormParam, _xform);
 
             foreach (var mesh in _pointCloud.GetMeshes())
             {
                 RC.Render(mesh);                
             }
 
-            var aspectRatio = Width / (float)Height;            
-                       
-            //var mtxRot = float4x4.CreateRotationY(_alpha) * float4x4.CreateRotationX(_beta);
+            var aspectRatio = Width / (float)Height;                  
+
             RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize * aspectRatio));
 
-          /*  var mtxCam = float4x4.LookAt(50, 0, -_zoom, 50, 0, 0, 0, 1, 0); // both x = 55 
-            var mtxOffset = float4x4.CreateTranslation(2 * _offset.x / Width, -2 * _offset.y / Height, 0);
-            var mtxOffsetDesktop = float4x4.CreateTranslation(_offsetMouseX / Width, -1* _offsetMouseY / Height, 0);
-
-           // RC.ModelView = mtxCam * mtxRot;*/
-
-           // RC.Projection =  mtxOffsetDesktop * mtxOffset * projection * mtxCam;
-            
             RC.SetRenderState(new RenderStateSet
             {
                 AlphaBlendEnable = true,
@@ -156,7 +145,7 @@ namespace Fusee.Tutorial.Core
         public void MoveInScene()
         {
             // set origin to camera pivot
-            _xform = float4x4.CreateTranslation(-1 * _cameraPivot);
+            //_xform = float4x4.CreateTranslation(-1 * _cameraPivot);
 
             //Scale Points with W and A
             if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0)
@@ -182,10 +171,10 @@ namespace Fusee.Tutorial.Core
             }
 
             var rotation = float4x4.CreateRotationX(_rotationX) * float4x4.CreateRotationY(_rotationY);
-            _xform = rotation * _xform;
+           // _xform = rotation * _xform;
 
             // set camera to its position
-            _xform = float4x4.CreateTranslation(-1 * _cameraPosition) * _xform;
+           // _xform = float4x4.CreateTranslation(-1 * _cameraPosition) * _xform;
 
             // --- move camera pivot
 
@@ -214,8 +203,8 @@ namespace Fusee.Tutorial.Core
 
             // --- projection matrix
 
-            _xform = RC.Projection * _xform;
-            RC.SetShaderParam(_xFormParam, _xform);
+          //  _xform = RC.Projection * _xform;
+            //RC.SetShaderParam(_xFormParam, _xform);
         }
 
         // Is called when the window was resized
@@ -226,7 +215,7 @@ namespace Fusee.Tutorial.Core
 
             // Create a new projection matrix generating undistorted images on the new aspect ratio.
             var aspectRatio = Width / (float)Height;
-            RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize * aspectRatio)); //set params that can be controlled with arrow keys
+            //RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize * aspectRatio)); //set params that can be controlled with arrow keys
 
             // Question: should we set particleSize depending on aspect ratio or rather define an amount of pixels, thus taking window size into computation?
 
