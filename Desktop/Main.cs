@@ -72,7 +72,7 @@ namespace Fusee.Tutorial.Desktop
                                 Point point = new Point();
                                 float[] numbers = Array.ConvertAll(textElements, n => float.Parse(n, CultureInfo.InvariantCulture.NumberFormat));
 
-                                point.Position = new float3(numbers[0], numbers[1], numbers[2]);
+                                point.Position = new float3(numbers[0], numbers[2], numbers[1]);
 
                                 if (numbers.Length == 9)
                                 {

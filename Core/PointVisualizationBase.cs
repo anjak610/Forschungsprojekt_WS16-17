@@ -14,6 +14,14 @@ namespace Fusee.Tutorial.Core
     public class PointVisualizationBase : RenderCanvas
     {
         private PointCloud _pointCloud;
+       
+        // camera controls
+        private float _rotationY = 0.0f;
+        private float _rotationX = 0.0f;
+        private float3 _cameraPosition = new float3(0, 0, -20.0f);
+        private float3 _cameraPivot = new float3(0, 0, 0);
+
+        private const float Damping = 0.8f;
 
         //Sceneviewer Parameters    
         private float _maxPinchSpeed;
@@ -66,7 +74,7 @@ namespace Fusee.Tutorial.Core
             //For SceneViewer
             _twoTouchRepeated = false;
             // _twoTouchRepeated = false;
-            _zoom = -40;
+            _zoom = 0;
             _offsetMouseX = 0f;
             _offsetMouseY = 0f;
             _offset = float2.Zero;
@@ -106,7 +114,9 @@ namespace Fusee.Tutorial.Core
         {            
             
             // Clear the backbuffer
-            RC.Clear(ClearFlags.Color | ClearFlags.Depth);            
+            RC.Clear(ClearFlags.Color | ClearFlags.Depth);
+
+            MoveInScene();
 
             RC.SetShaderParam(_xFormParam, _xform);
 
@@ -115,21 +125,18 @@ namespace Fusee.Tutorial.Core
                 RC.Render(mesh);                
             }
 
-            var aspectRatio = Width / (float)Height;
-
-            MoveInScene();
-           
-
+            var aspectRatio = Width / (float)Height;            
+                       
             //var mtxRot = float4x4.CreateRotationY(_alpha) * float4x4.CreateRotationX(_beta);
             RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize * aspectRatio));
 
-            var mtxCam = float4x4.LookAt(50, 0, -_zoom, 50, 0, 0, 0, 1, 0); // both x = 55 
+          /*  var mtxCam = float4x4.LookAt(50, 0, -_zoom, 50, 0, 0, 0, 1, 0); // both x = 55 
             var mtxOffset = float4x4.CreateTranslation(2 * _offset.x / Width, -2 * _offset.y / Height, 0);
             var mtxOffsetDesktop = float4x4.CreateTranslation(_offsetMouseX / Width, -1* _offsetMouseY / Height, 0);
 
-           // RC.ModelView = mtxCam * mtxRot;
+           // RC.ModelView = mtxCam * mtxRot;*/
 
-            RC.Projection =  mtxOffsetDesktop * mtxOffset * projection * mtxCam;
+           // RC.Projection =  mtxOffsetDesktop * mtxOffset * projection * mtxCam;
             
             RC.SetRenderState(new RenderStateSet
             {
@@ -148,17 +155,9 @@ namespace Fusee.Tutorial.Core
 
         public void MoveInScene()
         {
-            //rotate around Object
-            speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);
-            if (Mouse.LeftButton || Touch.GetTouchActive(TouchPoints.Touchpoint_0))
-            {
-                // _oneTouch = true;
-                _alpha -= speed.x * 0.0001f;
-                _beta -= speed.y * 0.0001f;
-            }
+            // set origin to camera pivot
+            _xform = float4x4.CreateTranslation(-1 * _cameraPivot);
 
-            var mtxRot = float4x4.CreateRotationY(_alpha) * float4x4.CreateRotationX(_beta);
-            _xform = RC.Projection * float4x4.CreateTranslation(0, 0, 0) * mtxRot; // RC.Projection*  float4x4.CreateTranslation(0, 0,0f) *view;
             //Scale Points with W and A
             if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0)
             {
@@ -173,75 +172,50 @@ namespace Fusee.Tutorial.Core
             {
                 ParticleSize = ParticleSize + Keyboard.ADAxis * ParticleSize / 20;
             }
-
-            //Move Camer on x- and y-axis through scene by click Right MouseButton
-
-            if (Mouse.RightButton)
+            // rotate around camera pivot
+            if (Mouse.LeftButton || Touch.ActiveTouchpoints == 1)
             {
-                _offsetMouseY += Mouse.YVel - _offsetInitMouseY; //Mouse.YVel;// 
-                _offsetMouseX += Mouse.XVel - _offsetInitMouseX; //Mouse.XVel;// 
+                float2 speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);
+
+                _rotationY -= speed.x * 0.0001f;
+                _rotationX -= speed.y * 0.0001f;
             }
 
-            // Scale Points with Touch and move camera on x- and y-axis through scene
-            if (Touch.TwoPoint) // TODO: Implement scaling with slide movements on screen 
-            {
-                if (!_twoTouchRepeated)
-                {
-                    _twoTouchRepeated = true;
-                    _maxPinchSpeed = 0;
-                    _minPinchSpeed = 0;
-                    _offsetInit = Touch.TwoPointMidPoint - _offset;
-                }
-                //_oneTouch = false;
-                _offset = Touch.TwoPointMidPoint - _offsetInit;
+            var rotation = float4x4.CreateRotationX(_rotationX) * float4x4.CreateRotationY(_rotationY);
+            _xform = rotation * _xform;
 
-                float pinchSpeed = Touch.TwoPointDistanceVel; // Bolean einbauen für stop des zooms
-                if (pinchSpeed > _maxPinchSpeed)
-                {           
-                    _maxPinchSpeed = pinchSpeed;
-                    _zoomVel = pinchSpeed * +0.008f;            
-                }
-                else
-                {
-                   // _maxPinchSpeed = 0;
-                    //_maxPinchSpeed = pinchSpeed;
-                    _zoomVel = pinchSpeed * +0.008f;
-                }           
+            // set camera to its position
+            _xform = float4x4.CreateTranslation(-1 * _cameraPosition) * _xform;
 
-                if (pinchSpeed < _minPinchSpeed)
-                {
-                    _minPinchSpeed = pinchSpeed;
-                    _zoomVel = pinchSpeed * -0.008f;
-                }
-                else
-                {
-                    //_minPinchSpeed = 0;
-                    //_minPinchSpeed = pinchSpeed;
-                    _zoomVel = pinchSpeed * -0.008f;
-                }
-            }
-            else
+            // --- move camera pivot
+
+            float3 translation = float3.Zero;
+
+            if (Mouse.RightButton || Touch.TwoPoint)
             {
-                _twoTouchRepeated = false;
+                float2 speed = Mouse.Velocity + Touch.TwoPointMidPointVel;
+                translation.x = speed.x * -0.005f;
+                translation.y = speed.y * 0.005f;
             }
 
-            //Zoom with Mousewheel
-            if (Mouse.Wheel != 0)
+            if (Mouse.Wheel != 0 || Touch.TwoPoint)
             {
-                _mouseWheel = true;
+                float speed = Mouse.WheelVel + Touch.TwoPointDistanceVel * 0.1f;
+                translation.z = speed * 0.1f;
             }
 
-            if (_mouseWheel)
+            if (translation.Length > 0)
             {
-                _zoomVel = Mouse.WheelVel * +0.08f;
+                rotation.Invert();
+                translation = rotation * translation;
+                _cameraPivot += translation;
+                //_xform = float4x4.CreateTranslation(translation) * _xform;
             }
 
-            _zoom += _zoomVel;
-            // Limit zoom
-            if (_zoom < -200)
-                _zoom = -200;
-            if (_zoom > 200)
-                _zoom = 200;
+            // --- projection matrix
+
+            _xform = RC.Projection * _xform;
+            RC.SetShaderParam(_xFormParam, _xform);
         }
 
         // Is called when the window was resized
@@ -264,7 +238,7 @@ namespace Fusee.Tutorial.Core
 
             // RC.Projection = projection * mtxOffsetDesktop * mtxOffset * mtxCam;
 
-            projection = float4x4.CreatePerspectiveFieldOfView(3.141592f * 0.25f, aspectRatio, 1, 2000);
+            RC.Projection = float4x4.CreatePerspectiveFieldOfView(3.141592f * 0.25f, aspectRatio, 1, 2000);
             // RC.Projection = projection;
         }
 
