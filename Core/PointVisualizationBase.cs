@@ -16,10 +16,13 @@ namespace Fusee.Tutorial.Core
         private PointCloud _pointCloud;
 
         // camera controls
-        private float _rotationY = 0.0f;
-        private float _rotationX = 0.0f;
+        private float _rotationY = (float) System.Math.PI;
+        private float _rotationX = (float) System.Math.PI / -8;
         private float3 _cameraPosition = new float3(0, 0, -20.0f);
-        private float3 _cameraPivot = new float3(0, 0, 0);
+        private float3 _cameraPivot = new float3(60, -25, 10);
+
+        private float _minAngleX = (float) -System.Math.PI / 4;
+        private float _maxAngleX = (float) System.Math.PI / 4;
         
         // shader parameters
         private IShaderParam _particleSizeParam;
@@ -84,6 +87,9 @@ namespace Fusee.Tutorial.Core
 
                 _rotationY -= speed.x * 0.0001f;
                 _rotationX -= speed.y * 0.0001f;
+
+                // clamp rotation x between min and max angle
+                _rotationX = _rotationX < _minAngleX ? _minAngleX : (_rotationX > _maxAngleX ? _maxAngleX : _rotationX);
             }
 
             var rotation = float4x4.CreateRotationX(_rotationX) * float4x4.CreateRotationY(_rotationY);
