@@ -3,7 +3,7 @@ using System.Threading;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
 
-namespace Fusee.Tutorial.Core
+namespace Fusee.Forschungsprojekt.Core
 {
     /// <summary>
     /// PointCloud holds the meshes which will be pushed through the rendering pipeline. It acts as a data structure 

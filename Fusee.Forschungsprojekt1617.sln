@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fusee.Tutorial05.Core", "Core\Fusee.Tutorial05.Core.csproj", "{4E534FDD-A963-448D-B2A6-F3E8B9F0BF69}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fusee.Forschungsprojekt.Core", "Core\Fusee.Forschungsprojekt.Core.csproj", "{4E534FDD-A963-448D-B2A6-F3E8B9F0BF69}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fusee.Tutorial05.Desktop", "Desktop\Fusee.Tutorial05.Desktop.csproj", "{A8C051C0-3A74-4976-9060-70E2A865D521}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fusee.Forschungsprojekt.Desktop", "Desktop\Fusee.Forschungsprojekt.Desktop.csproj", "{A8C051C0-3A74-4976-9060-70E2A865D521}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fusee.Tutorial05.Web", "Web\Fusee.Tutorial05.Web.csproj", "{DB21584F-4EA6-486A-9BDB-77D372CF1D64}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fusee.Forschungsprojekt.Web", "Web\Fusee.Forschungsprojekt.Web.csproj", "{DB21584F-4EA6-486A-9BDB-77D372CF1D64}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fusee.Tutorial05.Android", "Android\Fusee.Tutorial05.Android.csproj", "{73A74ADF-6308-42A0-8BA6-2B5D53238546}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fusee.Forschungsprojekt.Android", "Android\Fusee.Forschungsprojekt.Android.csproj", "{73A74ADF-6308-42A0-8BA6-2B5D53238546}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

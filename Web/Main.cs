@@ -8,9 +8,9 @@ using Fusee.Base.Core;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using Fusee.Serialization;
-using Fusee.Tutorial.Core;
+using Fusee.Forschungsprojekt.Core;
 using Path = Fusee.Base.Common.Path;
-namespace Fusee.Tutorial.Web
+namespace Fusee.Forschungsprojekt.Web
 {
     public class Tutorial
     {

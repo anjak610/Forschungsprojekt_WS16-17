@@ -7,7 +7,7 @@ using Fusee.Math.Core;
 using System.ComponentModel;
 using static Fusee.Engine.Core.Input;
 
-namespace Fusee.Tutorial.Core
+namespace Fusee.Forschungsprojekt.Core
 {
 
     [FuseeApplication(Name = "Forschungsprojekt", Description = "HFU Wintersemester 16-17")]

@@ -8,7 +8,7 @@ using Fusee.Base.Core;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
 
-namespace Fusee.Tutorial.Core
+namespace Fusee.Forschungsprojekt.Core
 {
     /// <summary>
     /// This class loads an asset and creates a point cloud out of it. May be used in the future to load
@@ -31,7 +31,7 @@ namespace Fusee.Tutorial.Core
             task.Start();
         }
 
-        private static void StreamFromAsset()
+        private static void StreamFromAsset()//background task
         {
             PointCloud pointCloud = new PointCloud();
 

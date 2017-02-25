@@ -151,9 +151,9 @@
     <AndroidResource Include="Resources\drawable\icon.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Core\Fusee.Tutorial05.Core.csproj">
+    <ProjectReference Include="..\Core\Fusee.Forschungsprojekt.Core.csproj">
       <Project>{4e534fdd-a963-448d-b2a6-f3e8b9f0bf69}</Project>
-      <Name>Fusee.Tutorial04.Core</Name>
+      <Name>Fusee.Forschungsprojekt.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <!-- Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" / -->

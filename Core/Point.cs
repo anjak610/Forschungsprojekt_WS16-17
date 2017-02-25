@@ -8,7 +8,7 @@ using Fusee.Math.Core;
 /// Represents a simple point which holds all properties given by the IPM format.
 /// </summary>
 
-namespace Fusee.Tutorial.Core
+namespace Fusee.Forschungsprojekt.Core
 {
     public class Point
     {

@@ -7,10 +7,10 @@ using Fusee.Base.Imp.Desktop;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using Fusee.Serialization;
-using Fusee.Tutorial.Core;
+using Fusee.Forschungsprojekt.Core;
 using Path = Fusee.Base.Common.Path;
 
-namespace Fusee.Tutorial.Desktop
+namespace Fusee.Forschungsprojekt.Desktop
 {
     public class Simple
     {

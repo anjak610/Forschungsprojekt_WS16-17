@@ -11,7 +11,7 @@ using Fusee.Base.Core;
 using Fusee.Base.Imp.Android;
 using Fusee.Engine.Imp.Graphics.Android;
 using Fusee.Serialization;
-using Fusee.Tutorial.Core;
+using Fusee.Forschungsprojekt.Core;
 using static Fusee.Engine.Core.Time; // frame rate
 using Font = Fusee.Base.Core.Font;
 using Path = Fusee.Base.Common.Path;
@@ -19,7 +19,7 @@ using Fusee.Math.Core;
 using System;
 using System.Globalization;
 
-namespace Fusee.Tutorial.Android
+namespace Fusee.Forschungsprojekt.Android
 {
 	[Activity (Label = "@string/app_name", MainLauncher = true, Icon = "@drawable/icon",
 #if __ANDROID_11__
