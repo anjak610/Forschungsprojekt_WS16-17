@@ -17,7 +17,10 @@ using Font = Fusee.Base.Core.Font;
 using Path = Fusee.Base.Common.Path;
 using Fusee.Math.Core;
 using System;
+using System.Net.Sockets;
 using System.Globalization;
+using System.Text;
+using System.Net;
 
 namespace Fusee.Forschungsprojekt.Android
 {
@@ -39,6 +42,32 @@ namespace Fusee.Forschungsprojekt.Android
                 _fRL = new FrameRateLogger(); // start logging frame rate on console
 
                 // SetContentView(new LibPaintingView(ApplicationContext, null));
+
+                //Simple tcp connection test
+                Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                //IP Address of sender device/server: change to your current IPv4 Address for debugging!
+                IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("192.168.1.32"), 1994);
+                socket.Connect(endPoint);
+
+                //send connection message to server
+                string msg = "Connected";
+                byte[] msgBuffer = Encoding.Default.GetBytes(msg);
+                socket.Send(msgBuffer, 0, msgBuffer.Length, 0);
+               
+
+                new System.Threading.Thread(() => //thread for receiving data
+                {
+                    //wait to receive data//PROGRAM NOT DOES NOT CONTINUE until data received
+                    byte[] buffer = new byte[255];
+                    int receive = socket.Receive(buffer, 0, buffer.Length, 0);
+                    //resize buffer
+                    Array.Resize(ref buffer, receive);
+                    //write received message to debug console
+                    string output = ("RECEIVED from Server: " + Encoding.Default.GetString(buffer));  
+                    System.Diagnostics.Debug.WriteLine(output);
+
+                }).Start();
+                
 
                 // Inject Fusee.Engine.Base InjectMe dependencies
                 IO.IOImp = new IOImp(ApplicationContext);
@@ -136,13 +165,13 @@ namespace Fusee.Forschungsprojekt.Android
                 
                 //show display dimensions for testing
                 IWindowManager wm = ApplicationContext.GetSystemService(WindowService).JavaCast<IWindowManager>() ;
-                Display display = wm.DefaultDisplay;
-                //app._screenSize = new float2(display.Width, display.Height);
-                float pixel_height = display.Height;
-                float pixel_width = display.Width;
-                string output = "Width: " + pixel_height + " Height:" + pixel_width;
-                //Show roasted bread
-                Toast.MakeText(ApplicationContext, output, ToastLength.Short).Show();
+                //Display display = wm.DefaultDisplay;
+                ////app._screenSize = new float2(display.Width, display.Height);
+                //float pixel_height = display.Height;
+                //float pixel_width = display.Width;
+                //string output = "Width: " + pixel_height + " Height:" + pixel_width;
+                ////Show roasted bread
+                //Toast.MakeText(ApplicationContext, output, ToastLength.Short).Show();
 
                 Engine.Core.Input.AddDriverImp(
 		            new Fusee.Engine.Imp.Graphics.Android.RenderCanvasInputDriverImp(app.CanvasImplementor));
