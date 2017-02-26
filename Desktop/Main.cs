@@ -9,16 +9,47 @@ using Fusee.Math.Core;
 using Fusee.Serialization;
 using Fusee.Forschungsprojekt.Core;
 using Path = Fusee.Base.Common.Path;
+using System.Threading.Tasks;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
 
 namespace Fusee.Forschungsprojekt.Desktop
 {
     public class Simple
     {
         private static FrameRateLogger _fRL;
+     
+
 
         public static void Main()
         {
-            _fRL = new FrameRateLogger(); // start logging frame rate on console
+            _fRL = new FrameRateLogger(); // start logging frame rate on console     
+
+                //Simple tcp connection test
+                Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1994);
+                socket.Connect(endPoint);
+
+                //send connection message to server
+                string msg = "Connected";
+                byte[] msgBuffer = Encoding.Default.GetBytes(msg);
+                socket.Send(msgBuffer, 0, msgBuffer.Length, 0);
+
+
+            new Thread(() => //thread for receiving data
+            {
+                //wait to receive data//PROGRAM NOT DOES NOT CONTINUE until data received
+                byte[] buffer = new byte[255];
+                int receive = socket.Receive(buffer, 0, buffer.Length, 0);
+                //resize buffer
+                Array.Resize(ref buffer, receive);
+                //write received message to debug console
+                System.Diagnostics.Debug.WriteLine("Received from Server: " + Encoding.Default.GetString(buffer));
+
+            }).Start();
+
 
             // Inject Fusee.Engine.Base InjectMe dependencies
             IO.IOImp = new Fusee.Base.Imp.Desktop.IOImp();
