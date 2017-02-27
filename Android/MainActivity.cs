@@ -21,6 +21,7 @@ using System.Globalization;
 
 namespace Fusee.Tutorial.Android
 {
+
 	[Activity (Label = "@string/app_name", MainLauncher = true, Icon = "@drawable/icon",
 #if __ANDROID_11__
 		HardwareAccelerated=false,
@@ -29,11 +30,32 @@ namespace Fusee.Tutorial.Android
 	public class MainActivity : Activity
 	{
 	    private FrameRateLogger _fRL;
+        private Button plusButton;
+        private Button minusButton;
+        private Core.PointVisualizationBase app;
 
-		protected override void OnCreate (Bundle savedInstanceState)
+        protected override void OnCreate (Bundle savedInstanceState)
 		{
+
 			base.OnCreate (savedInstanceState);
             RequestWindowFeature(WindowFeatures.NoTitle);
+
+            SetContentView(Resource.Layout.main_activity_layout);
+            plusButton = FindViewById<Button>(Resource.Id.plus_btn);
+            minusButton = FindViewById<Button>(Resource.Id.minus_btn);
+            //onclick: increase or decrease size of particles    
+
+            plusButton.Click += (sender, e) =>
+            {
+                app.ParticleSize = app.ParticleSize + app.ParticleSize / 2;
+            };
+
+            minusButton.Click += (sender, e) =>
+            {
+                app.ParticleSize = app.ParticleSize - app.ParticleSize / 2;
+            };
+
+           
 		    if (SupportedOpenGLVersion() >= 3)
 		    {
                 _fRL = new FrameRateLogger(); // start logging frame rate on console
@@ -133,16 +155,17 @@ namespace Fusee.Tutorial.Android
 		        app.ContextImplementor = new RenderContextImp(rci, ApplicationContext);
 
 		        SetContentView(rci.View);
-                
+
+                app.ParticleSize = 0.05f;
                 //show display dimensions for testing
-                IWindowManager wm = ApplicationContext.GetSystemService(WindowService).JavaCast<IWindowManager>() ;
-                Display display = wm.DefaultDisplay;
+                // IWindowManager wm = ApplicationContext.GetSystemService(WindowService).JavaCast<IWindowManager>() ;
+                //Display display = wm.DefaultDisplay;
                 //app._screenSize = new float2(display.Width, display.Height);
-                float pixel_height = display.Height;
-                float pixel_width = display.Width;
-                string output = "Width: " + pixel_height + " Height:" + pixel_width;
+                // float pixel_height = display.Height;
+                //float pixel_width = display.Width;
+                // string output = "Width: " + pixel_height + " Height:" + pixel_width;
                 //Show roasted bread
-                Toast.MakeText(ApplicationContext, output, ToastLength.Short).Show();
+                //  Toast.MakeText(ApplicationContext, output, ToastLength.Short).Show();
 
                 Engine.Core.Input.AddDriverImp(
 		            new Fusee.Engine.Imp.Graphics.Android.RenderCanvasInputDriverImp(app.CanvasImplementor));
