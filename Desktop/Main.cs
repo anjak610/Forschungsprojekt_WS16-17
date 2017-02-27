@@ -41,7 +41,7 @@ namespace Fusee.Forschungsprojekt.Desktop
             new Thread(() => //thread for receiving data
             {
                 //wait to receive data//PROGRAM NOT DOES NOT CONTINUE until data received
-                byte[] buffer = new byte[255];
+                byte[] buffer = new byte[1014];// TODO: Send length of data 
                 int receive = socket.Receive(buffer, 0, buffer.Length, 0);
                 //resize buffer
                 Array.Resize(ref buffer, receive);
