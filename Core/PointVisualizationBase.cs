@@ -29,7 +29,7 @@ namespace Fusee.Forschungsprojekt.Core
         private IShaderParam _xFormParam;
         
         private float4x4 _xform;
-        public float _particleSize = 0.015f;
+        public float ParticleSize = 0.015f;// = 0.015f;
         private bool _scaleKey;
 
         // Init is called on startup. 
@@ -48,7 +48,7 @@ namespace Fusee.Forschungsprojekt.Core
             RC.SetShader(shader);
 
             _particleSizeParam = RC.GetShaderParam(shader, "particleSize");
-            RC.SetShaderParam(_particleSizeParam, new float2(_particleSize, _particleSize));
+            RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize));
 
             _xFormParam = RC.GetShaderParam(shader, "xForm");
             _xform = float4x4.Identity;
@@ -74,7 +74,7 @@ namespace Fusee.Forschungsprojekt.Core
 
             float aspectRatio = Width / (float)Height;
 
-            RC.SetShaderParam(_particleSizeParam, new float2(_particleSize, _particleSize * aspectRatio)); //set params that can be controlled with arrow keys
+            RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize * aspectRatio)); //set params that can be controlled with arrow keys
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
         }
@@ -139,7 +139,7 @@ namespace Fusee.Forschungsprojekt.Core
 
             if (_scaleKey)
             {
-                _particleSize = _particleSize + Keyboard.ADAxis * _particleSize / 20;
+                ParticleSize = ParticleSize + Keyboard.ADAxis * ParticleSize / 20;
             }
 
             // --- projection matrix
@@ -157,7 +157,7 @@ namespace Fusee.Forschungsprojekt.Core
             // Create a new projection matrix generating undistorted images on the new aspect ratio.
             float aspectRatio = Width / (float) Height;
 
-            RC.SetShaderParam(_particleSizeParam, new float2(_particleSize, _particleSize * aspectRatio)); //set params that can be controlled with arrow keys
+            RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize * aspectRatio)); //set params that can be controlled with arrow keys
             
             // 0.25*PI Rad -> 45° Opening angle along the vertical direction. Horizontal opening angle is calculated based on the aspect ratio
             // Front clipping happens at 1 (Objects nearer than 1 world unit get clipped)

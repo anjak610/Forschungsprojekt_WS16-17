@@ -35,7 +35,7 @@ namespace Fusee.Forschungsprojekt.Android
         private RelativeLayout canvas_view;
         private Button plusButton;
         private Button minusButton;
-        private PointVisualizationBase app;
+        private Core.PointVisualizationBase app;
 
 
         protected override void OnCreate (Bundle savedInstanceState)
@@ -51,12 +51,12 @@ namespace Fusee.Forschungsprojekt.Android
 
             plusButton.Click += (sender, e) =>
             {
-                app._particleSize = app._particleSize + app._particleSize / 2;
+                app.ParticleSize = app.ParticleSize + app.ParticleSize / 2;
             };
 
             minusButton.Click += (sender, e) =>
             {
-                app._particleSize = app._particleSize - app._particleSize / 2;
+                app.ParticleSize = app.ParticleSize - app.ParticleSize / 2;
             };
 
 
@@ -186,7 +186,7 @@ namespace Fusee.Forschungsprojekt.Android
 
                 //SetContentView(rci.View);
                 canvas_view.AddView(rci.View);
-                app._particleSize = 0.05f;
+                app.ParticleSize = 0.05f;
 
                 //show display dimensions for testing
                 IWindowManager wm = ApplicationContext.GetSystemService(WindowService).JavaCast<IWindowManager>() ;
