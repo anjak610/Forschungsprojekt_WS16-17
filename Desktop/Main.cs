@@ -29,7 +29,7 @@ namespace Fusee.Forschungsprojekt.Desktop
 
                 //Simple tcp connection test
                 Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1994);
+                IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("192.168.0.30"), 1994);
                 socket.Connect(endPoint);
 
                 //send connection message to server
