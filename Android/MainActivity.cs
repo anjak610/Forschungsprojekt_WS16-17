@@ -32,12 +32,33 @@ namespace Fusee.Forschungsprojekt.Android
 	public class MainActivity : Activity
 	{
 	    private FrameRateLogger _fRL;
+        private Button plusButton;
+        private Button minusButton;
+        private Core.PointVisualizationBase app;
 
-		protected override void OnCreate (Bundle savedInstanceState)
+
+        protected override void OnCreate (Bundle savedInstanceState)
 		{
 			base.OnCreate (savedInstanceState);
             RequestWindowFeature(WindowFeatures.NoTitle);
-		    if (SupportedOpenGLVersion() >= 3)
+
+            SetContentView(Resource.Layout.main_activity_layout);
+            plusButton = FindViewById<Button>(Resource.Id.plus_btn);
+            minusButton = FindViewById<Button>(Resource.Id.minus_btn);
+            //onclick: increase or decrease size of particles    
+
+            plusButton.Click += (sender, e) =>
+            {
+                app._particleSize = app._particleSize + app._particleSize / 2;
+            };
+
+            minusButton.Click += (sender, e) =>
+            {
+                app._particleSize = app._particleSize - app._particleSize / 2;
+            };
+
+
+            if (SupportedOpenGLVersion() >= 3)
 		    {
                 _fRL = new FrameRateLogger(); // start logging frame rate on console
 
@@ -46,7 +67,7 @@ namespace Fusee.Forschungsprojekt.Android
                 //Simple tcp connection test
                 Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 //IP Address of sender device/server: change to your current IPv4 Address for debugging!
-                IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("192.168.1.32"), 1994);
+                IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("192.168.0.30"), 1994);
                 socket.Connect(endPoint);
 
                 //send connection message to server
@@ -58,7 +79,7 @@ namespace Fusee.Forschungsprojekt.Android
                 new System.Threading.Thread(() => //thread for receiving data
                 {
                     //wait to receive data//PROGRAM NOT DOES NOT CONTINUE until data received
-                    byte[] buffer = new byte[255];
+                    byte[] buffer = new byte[1014];
                     int receive = socket.Receive(buffer, 0, buffer.Length, 0);
                     //resize buffer
                     Array.Resize(ref buffer, receive);

@@ -29,7 +29,8 @@ namespace Fusee.Forschungsprojekt.Core
         private IShaderParam _xFormParam;
         
         private float4x4 _xform;
-        private float _particleSize = 0.015f;
+        public float _particleSize = 0.015f;
+        private bool _scaleKey;
 
         // Init is called on startup. 
         public override void Init()
@@ -70,7 +71,10 @@ namespace Fusee.Forschungsprojekt.Core
             {
                 RC.Render(meshes[i]);
             }
-            
+
+            float aspectRatio = Width / (float)Height;
+
+            RC.SetShaderParam(_particleSizeParam, new float2(_particleSize, _particleSize * aspectRatio)); //set params that can be controlled with arrow keys
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
         }
@@ -121,6 +125,21 @@ namespace Fusee.Forschungsprojekt.Core
                 translation = rotation * translation;
                 _cameraPivot += translation;
                 //_xform = float4x4.CreateTranslation(translation) * _xform;
+            }
+
+            //Scale Points with W and A
+            if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0)
+            {
+                _scaleKey = true;
+            }
+            else
+            {
+                _scaleKey = false;
+            }
+
+            if (_scaleKey)
+            {
+                _particleSize = _particleSize + Keyboard.ADAxis * _particleSize / 20;
             }
 
             // --- projection matrix
