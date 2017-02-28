@@ -32,9 +32,10 @@ namespace Fusee.Forschungsprojekt.Android
 	public class MainActivity : Activity
 	{
 	    private FrameRateLogger _fRL;
+        private RelativeLayout canvas_view;
         private Button plusButton;
         private Button minusButton;
-        private Core.PointVisualizationBase app;
+        private PointVisualizationBase app;
 
 
         protected override void OnCreate (Bundle savedInstanceState)
@@ -43,6 +44,7 @@ namespace Fusee.Forschungsprojekt.Android
             RequestWindowFeature(WindowFeatures.NoTitle);
 
             SetContentView(Resource.Layout.main_activity_layout);
+            canvas_view = FindViewById<RelativeLayout>(Resource.Id.canvas_container);
             plusButton = FindViewById<Button>(Resource.Id.plus_btn);
             minusButton = FindViewById<Button>(Resource.Id.minus_btn);
             //onclick: increase or decrease size of particles    
@@ -182,8 +184,10 @@ namespace Fusee.Forschungsprojekt.Android
 		        app.CanvasImplementor = rci;
 		        app.ContextImplementor = new RenderContextImp(rci, ApplicationContext);
 
-		        SetContentView(rci.View);
-                
+                //SetContentView(rci.View);
+                canvas_view.AddView(rci.View);
+                app._particleSize = 0.05f;
+
                 //show display dimensions for testing
                 IWindowManager wm = ApplicationContext.GetSystemService(WindowService).JavaCast<IWindowManager>() ;
                 //Display display = wm.DefaultDisplay;

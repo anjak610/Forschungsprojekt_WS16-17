@@ -16,9 +16,9 @@ void main()
 	float _dist = 0.5 * dist + 0.5;
 
 	//float z = (gl_FragCoord.z / gl_FragCoord.w)/100;
-	float z = (gl_FragCoord.z / gl_FragCoord.w)/20;
+	//float z = (gl_FragCoord.z / gl_FragCoord.w)/20;
 
-	gl_FragColor = vec4(((gl_FragCoord.x)/width)/z, (gl_FragCoord.y/height)/z, (1.5-dist)/z,  1);
+	gl_FragColor = vec4(0, 0, (1.5-dist),  1);
 
 	//gl_FragColor = vec4(_dist,0,0,1);
 	//gl_FragColor = vec4((1/z), 0, 0,  1);
