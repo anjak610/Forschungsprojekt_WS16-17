@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <RootNamespace>Fusee.Tutorial.Desktop</RootNamespace>
-    <AssemblyName>Fusee.Tutorial.Desktop</AssemblyName>
+    <RootNamespace>Fusee.Forschungsprojekt.Desktop</RootNamespace>
+    <AssemblyName>Fusee.Forschungsprojekt.Desktop</AssemblyName>
     <FuseeRoot Condition=" '$(FuseeRoot)' == '' ">L:\Programme\Gitkraken\Fusee\</FuseeRoot>
     <ProjectBuildRoot Condition=" '$(ProjectBuildRoot)' == '' ">..</ProjectBuildRoot>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>

@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: global::Android.Runtime.ResourceDesignerAttribute("Fusee.Tutorial.Android.Resource", IsApplication=true)]
+[assembly: global::Android.Runtime.ResourceDesignerAttribute("Fusee.Forschungsprojekt.Android.Resource", IsApplication=true)]
 
 namespace Fusee.Forschungsprojekt.Android
 {

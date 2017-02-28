@@ -43,10 +43,10 @@ namespace Fusee.Forschungsprojekt.Android
 			base.OnCreate (savedInstanceState);
             RequestWindowFeature(WindowFeatures.NoTitle);
 
-            SetContentView(Resource.Layout.main_activity_layout);
-            canvas_view = FindViewById<RelativeLayout>(Resource.Id.canvas_container);
-            plusButton = FindViewById<Button>(Resource.Id.plus_btn);
-            minusButton = FindViewById<Button>(Resource.Id.minus_btn);
+            SetContentView(Forschungsprojekt.Android.Resource.Layout.main_activity_layout);
+            canvas_view = FindViewById<RelativeLayout>(Forschungsprojekt.Android.Resource.Id.canvas_container);
+            plusButton = FindViewById<Button>(Forschungsprojekt.Android.Resource.Id.plus_btn);
+            minusButton = FindViewById<Button>(Forschungsprojekt.Android.Resource.Id.minus_btn);
             //onclick: increase or decrease size of particles    
 
             plusButton.Click += (sender, e) =>
