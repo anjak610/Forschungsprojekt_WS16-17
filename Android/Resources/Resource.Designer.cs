@@ -9,9 +9,9 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: global::Android.Runtime.ResourceDesignerAttribute("Fusee.Tutorial.Android.Resource", IsApplication=true)]
+[assembly: global::Android.Runtime.ResourceDesignerAttribute("Fusee.Forschungsprojekt.Android.Resource", IsApplication=true)]
 
-namespace Fusee.Tutorial.Android
+namespace Fusee.Forschungsprojekt.Android
 {
 	
 	
@@ -26,10 +26,10 @@ namespace Fusee.Tutorial.Android
 		
 		public static void UpdateIdValues()
 		{
-			global::Fusee.Base.Imp.Android.Resource.String.ApplicationName = global::Fusee.Tutorial.Android.Resource.String.ApplicationName;
-			global::Fusee.Base.Imp.Android.Resource.String.Hello = global::Fusee.Tutorial.Android.Resource.String.Hello;
-			global::Fusee.Engine.Imp.Graphics.Android.Resource.String.ApplicationName = global::Fusee.Tutorial.Android.Resource.String.ApplicationName;
-			global::Fusee.Engine.Imp.Graphics.Android.Resource.String.Hello = global::Fusee.Tutorial.Android.Resource.String.Hello;
+			global::Fusee.Base.Imp.Android.Resource.String.ApplicationName = global::Fusee.Forschungsprojekt.Android.Resource.String.ApplicationName;
+			global::Fusee.Base.Imp.Android.Resource.String.Hello = global::Fusee.Forschungsprojekt.Android.Resource.String.Hello;
+			global::Fusee.Engine.Imp.Graphics.Android.Resource.String.ApplicationName = global::Fusee.Forschungsprojekt.Android.Resource.String.ApplicationName;
+			global::Fusee.Engine.Imp.Graphics.Android.Resource.String.Hello = global::Fusee.Forschungsprojekt.Android.Resource.String.Hello;
 		}
 		
 		public partial class Attribute
@@ -66,6 +66,15 @@ namespace Fusee.Tutorial.Android
 			
 			// aapt resource value: 0x7f050000
 			public const int ToolbarTitle = 2131034112;
+			
+			// aapt resource value: 0x7f050003
+			public const int canvas_container = 2131034115;
+			
+			// aapt resource value: 0x7f050002
+			public const int minus_btn = 2131034114;
+			
+			// aapt resource value: 0x7f050001
+			public const int plus_btn = 2131034113;
 			
 			static Id()
 			{
