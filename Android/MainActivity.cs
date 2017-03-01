@@ -50,15 +50,15 @@ namespace Fusee.Forschungsprojekt.Android
 
             if (SupportedOpenGLVersion() >= 3)
 		    {
-                _fRL = new FrameRateLogger(); // start logging frame rate on console
+                //_fRL = new FrameRateLogger(); // start logging frame rate on console
 
                 // SetContentView(new LibPaintingView(ApplicationContext, null));
 
                 //Simple tcp connection test
                 Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 //IP Address of sender device/server: change to your current IPv4 Address for debugging!
-                IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("192.168.0.30"), 1994);
-                //IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("192.168.1.32"), 1994);
+                //IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("192.168.0.30"), 1994);
+                IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("192.168.1.32"), 1994);
                 socket.Connect(endPoint);
 
                 //send connection message to server

@@ -12,23 +12,32 @@ using System.Globalization;
 
 namespace Server
 {
-    class Program //for sending data
+    class Serverclient //for sending data
     {
+        private static Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
+        public static IPEndPoint createEndPoint()
+        {
+                //if there's no socket and it is not connected then get IPEndPoint
+                if (socket != null && socket.Connected)
+                {
+                    return (IPEndPoint)socket.RemoteEndPoint;
+
+                }else { return new IPEndPoint(0, 1994); }
+               
+            }
 
         static void Main(string[] args)
         {
 
-            //string path = @"C:/Users/Tanja Langer/Documents/Studium/Forschungsprojekt/Forschungsprojekt_WS16-17/TCPSimpleTest\TestPoints.txt";
-            string path = @"L:/Programme/Gitkraken/Forschungsprojekt_WS16-17/TCPSimpleTest/TestPoints.txt";
+            string path = @"C:/Users/Tanja Langer/Documents/Studium/Forschungsprojekt/Forschungsprojekt_WS16-17/TCPSimpleTest\TestPoints.txt";
+            //string path = @"L:/Programme/Gitkraken/Forschungsprojekt_WS16-17/TCPSimpleTest/TestPoints.txt";
             byte[] file = ReadfromFile(path);         
             List<byte[]> sendingPackages = Split(file);
 
             try {
-            
-                Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            
-                socket.Bind(new IPEndPoint(0, 1994));// connects to everything
+                IPEndPoint end = createEndPoint();                 
+                socket.Bind(end);// connects to everything
                 socket.Listen(0);
             
                 Socket acceptor = socket.Accept();
