@@ -47,18 +47,6 @@ namespace Fusee.Forschungsprojekt.Android
             canvas_view = FindViewById<RelativeLayout>(Forschungsprojekt.Android.Resource.Id.canvas_container);
             plusButton = FindViewById<Button>(Forschungsprojekt.Android.Resource.Id.plus_btn);
             minusButton = FindViewById<Button>(Forschungsprojekt.Android.Resource.Id.minus_btn);
-            //onclick: increase or decrease size of particles    
-
-            plusButton.Click += (sender, e) =>
-            {
-                app.ParticleSize = app.ParticleSize + app.ParticleSize / 2;
-            };
-
-            minusButton.Click += (sender, e) =>
-            {
-                app.ParticleSize = app.ParticleSize - app.ParticleSize / 2;
-            };
-
 
             if (SupportedOpenGLVersion() >= 3)
 		    {
@@ -70,6 +58,7 @@ namespace Fusee.Forschungsprojekt.Android
                 Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 //IP Address of sender device/server: change to your current IPv4 Address for debugging!
                 IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("192.168.0.30"), 1994);
+                //IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("192.168.1.32"), 1994);
                 socket.Connect(endPoint);
 
                 //send connection message to server
@@ -177,16 +166,29 @@ namespace Fusee.Forschungsprojekt.Android
                 AssetStorage.RegisterProvider(fap);
 
                 var app = new Core.PointVisualizationBase();
-                
 
-		        // Inject Fusee.Engine InjectMe dependencies (hard coded)
-		        RenderCanvasImp rci = new RenderCanvasImp(ApplicationContext, null, delegate { app.Run(); });
+                //buttons to increase or decrease particle size
+                plusButton.Click += (sender, e) =>
+                {
+                    app.ParticleSize = app.ParticleSize + app.ParticleSize / 2;
+                };
+
+                minusButton.Click += (sender, e) =>
+                {
+                    app.ParticleSize = app.ParticleSize - app.ParticleSize / 2;
+                };
+
+
+                // Inject Fusee.Engine InjectMe dependencies (hard coded)
+                RenderCanvasImp rci = new RenderCanvasImp(ApplicationContext, null, delegate { app.Run(); });
 		        app.CanvasImplementor = rci;
 		        app.ContextImplementor = new RenderContextImp(rci, ApplicationContext);
 
                 //SetContentView(rci.View);
                 canvas_view.AddView(rci.View);
                 app.ParticleSize = 0.05f;
+
+
 
                 //show display dimensions for testing
                 IWindowManager wm = ApplicationContext.GetSystemService(WindowService).JavaCast<IWindowManager>() ;
