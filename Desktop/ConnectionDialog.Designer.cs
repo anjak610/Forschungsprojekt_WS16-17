@@ -28,54 +28,90 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.sendButton = new System.Windows.Forms.Button();
-            this.inputBox = new System.Windows.Forms.TextBox();
-            this.enterIPlabel = new System.Windows.Forms.Label();
+            this.connectButton = new System.Windows.Forms.Button();
+            this.receivedDataText = new System.Windows.Forms.RichTextBox();
+            this.receivedLabel = new System.Windows.Forms.Label();
+            this.disconButton = new System.Windows.Forms.Button();
+            this.statusText = new System.Windows.Forms.RichTextBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
-            // sendButton
+            // connectButton
             // 
-            this.sendButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F);
-            this.sendButton.Location = new System.Drawing.Point(410, 106);
-            this.sendButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.sendButton.Name = "sendButton";
-            this.sendButton.Size = new System.Drawing.Size(175, 55);
-            this.sendButton.TabIndex = 0;
-            this.sendButton.Text = "Connect";
-            this.sendButton.UseVisualStyleBackColor = true;
-            this.sendButton.Click += new System.EventHandler(this.sendButton_Click_1);
+            this.connectButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.connectButton.Location = new System.Drawing.Point(60, 184);
+            this.connectButton.Margin = new System.Windows.Forms.Padding(4);
+            this.connectButton.Name = "connectButton";
+            this.connectButton.Size = new System.Drawing.Size(525, 41);
+            this.connectButton.TabIndex = 0;
+            this.connectButton.Text = "Connect";
+            this.connectButton.UseVisualStyleBackColor = true;
+            this.connectButton.Click += new System.EventHandler(this.connectButton_Click_1);
             // 
-            // inputBox
+            // receivedDataText
             // 
-            this.inputBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F);
-            this.inputBox.Location = new System.Drawing.Point(60, 114);
-            this.inputBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.inputBox.Name = "inputBox";
-            this.inputBox.Size = new System.Drawing.Size(294, 28);
-            this.inputBox.TabIndex = 1;
+            this.receivedDataText.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F);
+            this.receivedDataText.Location = new System.Drawing.Point(59, 347);
+            this.receivedDataText.MinimumSize = new System.Drawing.Size(525, 258);
+            this.receivedDataText.Name = "receivedDataText";
+            this.receivedDataText.Size = new System.Drawing.Size(525, 272);
+            this.receivedDataText.TabIndex = 3;
+            this.receivedDataText.Text = "";
             // 
-            // enterIPlabel
+            // receivedLabel
             // 
-            this.enterIPlabel.AutoSize = true;
-            this.enterIPlabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F);
-            this.enterIPlabel.Location = new System.Drawing.Point(55, 40);
-            this.enterIPlabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.enterIPlabel.MinimumSize = new System.Drawing.Size(545, 24);
-            this.enterIPlabel.Name = "enterIPlabel";
-            this.enterIPlabel.Size = new System.Drawing.Size(545, 24);
-            this.enterIPlabel.TabIndex = 2;
-            this.enterIPlabel.Text = "Please enter IP Adress of this device  (for example 192.168.1.32)";
+            this.receivedLabel.AutoSize = true;
+            this.receivedLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.receivedLabel.Location = new System.Drawing.Point(56, 309);
+            this.receivedLabel.MinimumSize = new System.Drawing.Size(132, 24);
+            this.receivedLabel.Name = "receivedLabel";
+            this.receivedLabel.Size = new System.Drawing.Size(132, 24);
+            this.receivedLabel.TabIndex = 4;
+            this.receivedLabel.Text = "Received Data";
+            // 
+            // disconButton
+            // 
+            this.disconButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.disconButton.Location = new System.Drawing.Point(60, 244);
+            this.disconButton.Name = "disconButton";
+            this.disconButton.Size = new System.Drawing.Size(525, 43);
+            this.disconButton.TabIndex = 5;
+            this.disconButton.Text = "Disconnect";
+            this.disconButton.UseVisualStyleBackColor = true;
+            this.disconButton.Click += new System.EventHandler(this.disconButton_Click);
+            // 
+            // statusText
+            // 
+            this.statusText.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.statusText.Location = new System.Drawing.Point(64, 48);
+            this.statusText.Name = "statusText";
+            this.statusText.Size = new System.Drawing.Size(525, 96);
+            this.statusText.TabIndex = 6;
+            this.statusText.Text = "Ready to Connect";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.label1.Location = new System.Drawing.Point(60, 13);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(57, 20);
+            this.label1.TabIndex = 7;
+            this.label1.Text = "Status";
             // 
             // ConnectionDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 22F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(818, 235);
-            this.Controls.Add(this.enterIPlabel);
-            this.Controls.Add(this.inputBox);
-            this.Controls.Add(this.sendButton);
+            this.ClientSize = new System.Drawing.Size(640, 658);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.statusText);
+            this.Controls.Add(this.disconButton);
+            this.Controls.Add(this.receivedLabel);
+            this.Controls.Add(this.receivedDataText);
+            this.Controls.Add(this.connectButton);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "ConnectionDialog";
             this.Text = "Setup connection";
             this.ResumeLayout(false);
@@ -85,8 +121,11 @@
 
         #endregion
 
-        private System.Windows.Forms.Button sendButton;
-        private System.Windows.Forms.TextBox inputBox;
-        private System.Windows.Forms.Label enterIPlabel;
+        private System.Windows.Forms.Button connectButton;
+        private System.Windows.Forms.RichTextBox receivedDataText;
+        private System.Windows.Forms.Label receivedLabel;
+        private System.Windows.Forms.Button disconButton;
+        private System.Windows.Forms.RichTextBox statusText;
+        private System.Windows.Forms.Label label1;
     }
 }

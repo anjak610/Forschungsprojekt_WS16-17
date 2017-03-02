@@ -9,56 +9,110 @@ using System.Windows.Forms;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.IO;
 
+//using tutorial: https://www.youtube.com/watch?v=-mYoJBT9XIg&list=PLAC179D21AF94D28F&index=6
 namespace Fusee.Forschungsprojekt.Desktop
 {
     public partial class ConnectionDialog : Form
     {
+
+        Socket socket;
+        Socket acceptor;
+        Boolean connected = false;
+
         public ConnectionDialog()
         {
             InitializeComponent();
 
         }
 
-        private void sendButton_Click_1(object sender, EventArgs e)
+        //connect button event handler
+        private void connectButton_Click_1(object sender, EventArgs e)
         {
-            try
+            
+            new Thread(() => //thread for receiving data
+           {
+               //Setup socket
+               socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+               IPEndPoint endPoint = new IPEndPoint(0, 1994);
+               socket.Bind(endPoint);
+               System.Diagnostics.Debug.WriteLine("Waiting for Server");
+
+               Invoke((MethodInvoker)delegate
+               {
+                   statusText.Text += ("\nWaiting for Server...");
+               });
+
+               socket.Listen(0);
+               acceptor = socket.Accept();
+               System.Diagnostics.Debug.WriteLine("Connection ready");
+               connected = true;
+               Invoke((MethodInvoker)delegate
+               {
+                   statusText.Text += ("\nConnected!");
+               });
+
+               while (connected)
+               {
+                   byte[] sizebuffer = new byte[4];
+                   acceptor.Receive(sizebuffer, 0, sizebuffer.Length, 0);
+                   //receive length of data                 
+                   int size = BitConverter.ToInt32(sizebuffer, 0);
+                   MemoryStream ms = new MemoryStream();//will hold the data that is received
+                                        
+                   while (size > 0)
+                   {
+                       System.Diagnostics.Debug.WriteLine("Inside loop in Connection Dialog");
+                       System.Diagnostics.Debug.WriteLine("Receiving..");
+                       byte[] buffer;
+                       if (size < acceptor.ReceiveBufferSize)
+                       {
+                           buffer = new byte[size];
+                       }
+                       else
+                       {
+                           buffer = new byte[acceptor.ReceiveBufferSize];
+                       }
+
+                       int receive = acceptor.Receive(buffer, 0, buffer.Length, 0);
+                       //subtract the size of the received data from the size
+                       size -= receive;
+                       //write the received data to the memory stream
+                       ms.Write(buffer, 0, buffer.Length);
+                                            
+                   }
+
+                   if (size == 0)
+                   {
+                       connected = false;
+                       ms.Close();
+                       byte[] data = ms.ToArray();
+
+                       ms.Dispose();
+                       System.Diagnostics.Debug.WriteLine("Everything received");
+
+                       Invoke((MethodInvoker)delegate
+                       {
+                           receivedDataText.Text = Encoding.UTF8.GetString(data);
+                       });
+
+                   }
+               }
+           }).Start();
+        
+        }
+
+        private void disconButton_Click(object sender, EventArgs e)
+        {
+            Invoke((MethodInvoker)delegate
             {
-                //Simple tcp connection
-                Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                //IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("192.168.0.30"), 1994);
-                IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(inputBox.Text), 1994);
-                socket.Connect(endPoint);
-                //send connection message to server
-                string msg = "Connected";
-                byte[] msgBuffer = Encoding.Default.GetBytes(msg);
-                socket.Send(msgBuffer, 0, msgBuffer.Length, 0);
+                statusText.Text += ("\nConnection closed");
+            });
+            connected = false;
+            acceptor.Close();
+            socket.Close();
 
-
-                new Thread(() => //thread for receiving data
-                {
-                    //receive data
-                    byte[] buffer = new byte[1014];// TODO: Send length of data // TODO: Set appropriate length for data that will be received
-                    int receive = socket.Receive(buffer, 0, buffer.Length, 0);
-                    //Error in receiving data 
-                    if (receive <= 0)
-                    {
-                        throw new SocketException();
-                    }
-
-                    //resize buffer
-                    Array.Resize(ref buffer, receive);
-                    //write received message to debug console
-                    System.Diagnostics.Debug.WriteLine("Received from Server: " + Encoding.Default.GetString(buffer));
-
-                }).Start();
-
-            }
-            catch (Exception exp)
-            {
-                System.Diagnostics.Debug.WriteLine("Server connection failed. Error: " + exp);
-                MessageBox.Show("Connection failed");
-            }
         }
     }
 }
