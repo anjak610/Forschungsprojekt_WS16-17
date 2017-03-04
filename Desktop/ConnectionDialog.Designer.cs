@@ -33,16 +33,18 @@
             this.receivedLabel = new System.Windows.Forms.Label();
             this.disconButton = new System.Windows.Forms.Button();
             this.statusText = new System.Windows.Forms.RichTextBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.statusLabel = new System.Windows.Forms.Label();
+            this.IPLabel = new System.Windows.Forms.Label();
+            this.IPinputBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // connectButton
             // 
             this.connectButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.connectButton.Location = new System.Drawing.Point(60, 184);
+            this.connectButton.Location = new System.Drawing.Point(11, 105);
             this.connectButton.Margin = new System.Windows.Forms.Padding(4);
             this.connectButton.Name = "connectButton";
-            this.connectButton.Size = new System.Drawing.Size(525, 41);
+            this.connectButton.Size = new System.Drawing.Size(611, 41);
             this.connectButton.TabIndex = 0;
             this.connectButton.Text = "Connect";
             this.connectButton.UseVisualStyleBackColor = true;
@@ -51,10 +53,10 @@
             // receivedDataText
             // 
             this.receivedDataText.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F);
-            this.receivedDataText.Location = new System.Drawing.Point(59, 347);
+            this.receivedDataText.Location = new System.Drawing.Point(12, 408);
             this.receivedDataText.MinimumSize = new System.Drawing.Size(525, 258);
             this.receivedDataText.Name = "receivedDataText";
-            this.receivedDataText.Size = new System.Drawing.Size(525, 272);
+            this.receivedDataText.Size = new System.Drawing.Size(616, 285);
             this.receivedDataText.TabIndex = 3;
             this.receivedDataText.Text = "";
             // 
@@ -62,7 +64,7 @@
             // 
             this.receivedLabel.AutoSize = true;
             this.receivedLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.receivedLabel.Location = new System.Drawing.Point(56, 309);
+            this.receivedLabel.Location = new System.Drawing.Point(12, 381);
             this.receivedLabel.MinimumSize = new System.Drawing.Size(132, 24);
             this.receivedLabel.Name = "receivedLabel";
             this.receivedLabel.Size = new System.Drawing.Size(132, 24);
@@ -72,9 +74,9 @@
             // disconButton
             // 
             this.disconButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.disconButton.Location = new System.Drawing.Point(60, 244);
+            this.disconButton.Location = new System.Drawing.Point(11, 711);
             this.disconButton.Name = "disconButton";
-            this.disconButton.Size = new System.Drawing.Size(525, 43);
+            this.disconButton.Size = new System.Drawing.Size(612, 43);
             this.disconButton.TabIndex = 5;
             this.disconButton.Text = "Disconnect";
             this.disconButton.UseVisualStyleBackColor = true;
@@ -83,28 +85,49 @@
             // statusText
             // 
             this.statusText.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.statusText.Location = new System.Drawing.Point(64, 48);
+            this.statusText.Location = new System.Drawing.Point(12, 197);
             this.statusText.Name = "statusText";
-            this.statusText.Size = new System.Drawing.Size(525, 96);
+            this.statusText.Size = new System.Drawing.Size(611, 161);
             this.statusText.TabIndex = 6;
             this.statusText.Text = "Ready to Connect";
             // 
-            // label1
+            // statusLabel
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.label1.Location = new System.Drawing.Point(60, 13);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(57, 20);
-            this.label1.TabIndex = 7;
-            this.label1.Text = "Status";
+            this.statusLabel.AutoSize = true;
+            this.statusLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.statusLabel.Location = new System.Drawing.Point(12, 163);
+            this.statusLabel.MinimumSize = new System.Drawing.Size(57, 20);
+            this.statusLabel.Name = "statusLabel";
+            this.statusLabel.Size = new System.Drawing.Size(57, 20);
+            this.statusLabel.TabIndex = 7;
+            this.statusLabel.Text = "Status";
+            // 
+            // IPLabel
+            // 
+            this.IPLabel.AutoSize = true;
+            this.IPLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.IPLabel.Location = new System.Drawing.Point(12, 41);
+            this.IPLabel.MinimumSize = new System.Drawing.Size(196, 20);
+            this.IPLabel.Name = "IPLabel";
+            this.IPLabel.Size = new System.Drawing.Size(196, 20);
+            this.IPLabel.TabIndex = 8;
+            this.IPLabel.Text = "Please enter IP of Server";
+            // 
+            // IPinputBox
+            // 
+            this.IPinputBox.Location = new System.Drawing.Point(231, 36);
+            this.IPinputBox.Name = "IPinputBox";
+            this.IPinputBox.Size = new System.Drawing.Size(224, 28);
+            this.IPinputBox.TabIndex = 9;
             // 
             // ConnectionDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 22F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(640, 658);
-            this.Controls.Add(this.label1);
+            this.ClientSize = new System.Drawing.Size(640, 766);
+            this.Controls.Add(this.IPinputBox);
+            this.Controls.Add(this.IPLabel);
+            this.Controls.Add(this.statusLabel);
             this.Controls.Add(this.statusText);
             this.Controls.Add(this.disconButton);
             this.Controls.Add(this.receivedLabel);
@@ -126,6 +149,8 @@
         private System.Windows.Forms.Label receivedLabel;
         private System.Windows.Forms.Button disconButton;
         private System.Windows.Forms.RichTextBox statusText;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label statusLabel;
+        private System.Windows.Forms.Label IPLabel;
+        private System.Windows.Forms.TextBox IPinputBox;
     }
 }

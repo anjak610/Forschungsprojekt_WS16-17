@@ -18,12 +18,15 @@ namespace Fusee.Forschungsprojekt.Desktop
     {
 
         Socket socket;
+        Socket receiver;
         Socket acceptor;
         Boolean connected = false;
 
         public ConnectionDialog()
         {
             InitializeComponent();
+            receiver = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
         }
 
@@ -33,24 +36,31 @@ namespace Fusee.Forschungsprojekt.Desktop
             
             new Thread(() => //thread for receiving data
            {
-               //Setup socket
-               socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-               IPEndPoint endPoint = new IPEndPoint(0, 1994);
-               socket.Bind(endPoint);
-               System.Diagnostics.Debug.WriteLine("Waiting for Server");
+               //Send own IP to listening server            
+               string serverip = IPinputBox.Text;
+               IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(serverip), 1234);            
+               socket.Connect(endPoint);
+               System.Diagnostics.Debug.WriteLine("Connected to Server");
+               string localip = "192.168.0.143";
+               byte[] ipbuffer = Encoding.Default.GetBytes(localip);
+               socket.Send(ipbuffer, 0, ipbuffer.Length, 0);
+               
+               System.Diagnostics.Debug.WriteLine("Sent local IP: " + localip);
 
                Invoke((MethodInvoker)delegate
                {
-                   statusText.Text += ("\nWaiting for Server...");
+                   statusText.Text += ("\nSent local IP: " + localip);
                });
 
-               socket.Listen(0);
-               acceptor = socket.Accept();
-               System.Diagnostics.Debug.WriteLine("Connection ready");
+               
+               receiver.Bind(new IPEndPoint(0, 1994));       
+               receiver.Listen(0);
+               acceptor = receiver.Accept();
+               System.Diagnostics.Debug.WriteLine("Socket accepting");
                connected = true;
                Invoke((MethodInvoker)delegate
                {
-                   statusText.Text += ("\nConnected!");
+                   statusText.Text += ("\nConnected. Waiting for data...");
                });
 
                while (connected)
@@ -110,6 +120,7 @@ namespace Fusee.Forschungsprojekt.Desktop
                 statusText.Text += ("\nConnection closed");
             });
             connected = false;
+            receiver.Close();
             acceptor.Close();
             socket.Close();
 
