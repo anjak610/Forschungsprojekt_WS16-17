@@ -66,8 +66,10 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="OpenTK" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConnectionDialog.cs" />
     <Compile Include="FrameRateLogger.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
@@ -77,6 +79,9 @@
       <SubType>Designer</SubType>
     </None>
     <AndroidResource Include="Resources\layout\main_activity_layout.axml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+    <AndroidResource Include="Resources\layout\connection_dialog_layout.axml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>
