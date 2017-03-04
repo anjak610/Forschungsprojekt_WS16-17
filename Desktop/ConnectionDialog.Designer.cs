@@ -107,15 +107,15 @@
             this.IPLabel.AutoSize = true;
             this.IPLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
             this.IPLabel.Location = new System.Drawing.Point(12, 41);
-            this.IPLabel.MinimumSize = new System.Drawing.Size(196, 20);
+            this.IPLabel.MinimumSize = new System.Drawing.Size(200, 20);
             this.IPLabel.Name = "IPLabel";
-            this.IPLabel.Size = new System.Drawing.Size(196, 20);
+            this.IPLabel.Size = new System.Drawing.Size(200, 20);
             this.IPLabel.TabIndex = 8;
             this.IPLabel.Text = "Please enter IP of Server";
             // 
             // IPinputBox
             // 
-            this.IPinputBox.Location = new System.Drawing.Point(231, 36);
+            this.IPinputBox.Location = new System.Drawing.Point(262, 36);
             this.IPinputBox.Name = "IPinputBox";
             this.IPinputBox.Size = new System.Drawing.Size(224, 28);
             this.IPinputBox.TabIndex = 9;

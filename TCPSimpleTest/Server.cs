@@ -26,19 +26,14 @@ namespace Server
             string path = @"C:/Users/Tanja Langer/Documents/Studium/Forschungsprojekt/Forschungsprojekt_WS16-17/TCPSimpleTest\TestPoints.txt";
             //string path = @"L:/Programme/Gitkraken/Forschungsprojekt_WS16-17/TCPSimpleTest/TestPoints.txt";
             file = ReadfromFile(path);           
-            string userinput = " ";
-           
-            Console.WriteLine("Enter c to setup a new connection");
-            userinput = Console.ReadLine();
-            if (userinput == "c")
-            {
-                listen();
-                receiveIP();
-            }        
 
-            Console.WriteLine("Enter x to connect to this IP");
-            userinput = Console.ReadLine();
-            if (userinput == "x")
+            ConsoleKeyInfo pressed;
+            listen();
+            receiveIP();
+       
+            Console.WriteLine("Press <enter> to connect to this IP");
+            pressed = Console.ReadKey();
+            if (pressed.Key == ConsoleKey.Enter)
             {
                 if (fuseeIP != null) {
                     connect(fuseeIP);
@@ -46,12 +41,13 @@ namespace Server
                 else { Console.WriteLine("No IP to connect to"); }
                
             }
-            Console.WriteLine("Enter s to send data");
-            string input = Console.ReadLine();
-            if (input == "s")
+
+            Console.WriteLine("Press <enter> to send data");
+            pressed = Console.ReadKey();
+            if (pressed.Key == ConsoleKey.Enter)
             {
                 sendData();
-            }
+            }            
 
             Console.Read();//Console waits for input, so window doesn't close immediately
         }
@@ -79,7 +75,7 @@ namespace Server
             IPEndPoint endPoint = new IPEndPoint(0, 1234);
             socket.Bind(endPoint);
             socket.Listen(0);
-            Console.WriteLine("Listening...");
+            Console.WriteLine("Waiting for requests...");
         }
 
         public static void receiveIP()
@@ -88,13 +84,13 @@ namespace Server
             
             try {
                 Socket acc = socket.Accept();
-                byte[] receivebuffer = new byte[1024000];
+                byte[] receivebuffer = new byte[1024];
                 int rec = acc.Receive(receivebuffer, 0, receivebuffer.Length, SocketFlags.None);
                 Array.Resize(ref receivebuffer, rec);
                 fuseeIP = Encoding.Default.GetString(receivebuffer);
                 socket.Close();
                 acc.Close();
-                Console.WriteLine("Received IP: " + fuseeIP);
+                Console.WriteLine("Received request from IP: " + fuseeIP);
                 
             }
             catch
