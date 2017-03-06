@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Globalization;
 
+//192.168.0.211
 //using Tutorial: https://www.youtube.com/watch?v=-mYoJBT9XIg&list=PLAC179D21AF94D28F&index=6
 namespace Server
 {
