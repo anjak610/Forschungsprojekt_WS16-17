@@ -137,6 +137,8 @@ namespace Fusee.Forschungsprojekt.Android
                                     connected = false;
                                     ms.Close();
                                     byte[] data = ms.ToArray();
+                                    Core.PointCloudReader.receivedData = Encoding.UTF8.GetString(data);
+                                    Core.PointCloudReader.printReceived();
 
                                     ms.Dispose();
                                     System.Diagnostics.Debug.WriteLine("Everything received");

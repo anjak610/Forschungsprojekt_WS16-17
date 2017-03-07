@@ -49,7 +49,7 @@ namespace Fusee.Forschungsprojekt.Android
             plusButton = FindViewById<Button>(Forschungsprojekt.Android.Resource.Id.plus_btn);
             minusButton = FindViewById<Button>(Forschungsprojekt.Android.Resource.Id.minus_btn);
 
-            this.ActionBar.SetTitle(Forschungsprojekt.Android.Resource.String.app_name);
+            this.ActionBar.SetTitle(Forschungsprojekt.Android.Resource.String.actionbar_title);
             this.ActionBar.Show();
             
 

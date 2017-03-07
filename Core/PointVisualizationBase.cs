@@ -13,7 +13,7 @@ namespace Fusee.Forschungsprojekt.Core
     [FuseeApplication(Name = "Forschungsprojekt", Description = "HFU Wintersemester 16-17")]
     public class PointVisualizationBase : RenderCanvas
     {
-        private PointCloud _pointCloud;
+        public static PointCloud _pointCloud;
 
         // camera controls
         private float _rotationY = (float) System.Math.PI;
@@ -36,8 +36,8 @@ namespace Fusee.Forschungsprojekt.Core
         public override void Init()
         {
             //_pointCloud = new PointCloud();
-            _pointCloud = AssetStorage.Get<PointCloud>("BasicPoints.txt");
-            PointCloudReader.ReadFromAsset("PointCloud_IPM.txt", _pointCloud.Merge);
+            //_pointCloud = AssetStorage.Get<PointCloud>("BasicPoints.txt");
+            //PointCloudReader.ReadFromAsset("PointCloud_IPM.txt", _pointCloud.Merge);
             
             // read shaders from files
             var vertsh = AssetStorage.Get<string>("VertexShader.vert");
@@ -65,18 +65,21 @@ namespace Fusee.Forschungsprojekt.Core
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
 
             MoveInScene();
-            
-            List<Mesh> meshes = _pointCloud.GetMeshes();
-            for(var i=0; i<meshes.Count; i++)
+
+            if (_pointCloud != null)
             {
-                RC.Render(meshes[i]);
+                List<Mesh> meshes = _pointCloud.GetMeshes();
+                for (var i = 0; i < meshes.Count; i++)
+                {
+                    RC.Render(meshes[i]);
+                }
+
+                float aspectRatio = Width / (float)Height;
+
+                RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize * aspectRatio)); //set params that can be controlled with arrow keys
+                                                                                                             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
+                Present();
             }
-
-            float aspectRatio = Width / (float)Height;
-
-            RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize * aspectRatio)); //set params that can be controlled with arrow keys
-            // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
-            Present();
         }
 
         public void MoveInScene()
