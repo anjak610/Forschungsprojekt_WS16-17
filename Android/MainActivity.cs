@@ -41,45 +41,25 @@ namespace Fusee.Forschungsprojekt.Android
         protected override void OnCreate (Bundle savedInstanceState)
 		{
 			base.OnCreate (savedInstanceState);
-            RequestWindowFeature(WindowFeatures.NoTitle);
+            RequestWindowFeature(WindowFeatures.ActionBar);
 
+            //Setup UI Elements
             SetContentView(Forschungsprojekt.Android.Resource.Layout.main_activity_layout);
             canvas_view = FindViewById<RelativeLayout>(Forschungsprojekt.Android.Resource.Id.canvas_container);
             plusButton = FindViewById<Button>(Forschungsprojekt.Android.Resource.Id.plus_btn);
             minusButton = FindViewById<Button>(Forschungsprojekt.Android.Resource.Id.minus_btn);
 
+            this.ActionBar.SetTitle(Forschungsprojekt.Android.Resource.String.app_name);
+            this.ActionBar.Show();
+            
+
             if (SupportedOpenGLVersion() >= 3)
 		    {
-                _fRL = new FrameRateLogger(); // start logging frame rate on console
+                //_fRL = new FrameRateLogger(); // start logging frame rate on console
 
-                // SetContentView(new LibPaintingView(ApplicationContext, null));
+                //SetContentView(new LibPaintingView(ApplicationContext, null));
 
-                //Simple tcp connection test
-                Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                //IP Address of sender device/server: change to your current IPv4 Address for debugging!
-                IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("192.168.0.30"), 1994);
-                //IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("192.168.1.32"), 1994);
-                socket.Connect(endPoint);
-
-                //send connection message to server
-                string msg = "Connected";
-                byte[] msgBuffer = Encoding.Default.GetBytes(msg);
-                socket.Send(msgBuffer, 0, msgBuffer.Length, 0);
-               
-
-                new System.Threading.Thread(() => //thread for receiving data
-                {
-                    //wait to receive data//PROGRAM NOT DOES NOT CONTINUE until data received
-                    byte[] buffer = new byte[1014];
-                    int receive = socket.Receive(buffer, 0, buffer.Length, 0);
-                    //resize buffer
-                    Array.Resize(ref buffer, receive);
-                    //write received message to debug console
-                    string output = ("RECEIVED from Server: " + Encoding.Default.GetString(buffer));  
-                    System.Diagnostics.Debug.WriteLine(output);
-
-                }).Start();
-                
+                              
 
                 // Inject Fusee.Engine.Base InjectMe dependencies
                 IO.IOImp = new IOImp(ApplicationContext);
@@ -212,11 +192,38 @@ namespace Fusee.Forschungsprojekt.Android
             }
         }
 
+        /// <summary>
+        /// Inflates Menu Layout
+        /// </summary>
+
+        public override bool OnCreateOptionsMenu(IMenu menu)
+        {
+            var inflater = MenuInflater;
+            inflater.Inflate(Forschungsprojekt.Android.Resource.Menu.menu_main, menu);
+            return true;
+        }
+
+        /// <summary>
+        /// Sets up the actions that happen when menu buttons are clicked
+        /// </summary>
+        public override bool OnOptionsItemSelected(IMenuItem item)
+        {
+            var id = item.ItemId;
+            //If someone clicks on the Add Service button
+            if (id == Resource.Id.action_open_conn_dialog)
+            {
+                //Create a new dialog and all show on
+                //That dialog
+                var dialog = ConnectionDialog.NewInstance();
+                dialog.Show(FragmentManager, "dialog");
+            }
+            return base.OnOptionsItemSelected(item);
+        }
 
         /// <summary>
         /// Gets the supported OpenGL ES version of device.
         /// </summary>
-        /// <returns>Hieghest supported version of OpenGL ES</returns>
+        /// <returns>Highest supported version of OpenGL ES</returns>
         private long SupportedOpenGLVersion()
         {
             //based on https://android.googlesource.com/platform/cts/+/master/tests/tests/graphics/src/android/opengl/cts/OpenGlEsVersionTest.java

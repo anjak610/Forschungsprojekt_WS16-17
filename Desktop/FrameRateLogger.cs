@@ -20,7 +20,7 @@ namespace Fusee.Forschungsprojekt.Desktop
 
         private void PrintFrameRate(Object state)
         {
-            Console.WriteLine(Time.FramePerSecond.ToString());
+            Console.WriteLine("Frames per sec: " + Time.FramePerSecond.ToString());
         }
     }
 }

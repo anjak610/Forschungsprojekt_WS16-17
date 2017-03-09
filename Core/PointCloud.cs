@@ -2,6 +2,9 @@
 using System.Threading;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
+using System.Diagnostics;
+using System.Linq;
+
 
 namespace Fusee.Forschungsprojekt.Core
 {
@@ -18,12 +21,16 @@ namespace Fusee.Forschungsprojekt.Core
         // Because 1 mesh can only take up to 65.535 indices in the triangles ushort[] array,
         // we need multiple meshes.
         private List<Mesh> _meshes;
+        private List<float3> _pointPositions;
+
 
         //those lists refer to the properties of one mesh
         private List<float3> _vertices;
         private List<float3> _normals;
         private List<ushort> _triangles;
         private List<float2> _uvs;
+
+        public List<float3> _positions;
 
         private int _currentIndex; // index of the current point
         private long _totalNumberOfPoints = 0; // counts all points
@@ -33,6 +40,7 @@ namespace Fusee.Forschungsprojekt.Core
             _limit = 0;
 
             _meshes = new List<Mesh>();
+            _positions = new List<float3>();
             ResetMesh();
         }
 
@@ -49,6 +57,11 @@ namespace Fusee.Forschungsprojekt.Core
             return _meshes;
         }
 
+        public List<float3> GetPositions()
+        {
+            return _positions;
+        }
+
         public long GetNumberOfPoints()
         {
             return _totalNumberOfPoints;
@@ -60,7 +73,7 @@ namespace Fusee.Forschungsprojekt.Core
         {
             AddCurrentToMeshes();
         }
-        
+
         // Instantiate a new mesh
         private void ResetMesh()
         {
@@ -84,7 +97,7 @@ namespace Fusee.Forschungsprojekt.Core
             //UVs = mc.UVs;
 
             _meshes.Add(mesh);
-            
+
             ResetMesh();
         }
 
@@ -103,22 +116,27 @@ namespace Fusee.Forschungsprojekt.Core
 
             float3 pickedvertex = point.Position;
 
+            _positions.Add(pickedvertex);
+
+            // Debug.WriteLine("_pointCloud._pointPositions" + _pointPositions);
+            // Point TryPoint = new Point();
+
             _vertices.Add(pickedvertex);
             _vertices.Add(pickedvertex);
             _vertices.Add(pickedvertex);
             _vertices.Add(pickedvertex);
-            
+
             _normals.Add(new float3(-1, -1, 0));
             _normals.Add(new float3(1, -1, 0));
             _normals.Add(new float3(-1, 1, 0));
             _normals.Add(new float3(1, 1, 0));
-            
+
             _triangles.Add((ushort)(0 + _currentIndex * 4));
             _triangles.Add((ushort)(1 + _currentIndex * 4));
             _triangles.Add((ushort)(3 + _currentIndex * 4));
             _triangles.Add((ushort)(0 + _currentIndex * 4));
             _triangles.Add((ushort)(3 + _currentIndex * 4));
-            _triangles.Add((ushort)(2 + _currentIndex * 4));      
+            _triangles.Add((ushort)(2 + _currentIndex * 4));
 
             _uvs.Add(new float2(0, 0));
             _uvs.Add(new float2(0, 1));
@@ -137,6 +155,7 @@ namespace Fusee.Forschungsprojekt.Core
             lock (_meshes)
             {
                 _meshes.AddRange(pointCloud.GetMeshes());
+                _positions.AddRange(pointCloud.GetPositions());
             }
         }
     }

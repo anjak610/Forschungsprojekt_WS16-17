@@ -3,201 +3,127 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Net.Sockets;
+using System.Threading;
 using System.Net;
+using System.Net.Sockets;
+using System.Diagnostics;
 using System.IO;
+using System.Globalization;
 
-//NOT USED SO FAR
-//async server  example 
+//192.168.0.211
+//using Tutorial: https://www.youtube.com/watch?v=-mYoJBT9XIg&list=PLAC179D21AF94D28F&index=6
 namespace Server
 {
-    enum Commands : int //commands for server 
+    class Serverclient //for sending data
     {
-        String = 0,
-        Image
-    }
-    struct ReceiveBuffer //buffer that holds data
-    {
-        public const int BUFFER_SIZE = 1024;
-        public byte[] Buffer;
-        public int ToReceive;
-        public MemoryStream BufStream;//received data will write to this stream
+        private static List<byte[]> sendingPackages = new List<byte[]>();
+        private static Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        private static Socket sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        private static byte[] file;
+        private static string fuseeIP = null;
 
-        public ReceiveBuffer(int toRec)
-        {
-            Buffer = new byte[BUFFER_SIZE];
-            ToReceive = toRec;//length of data we are expecting to receive
-            BufStream = new MemoryStream(toRec);
+        static void Main(string[] args)
+        {         
+            //string path = @"C:/Users/Tanja Langer/Documents/Studium/Forschungsprojekt/Forschungsprojekt_WS16-17/TCPSimpleTest\TestPoints.txt";
+            string path = @"L:/Programme/Gitkraken/Forschungsprojekt_WS16-17/TCPSimpleTest/TestPoints.txt";
+            file = ReadfromFile(path);           
 
-        }
-
-        public void Dispose()
-        {
-            Buffer = null;
-            ToReceive = 0;
-            Close();
-
-            if (BufStream != null)
+            ConsoleKeyInfo pressed;
+            listen();
+            receiveIP();
+       
+            Console.WriteLine("Press <enter> to connect to this IP");
+            pressed = Console.ReadKey();
+            if (pressed.Key == ConsoleKey.Enter)
             {
-                BufStream.Dispose();
-
-            }
-
-        }
-
-        public void Close()
-        {
-            if (BufStream != null && BufStream.CanWrite)
-            {
-                BufStream.Close();
-            }
-        }
-
-
-    }
-
-    //one client necessary for each connection
-    class Client
-    {
-        byte[] lenBuffer;
-        ReceiveBuffer buffer;
-        Socket socket;
-
-        public IPEndPoint EndPoint
-        {
-            get
-            {
-                //if there's no socket and it is not connected then get IPEndPoint
-                if (socket != null && socket.Connected)
-                {
-                    return (IPEndPoint)socket.RemoteEndPoint;
-
+                if (fuseeIP != null) {
+                    connect(fuseeIP);
                 }
-                return new IPEndPoint(IPAddress.None, 0);
+                else { Console.WriteLine("No IP to connect to"); }
+               
             }
-        }
 
-        //delegate --> method references // event handlers
-        public delegate void DisconnectedEventHandler(Client sender);
-        public event DisconnectedEventHandler Disconnected;
-        public delegate void DataReceivedEventHandler(Client sender, ReceiveBuffer e);
-        public event DataReceivedEventHandler DataReceived;
-
-
-        //constructor creates client object with socket
-        public Client(Socket s)
-        {
-            socket = s;
-            lenBuffer = new byte[4];//byte length of integer because int will be received datatype
-        }
-
-        //close connection and dispose everything
-        public void Close()
-        {
-            if (socket != null)
+            Console.WriteLine("Press <enter> to send data");
+            pressed = Console.ReadKey();
+            if (pressed.Key == ConsoleKey.Enter)
             {
-                socket.Disconnect(false);
-                socket.Close();
+                sendData();
+            }            
 
+            Console.Read();//Console waits for input, so window doesn't close immediately
+        }
+
+        public static void sendData()
+        {
+            Console.Write("Sending... ");
+            try {
+                sender.Send(BitConverter.GetBytes(file.Length), 0, 4, 0);
+                sender.Send(file);
+                Console.WriteLine("File sent successfully!");
+                sender.Close();             
             }
-            buffer.Dispose();
-            socket = null;
-            lenBuffer = null;
-            Disconnected = null;
-            DataReceived = null;
+            catch
+            {
+                Console.WriteLine("Sending packets failed");            
+              
+            }
 
+           
         }
 
-        //receiving data will be happening asynchronous
-        public void ReceiveAsync()
-        {
-            socket.BeginReceive(lenBuffer, 0, lenBuffer.Length, SocketFlags.None, receiveCallback, null);
+        public static void listen()
+        {       
+            IPEndPoint endPoint = new IPEndPoint(0, 1234);
+            socket.Bind(endPoint);
+            socket.Listen(0);
+            Console.WriteLine("Waiting for requests...");
         }
 
-        void receiveCallback(IAsyncResult ar)
+        public static void receiveIP()
         {
+            //Get IP Address from client first
+            
+            try {
+                Socket acc = socket.Accept();
+                byte[] receivebuffer = new byte[1024];
+                int rec = acc.Receive(receivebuffer, 0, receivebuffer.Length, SocketFlags.None);
+                Array.Resize(ref receivebuffer, rec);
+                fuseeIP = Encoding.Default.GetString(receivebuffer);
+                socket.Close();
+                acc.Close();
+                Console.WriteLine("Received request from IP: " + fuseeIP);
+                
+            }
+            catch
+            {
+                Console.WriteLine("Could not receive IP");
+                
+            }
+        }
+
+        public static void connect(string address)
+        {
+            //try to connect to remote application and send data
             try
             {
-                int rec = socket.EndReceive(ar);
-                if (rec == 0)//disconnected --> no received data
-                {
-                    if (Disconnected != null)
-                    {
-                        Disconnected(this);
-                        return;
-
-                    }
-
-                    if (rec != 4)//data type/byte array length not matching
-                    {
-                        throw new Exception();
-                    }
-                }
+                sender.Connect(new IPEndPoint(IPAddress.Parse(address), 1994));// connects to everything on Port 1994
+                Console.WriteLine("Connected to " + address);
             }
-            catch (SocketException se)
+            catch
             {
-                switch (se.SocketErrorCode)//socket disconnected
-                {
-                    case SocketError.ConnectionAborted:
-                    case SocketError.ConnectionReset:
-                        if (Disconnected != null)
-                        {
-                            Disconnected(this);
-                            return;
-                        }
-                        break;
-
-
-                }
+                Console.WriteLine("Unable to connect");            
+            
             }
-            //Exception handling
-            catch (ObjectDisposedException)
-            {
-                return;
-            }
-            catch (NullReferenceException)
-            {
-                return;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return;
-            }
-            buffer = new ReceiveBuffer(BitConverter.ToInt32(lenBuffer, 0));
-            socket.BeginReceive(buffer.Buffer, 0, buffer.Buffer.Length, SocketFlags.None, receivePacketCallback, null);//receive callback function
-
         }
-        void receivePacketCallback(IAsyncResult ar)
+
+        public static byte[] ReadfromFile(string path)
         {
-            int rec = socket.EndReceive(ar);
-            if (rec <= 0) //nothing received
-            {
-                return;
-            }
-            buffer.BufStream.Write(buffer.Buffer, 0, rec);
-            buffer.ToReceive -= rec;//subtract what we have from the length
-
-            if (buffer.ToReceive > 0)//more data to be received
-            {
-                Array.Clear(buffer.Buffer, 0, buffer.Buffer.Length);
-                socket.BeginReceive(buffer.Buffer, 0, buffer.Buffer.Length, SocketFlags.None, receiveCallback, null);
-                return;
-
-            }
-
-            if (DataReceived != null)
-            {
-                buffer.BufStream.Position = 0;
-                DataReceived(this, buffer);
-            }
-
-            buffer.Dispose();
-            ReceiveAsync();//begin to receive data from socket
-
+            
+            byte[] b = File.ReadAllBytes(path);
+            Console.WriteLine("File converted to byte stream");
+            return b;
         }
 
-
+                 
     }
 }
-
