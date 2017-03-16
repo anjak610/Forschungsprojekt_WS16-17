@@ -35,7 +35,7 @@ namespace Fusee.Forschungsprojekt.Core
         // Init is called on startup. 
         public override void Init()
         {
-            //_pointCloud = new PointCloud();
+            _pointCloud = new PointCloud();
             //_pointCloud = AssetStorage.Get<PointCloud>("BasicPoints.txt");
             //PointCloudReader.ReadFromAsset("PointCloud_IPM.txt", _pointCloud.Merge);
             

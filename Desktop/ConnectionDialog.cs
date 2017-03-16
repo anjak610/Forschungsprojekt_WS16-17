@@ -106,7 +106,7 @@ namespace Fusee.Forschungsprojekt.Desktop
                                    ms.Close();
                                    byte[] data = ms.ToArray();
                                    Core.PointCloudReader.receivedData = Encoding.UTF8.GetString(data);
-                                   Core.PointCloudReader.StreamFromNetwork();
+                                   Core.PointCloudReader.DisplayReceived();
                                    ms.Dispose();
                                    System.Diagnostics.Debug.WriteLine("Everything received");
 

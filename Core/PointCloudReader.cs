@@ -33,6 +33,12 @@ namespace Fusee.Forschungsprojekt.Core
             task.Start();
         }
 
+        public static void DisplayReceived()
+        {
+            //_callback = callback;
+            StreamFromNetwork();
+        }
+
         private static void StreamFromAsset()//executed in background task
         {
             PointCloud pointCloud = new PointCloud();
@@ -100,7 +106,7 @@ namespace Fusee.Forschungsprojekt.Core
             string delimiter = "\n";
             string[] pointElementLines = receivedData.Split(delimiter.ToCharArray());// received string split into lines
 
-            for (int j= 0; j< pointElementLines.Length; j++)
+            for (int j= 1; j< pointElementLines.Length; j++)
             {
                 string tab = "\t";//split into numbers
                 string[] pointStrings = pointElementLines[j].Split(tab.ToCharArray());// received string
@@ -111,10 +117,13 @@ namespace Fusee.Forschungsprojekt.Core
                 float[] numbers = new float[pointStrings.Length];
                 for (var i = 0; i < numbers.Length; i++)
                 {
-                    numbers[i] = float.Parse(pointStrings[i], CultureInfo.InvariantCulture.NumberFormat);// TODO: Bug, String not in correct format??
+                    if (pointStrings[i] != null)
+                    {
+                        numbers[i] = float.Parse(pointStrings[i], CultureInfo.InvariantCulture.NumberFormat);
+                    }
                 }
 
-                point.Position = new float3(numbers[0], numbers[2], numbers[1]);
+                point.Position = new float3(numbers[0], numbers[1], numbers[2]);
 
                 if (numbers.Length == 9)
                 {
@@ -123,11 +132,18 @@ namespace Fusee.Forschungsprojekt.Core
                     point.ScanNr = numbers[8];
                 }
 
-                pointCloud.AddPoint(point);
+                //pointCloud.AddPoint(point);
+
+                bool newMeshCreated = pointCloud.AddPoint(point);
+
+                if (newMeshCreated)
+                {
+                    System.Diagnostics.Debug.WriteLine("created Mesh");
+
+                }                   
 
             }
-            Core.PointVisualizationBase._pointCloud = pointCloud;
-
+            Core.PointVisualizationBase._pointCloud.Merge(pointCloud);
 
         }
 
