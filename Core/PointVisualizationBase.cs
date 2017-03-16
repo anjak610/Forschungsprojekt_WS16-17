@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
-using Fusee.Base.Core;
-using Fusee.Base.Common;
+﻿using Fusee.Base.Core;
 using Fusee.Engine.Common;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
-using System.ComponentModel;
 using static Fusee.Engine.Core.Input;
+using Fusee.Serialization;
+using Fusee.Xene;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Fusee.Tutorial.Core
 {
@@ -14,31 +15,42 @@ namespace Fusee.Tutorial.Core
     public class PointVisualizationBase : RenderCanvas
     {
         private PointCloud _pointCloud;
+        private VoxelSpace _voxelSpace;
+
+        private Mesh _cubeMesh;
+
+        // shader params
+        private IShaderParam _albedoParam;
+        private float3 _albedo = new float3(1, 0, 0);
 
         // camera controls
+        private float _alpha;
+        private float _beta;
+
         private float _rotationY = (float) System.Math.PI;
         private float _rotationX = (float) System.Math.PI / -8;
-        private float3 _cameraPosition = new float3(0, 0, -20.0f);
-        private float3 _cameraPivot = new float3(60, -25, 10);
+
+        //private float3 _cameraPosition = new float3(0, 0, -20.0f);
+        //private float3 _cameraPivot = new float3(60, -25, 10);
+
+        private float3 _cameraPosition = new float3(0, 0, -5.0f);
+        private float3 _cameraPivot = new float3(0, 0, 0);
 
         private float _minAngleX = (float) -System.Math.PI / 4;
         private float _maxAngleX = (float) System.Math.PI / 4;
-        
-        // shader parameters
-        private IShaderParam _particleSizeParam;
-        private IShaderParam _xFormParam;
-        
-        private float4x4 _xform;
-        public float ParticleSize;// = 0.015f;
-        private bool _scaleKey;
-
+                
         // Init is called on startup. 
         public override void Init()
         {
+            _voxelSpace = new VoxelSpace();
+            _voxelSpace.SetVoxelSize(2);
+
             //_pointCloud = new PointCloud();
             _pointCloud = AssetStorage.Get<PointCloud>("BasicPoints.txt");
             PointCloudReader.ReadFromAsset("PointCloud_IPM.txt", _pointCloud.Merge);
-            
+
+            _cubeMesh = LoadMesh("Cube.fus");
+
             // read shaders from files
             var vertsh = AssetStorage.Get<string>("VertexShader.vert");
             var pixsh = AssetStorage.Get<string>("PixelShader.frag");
@@ -47,15 +59,23 @@ namespace Fusee.Tutorial.Core
             var shader = RC.CreateShader(vertsh, pixsh);
             RC.SetShader(shader);
 
-            _particleSizeParam = RC.GetShaderParam(shader, "particleSize");
-            RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize));
-
-            _xFormParam = RC.GetShaderParam(shader, "xForm");
-            _xform = float4x4.Identity;
-            RC.SetShaderParam(_xFormParam, _xform);
+            _albedoParam = RC.GetShaderParam(shader, "albedo");
+            RC.SetShaderParam(_albedoParam, _albedo);
 
             // Set the clear color for the backbuffer
             RC.ClearColor = new float4(0.95f, 0.95f, 0.95f, 1);
+        }
+
+        private Mesh LoadMesh(string assetName)
+        {
+            SceneContainer sc = AssetStorage.Get<SceneContainer>(assetName);
+            MeshComponent mc = sc.Children.FindComponents<MeshComponent>(c => true).First();
+            return new Mesh
+            {
+                Vertices = mc.Vertices,
+                Normals = mc.Normals,
+                Triangles = mc.Triangles
+            };
         }
 
         // RenderAFrame is called once a frame
@@ -63,26 +83,29 @@ namespace Fusee.Tutorial.Core
         {
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
-
-            MoveInScene();
             
-            List<Mesh> meshes = _pointCloud.GetMeshes();
-            for(var i=0; i<meshes.Count; i++)
-            {
-                RC.Render(meshes[i]);
-            }
+            float4x4 cameraView = MoveInScene();
 
-            var aspectRatio = Width / (float)Height;
-            RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize * aspectRatio));
+            List<Voxel> voxels = _voxelSpace.GetVoxels();
+            for(var i=0; i<voxels.Count; i++)
+            {
+                Voxel voxel = voxels[i];
+
+                float4x4 modelView = cameraView * float4x4.CreateTranslation(voxel.Position);
+                RC.ModelView = modelView * float4x4.CreateScale( _voxelSpace.GetVoxelSize() / 2 );
+                
+                RC.Render(_cubeMesh);
+            }
+            
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
         }
 
-        public void MoveInScene()
+        private float4x4 MoveInScene()
         {
             // set origin to camera pivot
-            _xform = float4x4.CreateTranslation(-1 * _cameraPivot);
-
+            float4x4 xform = float4x4.CreateTranslation(-1 * _cameraPivot);
+            
             // rotate around camera pivot
             if (Mouse.LeftButton || Touch.ActiveTouchpoints == 1)
             {
@@ -96,28 +119,13 @@ namespace Fusee.Tutorial.Core
             }
 
             var rotation = float4x4.CreateRotationX(_rotationX) * float4x4.CreateRotationY(_rotationY);
-            _xform = rotation * _xform;
+            xform = rotation * xform;
 
             // set camera to its position
-            _xform = float4x4.CreateTranslation(-1 * _cameraPosition) * _xform;
-
+            xform = float4x4.CreateTranslation(-1 * _cameraPosition) * xform;
+            
             // --- move camera pivot
-
-            //Scale Points with W and A
-            if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0)
-            {
-                _scaleKey = true;
-            }
-            else
-            {
-                _scaleKey = false;
-            }
-
-            if (_scaleKey)
-            {
-                ParticleSize = ParticleSize + Keyboard.ADAxis * ParticleSize / 20;
-            }
-
+            
             float3 translation = float3.Zero;
 
             if (Mouse.RightButton || Touch.TwoPoint)
@@ -143,8 +151,7 @@ namespace Fusee.Tutorial.Core
 
             // --- projection matrix
 
-            _xform = RC.Projection * _xform;
-            RC.SetShaderParam(_xFormParam, _xform);
+            return xform;
         }
 
         // Is called when the window was resized
@@ -155,8 +162,6 @@ namespace Fusee.Tutorial.Core
 
             // Create a new projection matrix generating undistorted images on the new aspect ratio.
             float aspectRatio = Width / (float) Height;
-
-            RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize * aspectRatio)); //set params that can be controlled with arrow keys
             
             // 0.25*PI Rad -> 45° Opening angle along the vertical direction. Horizontal opening angle is calculated based on the aspect ratio
             // Front clipping happens at 1 (Objects nearer than 1 world unit get clipped)

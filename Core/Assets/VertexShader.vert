@@ -1,12 +1,16 @@
 attribute vec3 fuVertex;
 attribute vec3 fuNormal;
-uniform vec2 particleSize;
-uniform mat4 xForm;
-        
+
+uniform mat4 FUSEE_MV;
+uniform mat4 FUSEE_MVP;
+
+varying vec3 modelpos;
+varying vec3 normal;
+
 void main()
 {
-	vec4 newVertex = xForm * vec4(fuVertex, 1.0);
-	vec4 result = newVertex  + vec4(fuNormal.xy * particleSize, 0, 0);
+	modelpos = fuVertex;
+	normal = normalize(mat3(FUSEE_MV) * fuNormal);
 
-	gl_Position = result;
+	gl_Position = FUSEE_MVP * vec4(fuVertex, 1.0);
 }

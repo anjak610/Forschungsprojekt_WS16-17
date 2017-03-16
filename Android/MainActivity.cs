@@ -44,7 +44,7 @@ namespace Fusee.Tutorial.Android
             plusButton = FindViewById<Button>(Resource.Id.plus_btn);
             minusButton = FindViewById<Button>(Resource.Id.minus_btn);
             //onclick: increase or decrease size of particles    
-
+            /*
             plusButton.Click += (sender, e) =>
             {
                 app.ParticleSize = app.ParticleSize + app.ParticleSize / 2;
@@ -54,7 +54,7 @@ namespace Fusee.Tutorial.Android
             {
                 app.ParticleSize = app.ParticleSize - app.ParticleSize / 2;
             };
-
+            */
            
 		    if (SupportedOpenGLVersion() >= 3)
 		    {
@@ -156,7 +156,7 @@ namespace Fusee.Tutorial.Android
 
 		        SetContentView(rci.View);
 
-                app.ParticleSize = 0.05f;
+                //app.ParticleSize = 0.05f;
                 //show display dimensions for testing
                 // IWindowManager wm = ApplicationContext.GetSystemService(WindowService).JavaCast<IWindowManager>() ;
                 //Display display = wm.DefaultDisplay;

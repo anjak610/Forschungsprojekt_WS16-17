@@ -18,9 +18,12 @@ namespace Fusee.Tutorial.Core
     public class PointCloudReader
     {
         public delegate void AddPointCloud(PointCloud pointCloud); // use this as callback
+        public delegate void OnNewPointAdded(Point point);
 
         private static string _assetName;
         private static AddPointCloud _callback;
+
+        public static OnNewPointAdded OnNewPointCallbacks;
         
         public static void ReadFromAsset(string assetName, AddPointCloud callback)
         {
@@ -66,12 +69,14 @@ namespace Fusee.Tutorial.Core
                     }
 
                     bool newMeshCreated = pointCloud.AddPoint(point);
-
+                    
                     if (newMeshCreated)
                     {
                         _callback(pointCloud);
                         pointCloud = new PointCloud();
                     }
+
+                    OnNewPointCallbacks?.Invoke(point);
                 }
             }
         }
