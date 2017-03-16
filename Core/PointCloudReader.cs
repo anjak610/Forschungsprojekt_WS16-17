@@ -135,15 +135,19 @@ namespace Fusee.Forschungsprojekt.Core
                 //pointCloud.AddPoint(point);
 
                 bool newMeshCreated = pointCloud.AddPoint(point);
+          
 
-                if (newMeshCreated)
+                if (newMeshCreated)//new mesh if the limit of 65000 vertices is reached
                 {
-                    System.Diagnostics.Debug.WriteLine("created Mesh");
-
-                }                   
+                    System.Diagnostics.Debug.WriteLine("created new Mesh");
+                    Core.PointVisualizationBase._pointCloud.Merge(pointCloud);
+                    pointCloud = new PointCloud();
+                }                
 
             }
-            Core.PointVisualizationBase._pointCloud.Merge(pointCloud);
+
+
+            Core.PointVisualizationBase._pointCloud = pointCloud;
 
         }
 

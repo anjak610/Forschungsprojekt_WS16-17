@@ -44,6 +44,19 @@ namespace Fusee.Forschungsprojekt.Core
             ResetMesh();
         }
 
+        public void AddOneMesh()
+        {
+            Mesh mesh = new Mesh();
+
+            mesh.Vertices = _vertices.ToArray();
+            mesh.Normals = _normals.ToArray();
+            mesh.Triangles = _triangles.ToArray();
+            mesh.UVs = _uvs.ToArray();
+            //UVs = mc.UVs;
+
+            _meshes.Add(mesh);
+        }
+
         public List<Mesh> GetMeshes()
         {
             return _meshes;
