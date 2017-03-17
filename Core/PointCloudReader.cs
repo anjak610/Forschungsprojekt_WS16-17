@@ -142,13 +142,14 @@ namespace Fusee.Forschungsprojekt.Core
                     System.Diagnostics.Debug.WriteLine("created new Mesh");
                     Core.PointVisualizationBase._pointCloud.Merge(pointCloud);
                     pointCloud = new PointCloud();
-                }                
+                }
 
+                pointCloud.FlushPoints();
             }
 
-
+           
             Core.PointVisualizationBase._pointCloud = pointCloud;
-
+           
         }
 
     }
