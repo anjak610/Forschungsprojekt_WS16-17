@@ -80,8 +80,9 @@ namespace Fusee.Forschungsprojekt.Desktop
 
                                while (size > 0)
                                {
-                                   System.Diagnostics.Debug.WriteLine("Inside loop in Connection Dialog");
-                                   System.Diagnostics.Debug.WriteLine("Receiving..");
+                                   System.Diagnostics.Debug.WriteLine("Buffersize > 0");
+                                   System.Diagnostics.Debug.WriteLine("Receiving...");
+                              
                                    byte[] buffer;
                                    if (size < acceptor.ReceiveBufferSize)
                                    {
@@ -112,8 +113,18 @@ namespace Fusee.Forschungsprojekt.Desktop
 
                                    Invoke((MethodInvoker)delegate
                                    {
-                                       receivedDataText.Text = Encoding.UTF8.GetString(data);
-                                       statusText.Text += "\nData transfer complete!";
+                                       try {
+                                           receivedDataText.Text = Encoding.UTF8.GetString(data);
+                                       }
+                                       catch
+                                       {
+                                           receivedDataText.Text = "To much data to process for output";
+                                       }
+                                       finally
+                                       {
+                                           statusText.Text += "\nData transfer complete!";
+                                       }
+                                       
                                    });
 
                                }
@@ -161,6 +172,10 @@ namespace Fusee.Forschungsprojekt.Desktop
             return ipv4;
         }
 
- 
+        private void statusText_TextChanged(object sender, EventArgs e)
+        {
+            statusText.SelectionStart = statusText.Text.Length;
+            statusText.ScrollToCaret();
+        }
     }
 }

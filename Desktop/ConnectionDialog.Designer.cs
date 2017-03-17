@@ -53,10 +53,10 @@
             // receivedDataText
             // 
             this.receivedDataText.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F);
-            this.receivedDataText.Location = new System.Drawing.Point(12, 408);
-            this.receivedDataText.MinimumSize = new System.Drawing.Size(525, 258);
+            this.receivedDataText.Location = new System.Drawing.Point(16, 544);
+            this.receivedDataText.MinimumSize = new System.Drawing.Size(525, 100);
             this.receivedDataText.Name = "receivedDataText";
-            this.receivedDataText.Size = new System.Drawing.Size(616, 285);
+            this.receivedDataText.Size = new System.Drawing.Size(616, 146);
             this.receivedDataText.TabIndex = 3;
             this.receivedDataText.Text = "";
             // 
@@ -64,12 +64,12 @@
             // 
             this.receivedLabel.AutoSize = true;
             this.receivedLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.receivedLabel.Location = new System.Drawing.Point(12, 381);
-            this.receivedLabel.MinimumSize = new System.Drawing.Size(132, 24);
+            this.receivedLabel.Location = new System.Drawing.Point(12, 517);
+            this.receivedLabel.MinimumSize = new System.Drawing.Size(200, 24);
             this.receivedLabel.Name = "receivedLabel";
-            this.receivedLabel.Size = new System.Drawing.Size(132, 24);
+            this.receivedLabel.Size = new System.Drawing.Size(200, 24);
             this.receivedLabel.TabIndex = 4;
-            this.receivedLabel.Text = "Received Data";
+            this.receivedLabel.Text = "Received Data Preview";
             // 
             // disconButton
             // 
@@ -87,9 +87,11 @@
             this.statusText.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
             this.statusText.Location = new System.Drawing.Point(12, 197);
             this.statusText.Name = "statusText";
-            this.statusText.Size = new System.Drawing.Size(611, 161);
+            this.statusText.ReadOnly = true;
+            this.statusText.Size = new System.Drawing.Size(611, 275);
             this.statusText.TabIndex = 6;
             this.statusText.Text = "Ready to Connect";
+            this.statusText.TextChanged += new System.EventHandler(this.statusText_TextChanged);
             // 
             // statusLabel
             // 
