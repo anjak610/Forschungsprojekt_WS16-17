@@ -46,7 +46,7 @@ namespace Fusee.Forschungsprojekt.Core
             // Initialize the shader(s)
             var shader = RC.CreateShader(vertsh, pixsh);
             RC.SetShader(shader);
-
+            
             _particleSizeParam = RC.GetShaderParam(shader, "particleSize");
             RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize));
 

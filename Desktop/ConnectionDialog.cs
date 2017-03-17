@@ -118,7 +118,7 @@ namespace Fusee.Forschungsprojekt.Desktop
                                        }
                                        catch
                                        {
-                                           receivedDataText.Text = "To much data to process for output";
+                                           receivedDataText.Text = "Too much output to process";
                                        }
                                        finally
                                        {

@@ -112,7 +112,7 @@ namespace Fusee.Forschungsprojekt.Android
 
                                 while (size > 0)
                                 {
-                                    System.Diagnostics.Debug.WriteLine("Inside loop in Connection Dialog");
+                                    System.Diagnostics.Debug.WriteLine("Buffersize > 0");
                                     System.Diagnostics.Debug.WriteLine("Receiving..");
                                     byte[] buffer;
                                     if (size < acceptor.ReceiveBufferSize)
@@ -138,15 +138,24 @@ namespace Fusee.Forschungsprojekt.Android
                                     ms.Close();
                                     byte[] data = ms.ToArray();
                                     Core.PointCloudReader.receivedData = Encoding.UTF8.GetString(data);
-                                    Core.PointCloudReader.printReceived();
-
+                                    Core.PointCloudReader.DisplayReceived();
                                     ms.Dispose();
                                     System.Diagnostics.Debug.WriteLine("Everything received");
 
                                     Activity.RunOnUiThread( () => {
-                                    
-                                        ReceivedText.Text = Encoding.UTF8.GetString(data);
-                                        StatusText.Text += "\nData transfer complete!";
+
+                                        try {
+                                            ReceivedText.Text = Encoding.UTF8.GetString(data);
+                                        }
+                                        catch
+                                        {
+                                            ReceivedText.Text = "Too much output to process";
+                                        }
+                                        finally
+                                        {
+                                            StatusText.Text += "\nData transfer complete!";
+                                        }
+                                       
                                     });
 
                                 }

@@ -22,7 +22,6 @@ namespace Fusee.Forschungsprojekt.Desktop
         private static FrameRateLogger _fRL;
         public static ConnectionDialog SetupForm; 
 
-
         public static void Main()
         {
             // _fRL = new FrameRateLogger(); // start logging frame rate on console     
@@ -107,7 +106,7 @@ namespace Fusee.Forschungsprojekt.Desktop
             var app = new Core.PointVisualizationBase();
 
             // Inject Fusee.Engine InjectMe dependencies (hard coded)
-            app.CanvasImplementor = new Fusee.Engine.Imp.Graphics.Desktop.RenderCanvasImp();
+            app.CanvasImplementor = new Fusee.Engine.Imp.Graphics.Desktop.RenderCanvasImp();          
             app.ContextImplementor = new Fusee.Engine.Imp.Graphics.Desktop.RenderContextImp(app.CanvasImplementor);
             Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Desktop.RenderCanvasInputDriverImp(app.CanvasImplementor));
             Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Desktop.RenderCanvasInputDriverImp(app.CanvasImplementor));
