@@ -9,6 +9,8 @@ using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using System.Net;
 using System.Text;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Fusee.Forschungsprojekt.Core
 {
@@ -104,54 +106,59 @@ namespace Fusee.Forschungsprojekt.Core
             PointCloud pointCloud = new PointCloud();
 
             string delimiter = "\n";
-            string[] pointElementLines = receivedData.Split(delimiter.ToCharArray());// received string split into lines
+            List<string> pointElementLines = new List<string>();
 
-            for (int j= 1; j< pointElementLines.Length; j++)
+            pointElementLines = receivedData.Split(delimiter.ToCharArray()).ToList();// received string split into lines
+
+            //interate through every line
+            for (int j = 1; j < pointElementLines.Count; j++)
             {
-                string tab = "\t";//split into numbers
-                string[] pointStrings = pointElementLines[j].Split(tab.ToCharArray());// received string
-
-                Point point = new Point();
-
-                // convert each string to float
-                float[] numbers = new float[pointStrings.Length];
-                for (var i = 0; i < numbers.Length; i++)
+                try
                 {
-                    if (pointStrings[i] != null)
+                    string tab = "\t";//split into numbers
+                    List<string> pointStrings = new List<string>();
+                    pointStrings = pointElementLines[j].Split(tab.ToCharArray()).ToList();// line string split to point coordinates
+                    Point point = new Point();
+
+                    // convert each string to float and add to respective attributes of point objects
+                    float[] numbers = new float[pointStrings.Count];
+                    for (var i = 0; i < numbers.Length; i++)//does not get greater than 4 or 9
                     {
                         numbers[i] = float.Parse(pointStrings[i], CultureInfo.InvariantCulture.NumberFormat);
                     }
+
+                    if (numbers.Length >= 3)//make sure that there are enough values to create one point
+                    {
+                        point.Position = new float3(numbers[0], numbers[1], numbers[2]);
+
+                        if (numbers.Length == 9)
+                        {
+                            point.Color = new float3(numbers[4], numbers[5], numbers[6]); //numbers[3] => second z coordinate
+                            point.EchoId = numbers[7];
+                            point.ScanNr = numbers[8];
+                        }
+
+                        bool newMeshCreated = pointCloud.AddPoint(point);
+
+
+                        if (newMeshCreated)//new mesh if the limit of 65000 vertices is reached
+                        {
+                            Core.PointVisualizationBase._pointCloud.Merge(pointCloud);
+                            pointCloud = new PointCloud();
+                        }
+
+                    }
+
+                    //pointCloud.FlushPoints(); //Flush points if point data is less than 65000 vertices
                 }
-
-                point.Position = new float3(numbers[0], numbers[1], numbers[2]);
-
-                if (numbers.Length == 9)
+                catch
                 {
-                    point.Color = new float3(numbers[3], numbers[4], numbers[5]);
-                    point.EchoId = numbers[6];
-                    point.ScanNr = numbers[8];
+                    continue; //skip line if wrong number format or whatever 
                 }
 
-                //pointCloud.AddPoint(point);
-
-                bool newMeshCreated = pointCloud.AddPoint(point);
-          
-
-                if (newMeshCreated)//new mesh if the limit of 65000 vertices is reached
-                {
-                    System.Diagnostics.Debug.WriteLine("created new Mesh");
-                    Core.PointVisualizationBase._pointCloud.Merge(pointCloud);
-                    pointCloud = new PointCloud();
-                }
-
-                pointCloud.FlushPoints();
             }
-
-           
-            Core.PointVisualizationBase._pointCloud = pointCloud;
-           
+            Core.PointVisualizationBase._pointCloud.Merge(pointCloud);//after reading all lines merge point cloud into existing one
         }
-
     }
 }
 
