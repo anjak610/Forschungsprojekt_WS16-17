@@ -18,9 +18,8 @@ namespace Fusee.Forschungsprojekt.Core
         private PointCloud _pointCloud;
 
         // camera controls
-        private float _rotationY = (float)System.Math.PI;
-        private float _rotationX = (float)System.Math.PI / -8;
-        private float3 _cameraPosition = new float3(0, 0, -20.0f);
+       // private float _rotationY = (float)System.Math.PI;
+       // private float _rotationX = (float)System.Math.PI / -8;
         private float3 _cameraPivot = new float3(60, -25, 10);
         private static float _zoom, _zoomVel, _angleHorz = M.PiOver6 * 2.0f, _angleVert = -M.PiOver6 * 0.5f, _angleVelHorz, _angleVelVert, _angleRoll, _angleRollInit;
         private bool _twoTouchRepeated;
@@ -50,6 +49,8 @@ namespace Fusee.Forschungsprojekt.Core
         private float4x4 _xform;
         private bool _scaleKey;
         private bool _keys;
+
+        List<float3> positions = new List<float3>();
 
         // Init is called on startup. 
         public override void Init()
@@ -86,6 +87,7 @@ namespace Fusee.Forschungsprojekt.Core
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
 
+            BoundingBox();
             MoveInSceneNew();
            // MoveInScene();
 
@@ -96,7 +98,7 @@ namespace Fusee.Forschungsprojekt.Core
                 RC.Render(meshes[i]);
             }
 
-            BoundingBox();
+           
 
             // float aspectRatio = Width / (float)Height;
 
@@ -111,113 +113,115 @@ namespace Fusee.Forschungsprojekt.Core
 
        public void MoveInSceneNew()
        {
-           //set params that can be controlled with arrow keys
-       
-           var curDamp = (float)System.Math.Exp(-Damping * DeltaTime);
-       
-           if (Keyboard.LeftRightAxis != 0 || Keyboard.UpDownAxis != 0)
-           {
-               _keys = true;
-           }
-       
-           // Zoom & Roll
-           if (Touch.TwoPoint)
-           {
-               if (!_twoTouchRepeated)
-               {
-                   _twoTouchRepeated = true;
-                   _angleRollInit = Touch.TwoPointAngle - _angleRoll;
-                   _offsetInit = Touch.TwoPointMidPoint - _offset;
-                   _maxPinchSpeed = 0;
-               }
-               _zoomVel = Touch.TwoPointDistanceVel * -0.01f;
-               _angleRoll = Touch.TwoPointAngle - _angleRollInit;
-               _offset = Touch.TwoPointMidPoint - _offsetInit;
-               float pinchSpeed = Touch.TwoPointDistanceVel;
-               if (pinchSpeed > _maxPinchSpeed) _maxPinchSpeed = pinchSpeed; // _maxPinchSpeed is used for debugging only.
-           }
-           else
-           {
-               _twoTouchRepeated = false;
-               _zoomVel = Mouse.WheelVel * -0.5f;
-               _angleRoll *= curDamp * 0.8f;
-               _offset *= curDamp * 0.8f;
-           }
-       
-           // UpDown / LeftRight rotation
-           if (Mouse.LeftButton)
-           {
-               _keys = false;
-               _angleVelHorz = Mouse.XVel * 0.0002f;
-               _angleVelVert = Mouse.YVel * 0.0002f;
-           }
-           else if (Touch.GetTouchActive(TouchPoints.Touchpoint_0) && !Touch.TwoPoint)
-           {
-               _keys = false;
-               float2 touchVel;
-               touchVel = Touch.GetVelocity(TouchPoints.Touchpoint_0);
-               _angleVelHorz = -RotationSpeed * touchVel.x * 0.000002f;
-               _angleVelVert = -RotationSpeed * touchVel.y * 0.000002f;
-           }
-           else
-           {
-               if (_keys)
-               {
-                   _angleVelHorz = -RotationSpeed * Keyboard.LeftRightAxis * 0.002f;
-                   _angleVelVert = -RotationSpeed * Keyboard.UpDownAxis * 0.002f;
-               }
-               else
-               {
-                   _angleVelHorz *= curDamp;
-                   _angleVelVert *= curDamp;
-               }
-           }
-       
-           _zoom += _zoomVel;
-       
-           if (Mouse.RightButton || Touch.TwoPoint)
-           {
-               float2 speed = Mouse.Velocity + Touch.TwoPointMidPointVel;
-               MoveX += speed.x * -0.005f;
-               MoveY += speed.y * -0.005f;
-           }
-       
-       
-           // Scale Points with W and A
-           if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0)
-           {
-               _scaleKey = true;
-           }
-           else
-           {
-               _scaleKey = false;
-           }
-       
-           if (_scaleKey)
-           {
-               ParticleSize = ParticleSize + Keyboard.ADAxis * ParticleSize / 20;
-           }
-       
-           _angleHorz += _angleVelHorz;
-           // Wrap-around to keep _angleHorz between -PI and + PI
-           _angleHorz = M.MinAngle(_angleHorz);
-       
-           _angleVert += _angleVelVert;
-           // Limit pitch to the range between [-PI/2, + PI/2]
-           _angleVert = M.Clamp(_angleVert, -M.PiOver2, M.PiOver2);
-       
-           // Wrap-around to keep _angleRoll between -PI and + PI
-           _angleRoll = M.MinAngle(_angleRoll);
-       
-           var view = float4x4.CreateTranslation(-1 * _cameraPivot); //-1 * _cameraPosition) *
-       
+              //set params that can be controlled with arrow keys
+            
+              var curDamp = (float)System.Math.Exp(-Damping * DeltaTime);
+            
+              if (Keyboard.LeftRightAxis != 0 || Keyboard.UpDownAxis != 0)
+              {
+                  _keys = true;
+              }
+            
+              // Zoom & Roll
+             if (Touch.TwoPoint)
+             {
+                 if (!_twoTouchRepeated)
+                 {
+                     _twoTouchRepeated = true;
+                     _angleRollInit = Touch.TwoPointAngle - _angleRoll;
+                     //_offsetInit = Touch.TwoPointMidPoint - _offset;
+                     _maxPinchSpeed = 0;
+                 }
+                 _zoomVel = Touch.TwoPointDistanceVel * -0.01f;
+                 _angleRoll = Touch.TwoPointAngle - _angleRollInit;
+                 //_offset = Touch.TwoPointMidPoint - _offsetInit;
+                 float pinchSpeed = Touch.TwoPointDistanceVel;
+                 if (pinchSpeed > _maxPinchSpeed) _maxPinchSpeed = pinchSpeed; // _maxPinchSpeed is used for debugging only.
+             }
+             else
+             {
+                 _twoTouchRepeated = false;
+                 _zoomVel = Mouse.WheelVel * -0.5f;
+                 _angleRoll *= curDamp * 0.8f;
+                 _offset *= curDamp * 0.8f;
+             }
+            
+              // UpDown / LeftRight rotation
+              if (Mouse.LeftButton)
+              {
+                  _keys = false;
+                  _angleVelHorz = Mouse.XVel * 0.0002f;
+                  _angleVelVert = Mouse.YVel * 0.0002f;
+              }
+              else if (Touch.GetTouchActive(TouchPoints.Touchpoint_0) && !Touch.TwoPoint)
+              {
+                  _keys = false;
+                  float2 touchVel;
+                  touchVel = Touch.GetVelocity(TouchPoints.Touchpoint_0);
+                  _angleVelHorz = -RotationSpeed * touchVel.x * 0.0002f;
+                  _angleVelVert = -RotationSpeed * touchVel.y * 0.0002f;
+              }
+              else
+              {
+                  if (_keys)
+                  {
+                      _angleVelHorz = -RotationSpeed * Keyboard.LeftRightAxis * 0.002f;
+                      _angleVelVert = -RotationSpeed * Keyboard.UpDownAxis * 0.002f;
+                  }
+                  else
+                  {
+                      _angleVelHorz *= curDamp;
+                      _angleVelVert *= curDamp;
+                  }
+              }
+            
+              _zoom += _zoomVel;
+            
+             if (Mouse.RightButton || Touch.TwoPoint)
+             {
+                 float2 speed = Mouse.Velocity + Touch.TwoPointMidPointVel;
+                 MoveX += speed.x * -0.005f;
+                 MoveY += speed.y * -0.005f;
+             }
+            
+            
+              // Scale Points with W and A
+              if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0)
+              {
+                  _scaleKey = true;
+              }
+              else
+              {
+                  _scaleKey = false;
+              }
+            
+              if (_scaleKey)
+              {
+                  ParticleSize = ParticleSize + Keyboard.ADAxis * ParticleSize / 20;
+              }
+            
+              _angleHorz += _angleVelHorz;
+              // Wrap-around to keep _angleHorz between -PI and + PI
+              _angleHorz = M.MinAngle(_angleHorz);
+            
+              _angleVert += _angleVelVert;
+              // Limit pitch to the range between [-PI/2, + PI/2]
+              _angleVert = M.Clamp(_angleVert, -M.PiOver2, M.PiOver2);
+            
+              // Wrap-around to keep _angleRoll between -PI and + PI
+              _angleRoll = M.MinAngle(_angleRoll);
+
+            // List<float3> positions = _pointCloud.GetPositions();
+            float3 _startPoint = positions[50];
+            var view = float4x4.CreateTranslation(-1 * _startPoint); //-1 * _cameraPosition) *
+
            var MtxCam = float4x4.LookAt(0, 0, _zoom, 0, 0, 0, 0, 1, 0) * float4x4.CreateTranslation(MoveX, MoveY, 0);
            var MtxRot = float4x4.CreateRotationZ(_angleRoll) * float4x4.CreateRotationX(_angleVert) * float4x4.CreateRotationY(_angleHorz);
            RC.ModelView = MtxCam * MtxRot * view;
        
-           var mtxOffset = float4x4.CreateTranslation(2 * _offset.x / Width, -2 * _offset.y / Height, 0);
-           RC.Projection = mtxOffset * _projection;
-       }
+         //  var mtxOffset = float4x4.CreateTranslation(2 * _offset.x / Width, -2 * _offset.y / Height, 0);
+           RC.Projection =  _projection;//mtxOffset * 
+        }
 
         //public void MoveInScene()
      //  {
@@ -292,11 +296,11 @@ namespace Fusee.Forschungsprojekt.Core
 
         public void BoundingBox()
         {
-           List<float3> positions = _pointCloud.GetPositions();
+          positions = _pointCloud.GetPositions();
          
            //var test = positionsArray[0].x;
-           float _maxX = positions[0].x;
-           float _minX = positions[0].x;
+            float _maxX = positions[0].x;
+            float _minX = positions[0].x;
             float _maxY = positions[0].y;
             float _minY = positions[0].y;
             float _maxZ = positions[0].z;
@@ -336,9 +340,7 @@ namespace Fusee.Forschungsprojekt.Core
                 }
             }
 
-
-           //TODO compute Meridian x,y,z  and create BoundingBox --> how to transport Boudningbox to Shader???
-
+            //TODO compute Meridian x,y,z  and create BoundingBox --> how to transport Boudningbox to Shader???
         }
 
         public override void Resize()

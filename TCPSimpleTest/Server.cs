@@ -25,8 +25,8 @@ namespace Server
         static void Main(string[] args)
         {         
             //string path = @"C:/Users/Tanja Langer/Documents/Studium/Forschungsprojekt/Forschungsprojekt_WS16-17/TCPSimpleTest\TestPoints.txt";
-            //string path = @"L:/Programme/Gitkraken/Forschungsprojekt_WS16-17/TCPSimpleTest/TestPoints.txt";
-            string path = @"D:/Gitkraken/Forschungsprojekt_WS16-17/TCPSimpleTest/TestPoints.txt";
+            string path = @"L:/Programme/Gitkraken/Forschungsprojekt_WS16-17/TCPSimpleTest/TestPoints.txt";
+            //string path = @"D:/Gitkraken/Forschungsprojekt_WS16-17/TCPSimpleTest/TestPoints.txt";
             file = ReadfromFile(path);           
 
             ConsoleKeyInfo pressed;
