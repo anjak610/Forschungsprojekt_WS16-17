@@ -9,6 +9,8 @@ using System.Diagnostics;
 using static Fusee.Engine.Core.Time;
 using static Fusee.Engine.Core.Input;
 
+delegate float3 StartNumber(float3 StrP);
+
 namespace Fusee.Forschungsprojekt.Core
 {
 
@@ -24,14 +26,14 @@ namespace Fusee.Forschungsprojekt.Core
         private float _maxPinchSpeed;
 
         private float MoveX;
-        float MoveY;
+        private float MoveY;
 
-        float _maxX;
-        float _minX;
-        float _maxY;
-        float _minY;
-        float _maxZ;
-        float _minZ;
+       private float _maxX;
+       private float _minX;
+       private float _maxY;
+       private float _minY;
+       private float _maxZ;
+       private float _minZ;
 
         private float2 _offset;
         private static float2 _offsetInit;
@@ -51,6 +53,7 @@ namespace Fusee.Forschungsprojekt.Core
         // Init is called on startup. 
         public override void Init()
         {
+
             _pointCloud = new PointCloud();
             // _pointCloud = AssetStorage.Get<PointCloud>("BasicPoints.txt");
             PointCloudReader.ReadFromAsset("PointCloud_IPM.txt", _pointCloud.Merge);
@@ -195,25 +198,26 @@ namespace Fusee.Forschungsprojekt.Core
 
             // List<float3> positions = _pointCloud.GetPositions();
 
-            float3 _startPoint = StrP(new float3(0,0,0));//positions[1]; //TODO: solution for Android!! Points aren't read at that Time
+            StartNumber StrPoint = new StartNumber(StrP);
+            float3 _startPoint = StrPoint(new float3(0,0,0));//positions[1]; //TODO: solution for Android!! Points aren't read at that Time
             var view = float4x4.CreateTranslation(-1 * _startPoint);
 
             var MtxCam = float4x4.LookAt(0, 0, _zoom, 0, 0, 0, 0, 1, 0) * float4x4.CreateTranslation(MoveX, MoveY, 0);
             var MtxRot = float4x4.CreateRotationZ(_angleRoll) * float4x4.CreateRotationX(_angleVert) * float4x4.CreateRotationY(_angleHorz);
             RC.ModelView = MtxCam * MtxRot * view;
 
-            RC.Projection = _projection;//mtxOffset * 
+            RC.Projection = _projection;
+        
         }
-
         public static float3 StrP(float3 str)
         {
-            str = positions[1];
-            if (str != float3.Zero)
+           // str = positions[0];
+            if  (positions.Count != 0)
             {
-                return positions[1];
+                return positions[0];
             }
-            return new float3(0,0,0);
-            
+            return str;
+
         }
 
         public void BoundingBox()
@@ -270,7 +274,7 @@ namespace Fusee.Forschungsprojekt.Core
 
             float3 midpoint = new float3(medianX, medianY, medianZ);
 
-            //TODO compute Meridian x,y,z  and create BoundingBox --> how to transport Boudningbox to Shader???
+            //TODO: create BoundingBox --> how to transport Boudningbox to Shader???
         }
 
         public override void Resize()

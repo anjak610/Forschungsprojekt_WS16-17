@@ -21,7 +21,6 @@ namespace Fusee.Forschungsprojekt.Core
         // Because 1 mesh can only take up to 65.535 indices in the triangles ushort[] array,
         // we need multiple meshes.
         private List<Mesh> _meshes;
-        private List<float3> _pointPositions;
 
 
         //those lists refer to the properties of one mesh
