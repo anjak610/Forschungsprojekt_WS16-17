@@ -14,21 +14,19 @@ using System.Net.Sockets;
 using System.Threading;
 using System.IO;
 
+
 namespace Fusee.Forschungsprojekt.Android
 {
-    // TODO: Implement connection funtionality like in desktop version
     class ConnectionDialog : DialogFragment
     {
+    
         protected EditText IPEditText;
         protected TextView StatusText;
-        protected TextView ReceivedText;
         protected Button ConnectButton;
         protected Button DisconnectButton;
 
-        private static Socket socket;
-        private static Socket receiver;
-        private static Socket acceptor;
-        private static Boolean connected = false;
+        private static ReceiverClient client;
+       
 
         //string that will hold IP input
         protected string IPinput = "";
@@ -36,8 +34,7 @@ namespace Fusee.Forschungsprojekt.Android
         public static ConnectionDialog NewInstance()
         {
             var dialogFragment = new ConnectionDialog();
-            receiver = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            client = new ReceiverClient();
             return dialogFragment;
         }
 
@@ -59,7 +56,6 @@ namespace Fusee.Forschungsprojekt.Android
                 //Initialize the properties
                 IPEditText = dialogView.FindViewById<EditText>(Resource.Id.IPinputField);
                 StatusText = dialogView.FindViewById<TextView>(Resource.Id.statusTextView);
-                ReceivedText = dialogView.FindViewById<TextView>(Resource.Id.receivedTextView);
                 ConnectButton = dialogView.FindViewById<Button>(Resource.Id.connectBtn);
                 DisconnectButton = dialogView.FindViewById<Button>(Resource.Id.disconnectBtn);
 
@@ -71,6 +67,7 @@ namespace Fusee.Forschungsprojekt.Android
             {
                 //Send own IP to listening server            
                 string serverip = IPEditText.Text;
+                string localip = getIPv4();
 
                 IPAddress inputaddress;
                 if (IPAddress.TryParse(serverip, out inputaddress))
@@ -79,87 +76,34 @@ namespace Fusee.Forschungsprojekt.Android
                     {
                         try
                         {
-                            IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(serverip), 1234);
-                            socket.Connect(endPoint);
-                            System.Diagnostics.Debug.WriteLine("Connected to Server");
-                            string localip = getIPv4();
-                            byte[] ipbuffer = Encoding.Default.GetBytes(localip);
-                            socket.Send(ipbuffer, 0, ipbuffer.Length, 0);
-                            System.Diagnostics.Debug.WriteLine("Sent local IP: " + localip);
+                            client.ConnecttoServer(serverip, localip);
 
                             Activity.RunOnUiThread(() => {
                                 StatusText.Text += ("\nSent local IP: " + localip);
                             });
 
-                            //receiving data
-                            receiver.Bind(new IPEndPoint(0, 1994));
-                            receiver.Listen(0);
-                            acceptor = receiver.Accept();
-                            System.Diagnostics.Debug.WriteLine("Socket accepting");
-                            connected = true;
-                            Activity.RunOnUiThread(() => {
-                            
-                                StatusText.Text += ("\nConnected. Waiting for data...");
+                            client.SetupReceiving();
+                        
+                            Activity.RunOnUiThread(() => {                           
+                                StatusText.Text += ("\nConnected. Receiving data...");
                             });
 
-                            while (connected)
-                            {
-                                byte[] sizebuffer = new byte[4];
-                                acceptor.Receive(sizebuffer, 0, sizebuffer.Length, 0);
-                                //receive length of data                 
-                                int size = BitConverter.ToInt32(sizebuffer, 0);
-                                MemoryStream ms = new MemoryStream();//will hold the data that is received
+                            client.Receive();
 
-                                while (size > 0)
-                                {
-                                    System.Diagnostics.Debug.WriteLine("Buffersize > 0");
-                                    System.Diagnostics.Debug.WriteLine("Receiving..");
-                                    byte[] buffer;
-                                    if (size < acceptor.ReceiveBufferSize)
-                                    {
-                                        buffer = new byte[size];
-                                    }
-                                    else
-                                    {
-                                        buffer = new byte[acceptor.ReceiveBufferSize];
-                                    }
-
-                                    int receive = acceptor.Receive(buffer, 0, buffer.Length, 0);
-                                    //subtract the size of the received data from the size
-                                    size -= receive;
-                                    //write the received data to the memory stream
-                                    ms.Write(buffer, 0, buffer.Length);
-
-                                }
-
-                                if (size == 0)
-                                {
-                                    connected = false;
-                                    ms.Close();
-                                    byte[] data = ms.ToArray();
-                                    Core.PointCloudReader.receivedData = Encoding.UTF8.GetString(data);
-                                    Core.PointCloudReader.DisplayReceived();
-                                    ms.Dispose();
-                                    System.Diagnostics.Debug.WriteLine("Everything received");
-
-                                    Activity.RunOnUiThread( () => {
-
-                                        try {
-                                            ReceivedText.Text = Encoding.UTF8.GetString(data);
-                                        }
-                                        catch
-                                        {
-                                            ReceivedText.Text = "Too much output to process";
-                                        }
-                                        finally
-                                        {
-                                            StatusText.Text += "\nData transfer complete!";
-                                        }
-                                       
-                                    });
-
-                                }
+                            if (client.completed) {
+                                System.Diagnostics.Debug.WriteLine("Data transfer complete");
+                                Activity.RunOnUiThread(() => {
+                                       StatusText.Text += "\nData transfer complete!";                                  
+                                });
                             }
+                            else
+                            {
+                                System.Diagnostics.Debug.WriteLine("Data transfer not completed");
+                                Activity.RunOnUiThread(() => {
+                                    StatusText.Text += "\nData transfer not completed!";
+                                });
+                            }
+                            
                         }
                         catch (Exception exp) //catch socket exceptions
                         {
@@ -180,13 +124,11 @@ namespace Fusee.Forschungsprojekt.Android
                 //Disconnect 
                 DisconnectButton.Click += (sender, args) =>
                 {
+                    client.Disconect();
                     Activity.RunOnUiThread(() => {
                         StatusText.Text += ("\nConnection closed");
                     });
-                    connected = false;
-                    receiver.Close();
-                    acceptor.Close();
-                    socket.Close();
+           
                 };
 
             }

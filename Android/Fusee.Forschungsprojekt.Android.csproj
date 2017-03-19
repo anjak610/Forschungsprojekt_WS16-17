@@ -72,6 +72,7 @@
     <Compile Include="ConnectionDialog.cs" />
     <Compile Include="FrameRateLogger.cs" />
     <Compile Include="MainActivity.cs" />
+    <Compile Include="ReceiverClient.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
   </ItemGroup>
   <ItemGroup>

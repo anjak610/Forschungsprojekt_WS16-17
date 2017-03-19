@@ -80,6 +80,7 @@
     <Compile Include="FrameRateLogger.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReceiverClient.cs" />
     <Compile Include="UIForm.cs">
       <SubType>Form</SubType>
     </Compile>

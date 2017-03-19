@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:padding="10dp">
     <TextView
         android:text="Please enter IP Address of Server"
@@ -39,7 +39,7 @@
         android:textColor="#ffffff" />
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="250dp"
         android:background="@android:color/background_light"
         android:padding="5dp"
         android:id="@+id/statusScrollView">
@@ -49,26 +49,6 @@
             android:text="Status messages"
             android:id="@+id/statusTextView"
             android:textColor="@android:color/black" />
-    </ScrollView>
-    <TextView
-        android:text="Received Data"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/receivedLabel"
-        android:layout_margin="5dp"
-        android:textColor="#ffffff" />
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="180dp"
-        android:background="@android:color/background_light"
-        android:padding="5dp"
-        android:id="@+id/receivedScrollView">
-        <TextView
-            android:text="Received Points"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@android:color/black"
-            android:id="@+id/receivedTextView" />
     </ScrollView>
     <Button
         android:text="Disconnect"

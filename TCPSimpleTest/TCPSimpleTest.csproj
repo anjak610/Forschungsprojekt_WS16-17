@@ -45,8 +45,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Server.cs" />
+    <Compile Include="ConnectionState.cs" />
+    <Compile Include="Serverclient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TCPServer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

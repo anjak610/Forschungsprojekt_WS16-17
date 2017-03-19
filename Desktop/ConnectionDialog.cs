@@ -12,22 +12,20 @@ using System.Threading;
 using System.IO;
 
 //using tutorial: https://www.youtube.com/watch?v=-mYoJBT9XIg&list=PLAC179D21AF94D28F&index=6
+/// <summary>
+/// Input form for entering remote ServerIP and checking on data transfer status
+/// </summary>
 namespace Fusee.Forschungsprojekt.Desktop
 {
     public partial class ConnectionDialog : Form
     {
 
-        Socket socket;
-        Socket receiver;
-        Socket acceptor;
-        Boolean connected = false;
+        private ReceiverClient client;
 
         public ConnectionDialog()
         {
             InitializeComponent();
-            receiver = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
+            client = new ReceiverClient();
         }
 
         //connect button event handler
@@ -38,6 +36,7 @@ namespace Fusee.Forschungsprojekt.Desktop
            {
            //Send own IP to listening server            
            string serverip = IPinputBox.Text;
+           string localip = getIPv4();
 
            IPAddress inputaddress;
                if (IPAddress.TryParse(serverip, out inputaddress))
@@ -46,89 +45,38 @@ namespace Fusee.Forschungsprojekt.Desktop
                    {
                        try
                        {
-                           IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(serverip), 1234);
-                           socket.Connect(endPoint);
-                           System.Diagnostics.Debug.WriteLine("Connected to Server");
-                           string localip = getIPv4();
-                           byte[] ipbuffer = Encoding.Default.GetBytes(localip);
-                           socket.Send(ipbuffer, 0, ipbuffer.Length, 0);
-                           System.Diagnostics.Debug.WriteLine("Sent local IP: " + localip);
+                           client.ConnecttoServer(serverip, localip);
 
                            Invoke((MethodInvoker)delegate
                            {
                                statusText.Text += ("\nSent local IP: " + localip);
                            });
 
-                           //receiving data
-                           receiver.Bind(new IPEndPoint(0, 1994));
-                           receiver.Listen(0);
-                           acceptor = receiver.Accept();
-                           System.Diagnostics.Debug.WriteLine("Socket accepting");
-                           connected = true;
+                           client.SetupReceiving();
                            Invoke((MethodInvoker)delegate
                            {
-                               statusText.Text += ("\nConnected. Waiting for data...");
+                               statusText.Text += ("\nConnected.\nReceiving data...");
                            });
 
-                           while (connected)
-                           {
-                               byte[] sizebuffer = new byte[4];
-                               acceptor.Receive(sizebuffer, 0, sizebuffer.Length, 0);
-                               //receive length of data                 
-                               int size = BitConverter.ToInt32(sizebuffer, 0);
-                               MemoryStream ms = new MemoryStream();//will hold the data that is received
-
-                               while (size > 0)
-                               {
-                                   System.Diagnostics.Debug.WriteLine("Buffersize > 0");
-                                   System.Diagnostics.Debug.WriteLine("Receiving...");
-                              
-                                   byte[] buffer;
-                                   if (size < acceptor.ReceiveBufferSize)
-                                   {
-                                       buffer = new byte[size];
-                                   }
-                                   else
-                                   {
-                                       buffer = new byte[acceptor.ReceiveBufferSize];
-                                   }
-
-                                   int receive = acceptor.Receive(buffer, 0, buffer.Length, 0);
-                                   //subtract the size of the received data from the size
-                                   size -= receive;
-                                   //write the received data to the memory stream
-                                   ms.Write(buffer, 0, buffer.Length);
-
-                               }
-
-                               if (size == 0)
-                               {
-                                   connected = false;
-                                   ms.Close();
-                                   byte[] data = ms.ToArray();
-                                   Core.PointCloudReader.receivedData = Encoding.UTF8.GetString(data);
-                                   Core.PointCloudReader.DisplayReceived();
-                                   ms.Dispose();
-                                   System.Diagnostics.Debug.WriteLine("Everything received");
-
-                                   Invoke((MethodInvoker)delegate
-                                   {
-                                       try {
-                                           receivedDataText.Text = Encoding.UTF8.GetString(data);
-                                       }
-                                       catch
-                                       {
-                                           receivedDataText.Text = "Too much output to process";
-                                       }
-                                       finally
-                                       {
-                                           statusText.Text += "\nData transfer complete!";
-                                       }
-                                       
-                                   });
-
-                               }
+                           client.Receive();
+                         
+                           if (client.completed) {
+                               System.Diagnostics.Debug.WriteLine("Data transfer complete");
+                               Invoke((MethodInvoker)delegate
+                               {                                 
+                                   statusText.Text += "\nData transfer complete!";
+                                                                 
+                               });
                            }
+                           else
+                           {
+                               System.Diagnostics.Debug.WriteLine("Data transfer not completed");
+                               Invoke((MethodInvoker)delegate
+                               {
+                                   statusText.Text += "\nData transfer not completed!";
+                                   
+                               });
+                           }                          
                        }
                        catch (Exception exp) //catch socket exceptions
                        {
@@ -138,7 +86,7 @@ namespace Fusee.Forschungsprojekt.Desktop
                }//if user has not entered anything show warning
                else
                {
-                   MessageBox.Show("Please enter valid IPv4 Address of Server");
+                   MessageBox.Show("Please enter a valid IPv4 Address of the Server");
                }
            }).Start(); 
 
@@ -147,16 +95,13 @@ namespace Fusee.Forschungsprojekt.Desktop
 
         private void disconButton_Click(object sender, EventArgs e)
         {
+            client.Disconect();
+
             Invoke((MethodInvoker)delegate
             {
                 statusText.Text += ("\nConnection closed");
             });
-            connected = false;
-            receiver.Close();
-            acceptor.Close();
-            socket.Close();
-
-        }
+               }
 
         public string getIPv4()
         {
