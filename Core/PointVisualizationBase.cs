@@ -217,7 +217,6 @@ namespace Fusee.Forschungsprojekt.Core
                 return positions[0];
             }
             return str;
-
         }
 
         public void BoundingBox()
@@ -273,6 +272,20 @@ namespace Fusee.Forschungsprojekt.Core
            // var medianZ = System.Math.Abs(distZhalf);
 
             float3 midpoint = new float3(medianX, medianY, medianZ);
+            float _radius = 0;
+
+            if (System.Math.Abs(_maxX) > _radius)
+            {
+                _radius = _maxX;
+            }
+            if (System.Math.Abs(_maxY) > _radius)
+            {
+                _radius = _maxY;
+            }
+            if (System.Math.Abs(_maxZ) > _radius)
+            {
+                _radius = _maxZ;
+            }
 
             //TODO: create BoundingBox --> how to transport Boudningbox to Shader???
         }
