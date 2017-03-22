@@ -10,44 +10,46 @@ namespace Fusee.Forschungsprojekt.Desktop
 {
     public class ReceiverClient
     {
-        private Socket socket;
+        private Socket sender;
         private Socket receiver;
         private Socket acceptor;
-        public Boolean receiving;
-        private Boolean connected;
-        public Boolean completed;
+        public bool receiving;
+        private bool connected;
+        public bool completed;
         private byte[] data;
-     
+        public string serveraddress;
 
         public ReceiverClient()
         {
             receiver = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             receiving = false;
             connected = false;
             completed = false;
+            this.DataReceived += OnDataReceived;//subscription for event
+
         }
 
-        public void ConnecttoServer(string serveraddress, string localip)
+        public void ConnecttoServer(string serveraddress, string localip)//send on port 1234
         {
             IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(serveraddress), 1234);
-            socket.Connect(endPoint);
+            sender.Connect(endPoint);
             System.Diagnostics.Debug.WriteLine("Connected to Server");
             byte[] ipbuffer = Encoding.Default.GetBytes(localip);
-            socket.Send(ipbuffer, 0, ipbuffer.Length, 0);
+            sender.Send(ipbuffer, 0, ipbuffer.Length, 0);
             System.Diagnostics.Debug.WriteLine("Sent local IP: " + localip);
             connected = true;
 
         }
 
-        public void SetupReceiving()
+        public void SetupReceiving()//Receive on port 1994
         {
             try
             {
                 receiver.Bind(new IPEndPoint(0, 1994));
                 receiver.Listen(0);
                 acceptor = receiver.Accept();
-                System.Diagnostics.Debug.WriteLine("Socket accepting");
+                //System.Diagnostics.Debug.WriteLine("Socket accepting");
                 receiving = true;
                 completed = false;
             }
@@ -63,6 +65,7 @@ namespace Fusee.Forschungsprojekt.Desktop
             {
                 while (connected && receiving)
                 {
+                    System.Diagnostics.Debug.WriteLine("Socket accepting");
                     byte[] sizebuffer = new byte[4];
                     acceptor.Receive(sizebuffer, 0, sizebuffer.Length, 0);
                     //receive length of data                 
@@ -71,18 +74,8 @@ namespace Fusee.Forschungsprojekt.Desktop
 
                     while (size > 0)
                     {
-                        System.Diagnostics.Debug.WriteLine("Buffersize > 0");
-                        System.Diagnostics.Debug.WriteLine("Receiving...");
-
                         byte[] buffer;
-                        if (size < acceptor.ReceiveBufferSize)
-                        {
-                            buffer = new byte[size];
-                        }
-                        else
-                        {
-                            buffer = new byte[acceptor.ReceiveBufferSize];
-                        }
+                        buffer = size < acceptor.ReceiveBufferSize ? new byte[size] : new byte[acceptor.ReceiveBufferSize];
 
                         int receive = acceptor.Receive(buffer, 0, buffer.Length, 0);
                         //subtract the size of the received data from the size
@@ -97,13 +90,26 @@ namespace Fusee.Forschungsprojekt.Desktop
                         receiving = false;
                         ms.Close();
                         data = ms.ToArray();
-                        Core.PointCloudReader.receivedData = Encoding.UTF8.GetString(data);
+                        string datastring = Encoding.UTF8.GetString(data);
+                        Core.PointCloudReader.receivedData = datastring;
                         Core.PointCloudReader.DisplayReceived();
                         ms.Dispose();
-                        System.Diagnostics.Debug.WriteLine("Everything received");
-                        completed = true;
+                       
+
+                        if (datastring == "END")
+                        {
+                            System.Diagnostics.Debug.WriteLine("Everything received");
+                            Disconect();
+                            System.Diagnostics.Debug.WriteLine("Disconnected");
+                        }
+                        else
+                        {
+                            OnDataReceived(this, EventArgs.Empty);
+                        }
                     }
+
                 }
+                
             }
             catch (Exception exp) //catch socket exceptions
             {
@@ -111,13 +117,63 @@ namespace Fusee.Forschungsprojekt.Desktop
             }
         }
 
-            public void Disconect()
+        public void Disconect()
+        {
+        connected = false;
+        receiving = false;
+        receiver.Close();
+        acceptor.Close();
+        sender.Close();
+        }
+
+        public void SendConfirmation()
+        {
+            byte[] buffer = Encoding.Default.GetBytes("EOP");//End of package
+            sender.Send(buffer, 0, buffer.Length, 0);
+            System.Diagnostics.Debug.WriteLine("send confirmation: EOP");
+            receiving = true;
+            Receive();
+
+        }
+
+        public void SendFailure()
+        {
+            byte[] buffer = Encoding.Default.GetBytes("FAILED");//End of package
+            sender.Send(buffer, 0, buffer.Length, 0);
+            System.Diagnostics.Debug.WriteLine("send confirmation: FAILED");
+            receiving = true;
+            Receive();
+
+        }
+
+        //typical structure of a delegate with sender class and event argument parameters
+        public delegate void DataReceivedEventHandler(object sender, EventArgs e);//  public delegate void EventHandler(EventArgs e);
+        //event 'Data recieved' based on that delegate
+        public event DataReceivedEventHandler DataReceived;
+
+        public delegate void TransferFailedEventHandler(object sender, EventArgs e);
+
+        public event TransferFailedEventHandler DataTransferFailed;
+
+        //Event Handler methods should be protected, virtual and void
+        protected void  OnDataReceived (object sender, EventArgs e)
+        {
+            if (DataReceived != null)
             {
-            connected = false;
-            receiver.Close();
-            acceptor.Close();
-            socket.Close();
+                System.Diagnostics.Debug.WriteLine("Event onDataReceived raised ");
+                SendConfirmation();
             }
-        
+        }
+
+        protected void OnDataTransferFailed(object sender, EventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("Event Transfer failed raised");
+            SendFailure();
+        }
+
+
+     
+
+    
     }
 }

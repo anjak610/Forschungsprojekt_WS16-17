@@ -17,6 +17,8 @@ namespace Server
     {
        
         private static byte[] file;
+        private static string feedback;
+        private static List<byte[]> packages = new List<byte[]>();
         private static string path = @"C:/Users/Tanja Langer/Documents/Studium/Forschungsprojekt/Forschungsprojekt_WS16-17/TCPSimpleTest/PointCloud_IPM.txt";
         //private static string path = @"L:/Programme/Gitkraken/Forschungsprojekt_WS16-17/TCPSimpleTest/TestPoints.txt";
 
@@ -24,7 +26,8 @@ namespace Server
 
         static void Main(string[] args) //Method that starts the reading/listening
         {                   
-            file = server.ReadfromFile(path);           
+            file = server.ReadfromFile(path);
+            packages = server.Split(file);       
 
             ConsoleKeyInfo pressed;
             server.Start();
@@ -34,8 +37,8 @@ namespace Server
             pressed = Console.ReadKey();
             if (pressed.Key == ConsoleKey.Enter)
             {
-                if (server.fuseeIP != null) {
-                    server.Connect(server.fuseeIP);
+                if (server.FuseeIp != null) {
+                    server.Connect(server.FuseeIp);
                 }
                 else { Console.WriteLine("No IP to connect to"); }
                
@@ -45,8 +48,16 @@ namespace Server
             pressed = Console.ReadKey();
             if (pressed.Key == ConsoleKey.Enter)
             {
-                server.sendData(file);
+                try
+                {
+                    server.SendPackages(packages);
+                }
+                catch(Exception exception)
+                {
+                    Console.WriteLine("Error: " + exception);
+                }
             }
+
 
             Console.WriteLine("Press <enter> to stop server");
             pressed = Console.ReadKey();

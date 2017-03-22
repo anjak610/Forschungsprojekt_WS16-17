@@ -37,7 +37,7 @@ namespace Fusee.Forschungsprojekt.Core
 
         public static void DisplayReceived()
         {
-            //_callback = callback;
+            //_callback = callback;//TODO OnData Received Feedback when the displaying function is done or buffer for received data 
             StreamFromNetwork();
         }
 

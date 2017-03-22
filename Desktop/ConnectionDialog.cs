@@ -21,12 +21,16 @@ namespace Fusee.Forschungsprojekt.Desktop
     {
 
         private ReceiverClient client;
-
+        
         public ConnectionDialog()
         {
             InitializeComponent();
             client = new ReceiverClient();
+
+
+          
         }
+
 
         //connect button event handler
         private void connectButton_Click_1(object sender, EventArgs e)
@@ -45,6 +49,7 @@ namespace Fusee.Forschungsprojekt.Desktop
                    {
                        try
                        {
+                           client.serveraddress = serverip;
                            client.ConnecttoServer(serverip, localip);
 
                            Invoke((MethodInvoker)delegate

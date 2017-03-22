@@ -15,20 +15,51 @@ namespace Server
     {
         private Socket listener;
         private Socket sender;
-
+        private Socket acceptor;
 
         private int maxConnections { get; set; }
 
-        public string fuseeIP { get; set; }
+        public string FuseeIp { get; set; }
 
 
         public TCPServer()
         {
             listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);         
-            fuseeIP = null;         
+            sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+           
+            FuseeIp = null;         
             maxConnections = 10;
         
+        }
+
+        public void SendPackages(List<byte[]> packageList)
+        {
+            for(int i = 0; i < packageList.Count; i++)
+            {
+                string msg = " ";
+                if (msg == "EOP")
+                {
+                    sendData(packageList[i + 1]);
+                    Console.Write("Sending package " + (i+1));
+                    msg = ListenFeedback();
+                }
+                else
+                {
+                    sendData(packageList[i]);
+                    Console.Write("Sending package " + i + "\n");
+                    msg = ListenFeedback();
+                }
+
+                if (i == (packageList.Count - 1))
+                {
+                    string endMessage = "END";
+                    byte [] buffer = Encoding.Default.GetBytes(endMessage);
+                    sender.Send(buffer, 0, buffer.Length, 0);
+                    System.Diagnostics.Debug.WriteLine("Sent END OF FILE Message");
+                }
+                
+            }
         }
 
         public void sendData(byte[] file)
@@ -39,7 +70,6 @@ namespace Server
                 sender.Send(BitConverter.GetBytes(file.Length), 0, 4, 0);
                 sender.Send(file);
                 Console.WriteLine("File sent successfully!");
-                sender.Close();
             }
             catch
             {
@@ -58,6 +88,8 @@ namespace Server
                 listener.Bind(endPoint);
                 listener.Listen(0);
                 Console.WriteLine("Waiting for requests...");
+                acceptor = listener.Accept();
+                
                 return true;
             }
             catch
@@ -65,6 +97,24 @@ namespace Server
                 return false;
             }
         }
+
+        public string ListenFeedback()
+        {
+
+            byte[] receivebuffer = new byte[1024];         
+            int rec = acceptor.Receive(receivebuffer, 0, receivebuffer.Length, SocketFlags.None);
+            Array.Resize(ref receivebuffer, rec);
+            string message = Encoding.Default.GetString(receivebuffer);
+            Console.WriteLine("Received feedback: " + message);
+
+            if (message == "EOP")
+            {
+                Console.WriteLine("Package transfer successful");
+            }
+
+            return message;
+        }
+
 
         /// <summary>
         /// Receives IP address of request
@@ -76,14 +126,12 @@ namespace Server
 
             try
             {
-                Socket acc = listener.Accept();
+
                 byte[] receivebuffer = new byte[1024];
-                int rec = acc.Receive(receivebuffer, 0, receivebuffer.Length, SocketFlags.None);
+                int rec = acceptor.Receive(receivebuffer, 0, receivebuffer.Length, SocketFlags.None);
                 Array.Resize(ref receivebuffer, rec);
-                fuseeIP = Encoding.Default.GetString(receivebuffer);
-                listener.Close();
-                acc.Close();
-                Console.WriteLine("Received request from IP: " + fuseeIP);
+                FuseeIp = Encoding.Default.GetString(receivebuffer);
+                Console.WriteLine("Received request from IP: " + FuseeIp);
                 return true;
 
             }
@@ -125,6 +173,42 @@ namespace Server
             return b;
         }
 
+        /// <summary>
+        /// Splits big file into chunks of 1048576 byte
+        /// </summary>
+
+        public List<byte[]> Split(byte[] filebytes)
+        {
+
+            List<byte[]> packages = new List<byte[]>();
+            Console.WriteLine("Splitting file into packages");
+            for (int i = 0; i < filebytes.Length; i++)
+
+            {
+
+                IEnumerable<byte> b = filebytes.Cast<byte>();
+
+                IEnumerable<byte> chunk1024 = b.Take<byte>(1048576);//one MB packages
+
+                IEnumerable<byte> leftovers = b.Skip<byte>(1048576);
+
+                b = leftovers;
+
+
+
+                packages.Add(chunk1024.ToArray<byte>());
+
+                filebytes = b.ToArray<byte>();
+
+                Console.WriteLine(filebytes.Length);
+
+
+
+            }
+
+            return packages;
+
+        }
         /// <SUMMARY>
         /// Tells you the IP Address of the remote host that you are sending files to.
         /// should be identical with fuseeIP ;)
@@ -150,9 +234,9 @@ namespace Server
             {
 
                 sender.Close();
+                listener.Close();
             }
         }
-
-        
+                
     }
 }
