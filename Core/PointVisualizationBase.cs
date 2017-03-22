@@ -16,7 +16,9 @@ namespace Fusee.Tutorial.Core
     {
         private const float VoxelSideLength = 2;
 
-        private PointCloud _pointCloud;
+        //private PointCloud _pointCloud;
+        private BoundingBox _boundingBox;
+
         private Mesh _cubeMesh;
         private List<float3> _voxelPositions;
         
@@ -47,11 +49,11 @@ namespace Fusee.Tutorial.Core
             // octree
             _voxelPositions = new List<float3>();
 
-            Octree<VoxelState> octree = new Octree<VoxelState>(float3.Zero, VoxelSideLength);
+            Octree<OctreeNodeStates> octree = new Octree<OctreeNodeStates>(float3.Zero, VoxelSideLength);
 
-            octree.OnNodeAddedCallback += (OctreeNode<VoxelState> node) =>
+            octree.OnNodeAddedCallback += (OctreeNode<OctreeNodeStates> node) =>
             {
-                if(node.Data == VoxelState.Occupied && node.SideLength == VoxelSideLength)
+                if(node.Data == OctreeNodeStates.Occupied && node.SideLength == VoxelSideLength)
                 {
                     _voxelPositions.Add(node.Position);
                 }
@@ -59,15 +61,23 @@ namespace Fusee.Tutorial.Core
             
             PointCloudReader.OnNewPointCallbacks += (Point point) =>
             {
-                octree.Add(point.Position, VoxelState.Occupied);
+                octree.Add(point.Position, OctreeNodeStates.Occupied);
             };
-            
-            // point cloud
 
-            _pointCloud = new PointCloud();
-            _pointCloud.GetBoundingBox().UpdateCallbacks += OnBoundingBoxUpdate;
+            // point cloud + bounding box
 
-            PointCloudReader.ReadFromAsset("PointCloud_IPM.txt", _pointCloud.Merge);
+            //_pointCloud = new PointCloud();
+
+            _boundingBox = new BoundingBox();
+            _boundingBox.UpdateCallbacks += OnBoundingBoxUpdate;
+
+            PointCloudReader.OnNewPointCallbacks += (Point point) =>
+            {
+                _boundingBox.Update(point.Position);
+            };
+
+            //PointCloudReader.ReadFromAsset("PointCloud_IPM.txt", _pointCloud.Merge);
+            PointCloudReader.ReadFromAsset("PointCloud_IPM.txt");
 
             _cubeMesh = LoadMesh("Cube.fus");
 

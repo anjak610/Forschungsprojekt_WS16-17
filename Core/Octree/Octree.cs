@@ -1,4 +1,4 @@
-﻿using Fusee.Math.Core;
+﻿ using Fusee.Math.Core;
 using System;
 using System.Collections.Generic;
 
@@ -15,6 +15,11 @@ using System.Collections.Generic;
 
 namespace Fusee.Tutorial.Core
 {
+    public enum OctreeNodeStates
+    {
+        Unknown, Occupied, Free
+    }
+
     public class Octree<T>
     {
         public delegate void OnNewNodeAdded(OctreeNode<T> node);
@@ -59,7 +64,7 @@ namespace Fusee.Tutorial.Core
                 foreach (OctreeNode<T> child in _root.Children)
                 {
                     List<OctreeNode<T>> nodesAdded = new List<OctreeNode<T>>();
-                    found = child.Add(targetPosition, data, out nodesAdded);
+                    found = child.Add(ref targetPosition, ref data, out nodesAdded);
                     
                     if(nodesAdded != null)
                     {

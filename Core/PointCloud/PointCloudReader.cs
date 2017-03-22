@@ -22,7 +22,7 @@ namespace Fusee.Tutorial.Core
 
         public static OnNewPointAdded OnNewPointCallbacks;
         
-        public static void ReadFromAsset(string assetName, AddPointCloud callback)
+        public static void ReadFromAsset(string assetName, AddPointCloud callback = null)
         {
             _assetName = assetName;
             _callback = callback;
@@ -69,7 +69,7 @@ namespace Fusee.Tutorial.Core
                     
                     if (newMeshCreated)
                     {
-                        _callback(pointCloud);
+                        _callback?.Invoke(pointCloud);
                         pointCloud = new PointCloud();
                     }
 

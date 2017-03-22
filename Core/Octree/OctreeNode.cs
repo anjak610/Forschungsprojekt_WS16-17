@@ -34,7 +34,7 @@ namespace Fusee.Tutorial.Core
         /// <param name="data">The data to apply to this voxel / octree node.</param>
         /// <param name="addedNodes">if nodes had to be added, they will be stored in here.</param>
         /// <returns>Returns false, when target position does not lie inside this voxel.</returns>
-        public bool Add(float3 targetPosition, T data, out List<OctreeNode<T>> addedNodes)
+        public bool Add(ref float3 targetPosition, ref T data, out List<OctreeNode<T>> addedNodes)
         {
             // node contains position?
             // => YES, initialize voxel beneath
@@ -45,7 +45,7 @@ namespace Fusee.Tutorial.Core
             if (!Contains(targetPosition))
                 return false;
 
-            SubAdd(targetPosition, data, out addedNodes);
+            SubAdd(ref targetPosition, ref data, out addedNodes);
             return true;
         }
 
@@ -55,7 +55,7 @@ namespace Fusee.Tutorial.Core
         /// <param name="targetPosition">Random position in three space.</param>
         /// <param name="data">The data to apply to this voxel / octree node.</param>
         /// <param name="addedNodes">if nodes had to be added, they will be stored in here.</param>
-        private void SubAdd(float3 targetPosition, T data, out List<OctreeNode<T>> addedNodes)
+        private void SubAdd(ref float3 targetPosition, ref T data, out List<OctreeNode<T>> addedNodes)
         {
             // does it have sideLength == 2?
             // => YES, then change data
@@ -82,7 +82,7 @@ namespace Fusee.Tutorial.Core
 
                     foreach(OctreeNode<T> child in Children)
                     {
-                        found = child.Add(targetPosition, data, out addedNodes);
+                        found = child.Add(ref targetPosition, ref data, out addedNodes);
 
                         if (found)
                             return;

@@ -11,9 +11,6 @@ namespace Fusee.Tutorial.Core
 
     public class PointCloud
     {
-        // contains the bounding box of this point cloud
-        private BoundingBox _boundingBox = new BoundingBox();
-
         // maximum number of points
         private long _limit = 0;
 
@@ -130,14 +127,7 @@ namespace Fusee.Tutorial.Core
             _currentIndex++;
             _totalNumberOfPoints++;
 
-            _boundingBox.Update(pickedvertex);
-
             return newMeshCreated;
-        }
-
-        public BoundingBox GetBoundingBox()
-        {
-            return _boundingBox;
         }
 
         // Takes another pointcloud and adds its meshes to the mesh array
@@ -146,16 +136,6 @@ namespace Fusee.Tutorial.Core
             lock (_meshes)
             {
                 _meshes.AddRange(pointCloud.GetMeshes());
-            }
-
-            // update bounding box
-
-            foreach(Mesh mesh in pointCloud.GetMeshes())
-            {
-                foreach(float3 vertex in mesh.Vertices)
-                {
-                    _boundingBox.Update(vertex);
-                }
             }
         }
     }
