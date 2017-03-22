@@ -1,11 +1,8 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using Fusee.Base.Common;
 using Fusee.Base.Core;
-using Fusee.Engine.Core;
 using Fusee.Math.Core;
 
 namespace Fusee.Tutorial.Core

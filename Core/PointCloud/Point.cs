@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Fusee.Math.Core;
+﻿using Fusee.Math.Core;
 
 /// <summary>
 /// Represents a simple point which holds all properties given by the IPM format.

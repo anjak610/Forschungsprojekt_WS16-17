@@ -11,6 +11,6 @@ void main()
 {
 	modelpos = fuVertex;
 	normal = normalize(mat3(FUSEE_MV) * fuNormal);
-
+	
 	gl_Position = FUSEE_MVP * vec4(fuVertex, 1.0);
 }

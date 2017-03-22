@@ -43,17 +43,29 @@
     <OutputRoot>$(ProjectBuildRoot)\bin\$(Configuration)\</OutputRoot>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="VoxelSpace.cs">
+    <Compile Include="Octree2\Bounds.cs" />
+    <Compile Include="Octree2\PointOctree.cs" />
+    <Compile Include="Octree2\PointOctreeNode.cs" />
+    <Compile Include="Octree\Octree.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
-    <Compile Include="Voxel.cs">
+    <Compile Include="Octree\OctreeNode.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
-    <Compile Include="Point.cs">
+    <Compile Include="PointCloud\BoundingBox.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
-    <Compile Include="PointCloud.cs" />
-    <Compile Include="PointCloudReader.cs" />
+    <Compile Include="VoxelSpace\VoxelSpace.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="VoxelSpace\Voxel.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="PointCloud\Point.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="PointCloud\PointCloud.cs" />
+    <Compile Include="PointCloud\PointCloudReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PointVisualizationBase.cs" />
   </ItemGroup>

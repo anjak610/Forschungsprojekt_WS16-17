@@ -14,19 +14,20 @@ namespace Fusee.Tutorial.Core
     [FuseeApplication(Name = "Forschungsprojekt", Description = "HFU Wintersemester 16-17")]
     public class PointVisualizationBase : RenderCanvas
     {
+        private const float VoxelSideLength = 2;
+
         private PointCloud _pointCloud;
-        private VoxelSpace _voxelSpace;
-
         private Mesh _cubeMesh;
-
+        private List<float3> _voxelPositions;
+        
         // shader params
-        private IShaderParam _albedoParam;
-        private float3 _albedo = new float3(1, 0, 0);
 
-        // camera controls
-        private float _alpha;
-        private float _beta;
+        private IShaderParam _voxelPosParam;
+        private float3 _voxelPos = float3.Zero;
 
+        private IShaderParam _yScaleParam;
+        private float2 _yScale = new float2(0, 0);
+        
         private float _rotationY = (float) System.Math.PI;
         private float _rotationX = (float) System.Math.PI / -8;
 
@@ -35,6 +36,7 @@ namespace Fusee.Tutorial.Core
 
         private float3 _cameraPosition = new float3(0, 0, -5.0f);
         private float3 _cameraPivot = new float3(0, 0, 0);
+        private float3 _cameraPivotOffset = new float3(0, 0, 0);
 
         private float _minAngleX = (float) -System.Math.PI / 4;
         private float _maxAngleX = (float) System.Math.PI / 4;
@@ -42,11 +44,29 @@ namespace Fusee.Tutorial.Core
         // Init is called on startup. 
         public override void Init()
         {
-            _voxelSpace = new VoxelSpace();
-            _voxelSpace.SetVoxelSize(2);
+            // octree
+            _voxelPositions = new List<float3>();
 
-            //_pointCloud = new PointCloud();
-            _pointCloud = AssetStorage.Get<PointCloud>("BasicPoints.txt");
+            Octree<VoxelState> octree = new Octree<VoxelState>(float3.Zero, VoxelSideLength);
+
+            octree.OnNodeAddedCallback += (OctreeNode<VoxelState> node) =>
+            {
+                if(node.Data == VoxelState.Occupied && node.SideLength == VoxelSideLength)
+                {
+                    _voxelPositions.Add(node.Position);
+                }
+            };
+            
+            PointCloudReader.OnNewPointCallbacks += (Point point) =>
+            {
+                octree.Add(point.Position, VoxelState.Occupied);
+            };
+            
+            // point cloud
+
+            _pointCloud = new PointCloud();
+            _pointCloud.GetBoundingBox().UpdateCallbacks += OnBoundingBoxUpdate;
+
             PointCloudReader.ReadFromAsset("PointCloud_IPM.txt", _pointCloud.Merge);
 
             _cubeMesh = LoadMesh("Cube.fus");
@@ -59,9 +79,12 @@ namespace Fusee.Tutorial.Core
             var shader = RC.CreateShader(vertsh, pixsh);
             RC.SetShader(shader);
 
-            _albedoParam = RC.GetShaderParam(shader, "albedo");
-            RC.SetShaderParam(_albedoParam, _albedo);
+            _voxelPosParam = RC.GetShaderParam(shader, "voxelPos");
+            RC.SetShaderParam(_voxelPosParam, _voxelPos);
 
+            _yScaleParam = RC.GetShaderParam(shader, "yScale");
+            RC.SetShaderParam(_yScaleParam, _yScale);
+            
             // Set the clear color for the backbuffer
             RC.ClearColor = new float4(0.95f, 0.95f, 0.95f, 1);
         }
@@ -83,16 +106,17 @@ namespace Fusee.Tutorial.Core
         {
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
-            
+            RC.SetShaderParam(_yScaleParam, _yScale);
+
             float4x4 cameraView = MoveInScene();
-
-            List<Voxel> voxels = _voxelSpace.GetVoxels();
-            for(var i=0; i<voxels.Count; i++)
+            
+            for(var i=0; i<_voxelPositions.Count; i++)
             {
-                Voxel voxel = voxels[i];
+                float3 voxelPos = _voxelPositions[i];
+                RC.SetShaderParam(_voxelPosParam, voxelPos);
 
-                float4x4 modelView = cameraView * float4x4.CreateTranslation(voxel.Position);
-                RC.ModelView = modelView * float4x4.CreateScale( _voxelSpace.GetVoxelSize() / 2 );
+                float4x4 modelView = cameraView * float4x4.CreateTranslation(voxelPos);
+                RC.ModelView = modelView * float4x4.CreateScale( VoxelSideLength / 2 );
                 
                 RC.Render(_cubeMesh);
             }
@@ -101,10 +125,19 @@ namespace Fusee.Tutorial.Core
             Present();
         }
 
+        // update cameraPivot, whenever bounding box of point cloud gets updated
+        private void OnBoundingBoxUpdate(BoundingBox boundingBox)
+        {
+            _cameraPivot = boundingBox.GetCenterPoint();
+
+            _yScale.x = boundingBox.GetMinValues().y;
+            _yScale.y = boundingBox.GetMaxValues().y;
+        }
+
         private float4x4 MoveInScene()
         {
             // set origin to camera pivot
-            float4x4 xform = float4x4.CreateTranslation(-1 * _cameraPivot);
+            float4x4 xform = float4x4.CreateTranslation(-1 * ( _cameraPivot + _cameraPivotOffset ));
             
             // rotate around camera pivot
             if (Mouse.LeftButton || Touch.ActiveTouchpoints == 1)
@@ -121,11 +154,18 @@ namespace Fusee.Tutorial.Core
             var rotation = float4x4.CreateRotationX(_rotationX) * float4x4.CreateRotationY(_rotationY);
             xform = rotation * xform;
 
-            // set camera to its position
+            // --- move camera position
+            
+            if (Mouse.Wheel != 0 || Touch.TwoPoint)
+            {
+                float speed = Mouse.WheelVel + Touch.TwoPointDistanceVel * 0.1f;
+                _cameraPosition.z += speed * 0.1f;
+            }
+
             xform = float4x4.CreateTranslation(-1 * _cameraPosition) * xform;
             
             // --- move camera pivot
-            
+            /*
             float3 translation = float3.Zero;
 
             if (Mouse.RightButton || Touch.TwoPoint)
@@ -134,21 +174,15 @@ namespace Fusee.Tutorial.Core
                 translation.x = speed.x * -0.005f;
                 translation.y = speed.y * 0.005f;
             }
-
-            if (Mouse.Wheel != 0 || Touch.TwoPoint)
-            {
-                float speed = Mouse.WheelVel + Touch.TwoPointDistanceVel * 0.1f;
-                translation.z = speed * 0.1f;
-            }
-
+            
             if (translation.Length > 0)
             {
                 rotation.Invert();
                 translation = rotation * translation;
-                _cameraPivot += translation;
+                _cameraPivotOffset += translation;
                 //_xform = float4x4.CreateTranslation(translation) * _xform;
             }
-
+            */
             // --- projection matrix
 
             return xform;
