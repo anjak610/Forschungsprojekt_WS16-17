@@ -23,12 +23,10 @@ namespace Fusee.Tutorial.Core
         private List<float3> _voxelPositions;
         
         // shader params
-
-        private IShaderParam _voxelPosParam;
-        private float3 _voxelPos = float3.Zero;
-
-        private IShaderParam _yScaleParam;
-        private float2 _yScale = new float2(0, 0);
+        
+        private IShaderParam _albedoParam;
+        private float2 _yScale; // needed for color calculation
+        private float _lastVoxelPosY = 0; // speed up calculation
         
         private float _rotationY = (float) System.Math.PI;
         private float _rotationX = (float) System.Math.PI / -8;
@@ -56,6 +54,9 @@ namespace Fusee.Tutorial.Core
                 if(node.Data == OctreeNodeStates.Occupied && node.SideLength == VoxelSideLength)
                 {
                     _voxelPositions.Add(node.Position);
+
+                    // nach y position sortieren, damit color calculation schneller läuft => mehr rechenaufwand, lohnt nicht
+                    //_voxelPositions = _voxelPositions.OrderBy(o => o.y).ToList();
                 }
             };
             
@@ -89,11 +90,8 @@ namespace Fusee.Tutorial.Core
             var shader = RC.CreateShader(vertsh, pixsh);
             RC.SetShader(shader);
 
-            _voxelPosParam = RC.GetShaderParam(shader, "voxelPos");
-            RC.SetShaderParam(_voxelPosParam, _voxelPos);
-
-            _yScaleParam = RC.GetShaderParam(shader, "yScale");
-            RC.SetShaderParam(_yScaleParam, _yScale);
+            _albedoParam = RC.GetShaderParam(shader, "albedo");
+            RC.SetShaderParam(_albedoParam, float3.One);
             
             // Set the clear color for the backbuffer
             RC.ClearColor = new float4(0.95f, 0.95f, 0.95f, 1);
@@ -116,14 +114,29 @@ namespace Fusee.Tutorial.Core
         {
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
-            RC.SetShaderParam(_yScaleParam, _yScale);
-
+            
             float4x4 cameraView = MoveInScene();
             
             for(var i=0; i<_voxelPositions.Count; i++)
             {
                 float3 voxelPos = _voxelPositions[i];
-                RC.SetShaderParam(_voxelPosParam, voxelPos);
+
+                // color calculation
+
+                if(voxelPos.y != _lastVoxelPosY)
+                {
+                    _lastVoxelPosY = voxelPos.y;
+
+                    float hue = (voxelPos.y - _yScale.x) / (_yScale.y - _yScale.x);
+
+                    float r, g, b;
+                    Color.HSVtoRGB(out r, out g, out b, hue * 360, 1, 1);
+                    float3 albedo = new float3(r, g, b);
+
+                    RC.SetShaderParam(_albedoParam, albedo);
+                }
+                
+                // model view
 
                 float4x4 modelView = cameraView * float4x4.CreateTranslation(voxelPos);
                 RC.ModelView = modelView * float4x4.CreateScale( VoxelSideLength / 2 );

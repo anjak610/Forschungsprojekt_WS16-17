@@ -32,7 +32,7 @@ namespace Fusee.Tutorial.Android
 	    private FrameRateLogger _fRL;
         private Button plusButton;
         private Button minusButton;
-        private Core.PointVisualizationBase app;
+        //private Core.PointVisualizationBase app;
 
         protected override void OnCreate (Bundle savedInstanceState)
 		{

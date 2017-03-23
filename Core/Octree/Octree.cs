@@ -61,21 +61,15 @@ namespace Fusee.Tutorial.Core
 
             while(!found)
             {
-                foreach (OctreeNode<T> child in _root.Children)
-                {
-                    List<OctreeNode<T>> nodesAdded = new List<OctreeNode<T>>();
-                    found = child.Add(ref targetPosition, ref data, out nodesAdded);
-                    
-                    if(nodesAdded != null)
-                    {
-                        foreach (OctreeNode<T> nodeAdded in nodesAdded)
-                        {
-                            OnNodeAddedCallback?.Invoke(nodeAdded);
-                        }
-                    }
+                List<OctreeNode<T>> nodesAdded = new List<OctreeNode<T>>();
+                found = _root.Add(ref targetPosition, ref data, out nodesAdded);
 
-                    if (found)
-                        break;
+                if (nodesAdded != null)
+                {
+                    foreach (OctreeNode<T> nodeAdded in nodesAdded)
+                    {
+                        OnNodeAddedCallback?.Invoke(nodeAdded);
+                    }
                 }
 
                 if(!found)
@@ -140,6 +134,8 @@ namespace Fusee.Tutorial.Core
                         break;
                 }
 
+                position *= MinSideLength / 2;
+
                 OctreeNode<T> node = new OctreeNode<T>(CenterPosition + position, MinSideLength);
                 _root.AddChild(node);
 
@@ -185,9 +181,9 @@ namespace Fusee.Tutorial.Core
             // what is the next voxel position in the overall grid?
             // => multiple of voxel size
 
-            int divisionX = (int)System.Math.Floor(targetPosition.x / sideLength);
-            int divisionY = (int)System.Math.Floor(targetPosition.y / sideLength);
-            int divisionZ = (int)System.Math.Floor(targetPosition.z / sideLength);
+            int divisionX = (int) System.Math.Floor(targetPosition.x / sideLength);
+            int divisionY = (int) System.Math.Floor(targetPosition.y / sideLength);
+            int divisionZ = (int) System.Math.Floor(targetPosition.z / sideLength);
 
             float3 newPos = new float3(divisionX, divisionY, divisionZ) * sideLength; // lower corner of bounding box in x-, y- and z-direction
             newPos += float3.One * sideLength / 2; // center

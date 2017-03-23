@@ -17,6 +17,8 @@ namespace Fusee.Tutorial.Core
         public delegate void AddPointCloud(PointCloud pointCloud); // use this as callback
         public delegate void OnNewPointAdded(Point point);
 
+        public const int TakeEveryPoint = 4; // take only every xth point in order to speed up, only for OnNewPointCallbacks, not for point cloud
+
         private static string _assetName;
         private static AddPointCloud _callback;
 
@@ -34,6 +36,7 @@ namespace Fusee.Tutorial.Core
         private static void StreamFromAsset()
         {
             PointCloud pointCloud = new PointCloud();
+            int count = 0;
 
             Stream storage = IO.StreamFromFile("Assets/" + _assetName, FileMode.Open);
             using (var sr = new StreamReader(storage))
@@ -73,7 +76,10 @@ namespace Fusee.Tutorial.Core
                         pointCloud = new PointCloud();
                     }
 
-                    OnNewPointCallbacks?.Invoke(point);
+                    count++;
+
+                    if(count % TakeEveryPoint == 0)
+                        OnNewPointCallbacks?.Invoke(point);
                 }
             }
         }

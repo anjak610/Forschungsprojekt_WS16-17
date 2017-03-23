@@ -14,7 +14,7 @@ namespace Fusee.Tutorial.Core
         public float3 Position;
         public float SideLength;
         public T Data;
-        public List<OctreeNode<T>> Children;
+        public OctreeNode<T>[] Children;
 
         /// <summary>
         /// Constructor which requires the center position and the side length of this node's bounding box.
@@ -76,7 +76,7 @@ namespace Fusee.Tutorial.Core
             }
             else
             {
-                if (Children != null && Children.Count > 0)
+                if (Children != null && Children.Length > 0)
                 {
                     bool found = false;
 
@@ -114,9 +114,18 @@ namespace Fusee.Tutorial.Core
         public void AddChild(OctreeNode<T> childNode)
         {
             if (Children == null)
-                Children = new List<OctreeNode<T>>();
+                Children = new OctreeNode<T>[0];
 
-            Children.Add(childNode);
+            List<OctreeNode<T>> childList = new List<OctreeNode<T>>();
+
+            for(var i=0; i<Children.Length; i++)
+            {
+                childList.Add(Children[i]);
+            }
+
+            childList.Add(childNode);
+
+            Children = childList.ToArray();
         }
 
         /// <summary>
@@ -125,30 +134,29 @@ namespace Fusee.Tutorial.Core
         /// <returns>True if children exist.</returns>
         public bool hasChildren()
         {
-            return Children != null && Children.Count > 0;
+            return Children != null && Children.Length > 0;
         }
 
         /// <summary>
-        /// Checks whether a single point resides in this voxel.
+        /// Checks whether a single point resides in this voxel. The border, where points still are accepted, finds itself on the lower values
+        /// of the bounding box, see Octree.CreateNodeWithSideLength().
         /// </summary>
         /// <param name="target">The point to examine whether it lies inside the bounds of this octree node.</param>
         /// <returns>True if lies within.</returns>
         public bool Contains(float3 target)
         {
-            bool outlier = true;
-            
-            float diffX = System.Math.Abs(target.x - Position.x);
-            float diffY = System.Math.Abs(target.y - Position.y);
-            float diffZ = System.Math.Abs(target.z - Position.z);
-
+            bool insideX = false, insideY = false, insideZ = false;
             float halfVoxelSize = SideLength / 2;
 
-            if (diffX < halfVoxelSize && diffY < halfVoxelSize && diffZ < halfVoxelSize) // point lies inside this voxel
-            {
-                outlier = false;
-            }
+            float diffX = target.x - Position.x;
+            float diffY = target.y - Position.y;
+            float diffZ = target.z - Position.z;
+            
+            insideX = diffX < 0 ? System.Math.Abs(diffX) <= halfVoxelSize : diffX < halfVoxelSize;
+            insideY = diffY < 0 ? System.Math.Abs(diffY) <= halfVoxelSize : diffY < halfVoxelSize;
+            insideZ = diffZ < 0 ? System.Math.Abs(diffZ) <= halfVoxelSize : diffZ < halfVoxelSize;
 
-            return !outlier;
+            return insideX && insideY && insideZ;
         }
 
         /// <summary>
