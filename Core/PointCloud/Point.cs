@@ -1,7 +1,9 @@
-﻿using Fusee.Math.Core;
+﻿using Fusee.Engine.Core;
+using Fusee.Math.Core;
 
 /// <summary>
-/// Represents a simple point which holds all properties given by the IPM format.
+/// Acts as a data structure for storing values of the IPM format. 
+/// For the mesh representation of a point see <see cref="PointMesh"/>. 
 /// </summary>
 
 namespace Fusee.Tutorial.Core
@@ -9,8 +11,8 @@ namespace Fusee.Tutorial.Core
     public class Point
     {
         public float3 Position;
-        public float3 Color;
-        public float EchoId;
-        public float ScanNr;
+        public float3? Color;
+        public float? EchoId;
+        public float? ScanNr;
     }
 }

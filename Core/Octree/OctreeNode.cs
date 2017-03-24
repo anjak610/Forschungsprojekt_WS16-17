@@ -88,22 +88,23 @@ namespace Fusee.Tutorial.Core
                             return;
                     }
                 }
-                    
-                // create new voxel and let it grow, until this node is its parent
 
-                OctreeNode<T> newNode = Octree<T>.CreateNodeWithMinSideLength(targetPosition);
-                newNode.Data = data;
+                // create new subvoxels until minimum side length is reached
 
+                OctreeNode<T> currentNode = this;
                 addedNodes = new List<OctreeNode<T>>();
 
-                while (!IsEqual(newNode))
+                while (currentNode.SideLength > Octree<T>.MinSideLength)
                 {
-                    addedNodes.Add(newNode); // important: before Grow()
-                    newNode = Octree<T>.Grow(newNode);
+                    OctreeNode<T> newNode = Octree<T>.CreateNodeWithSideLength(targetPosition, currentNode.SideLength / 2);
+                    currentNode.AddChild(newNode);
+                    
+                    currentNode = newNode;
+                    addedNodes.Add(currentNode);
                 }
-
-                // now they are equal
-                AddChild(newNode.Children[0]); // because there must be only one child, otherwise it would have been found before
+                
+                // now current node is the node with minimum side length
+                currentNode.Data = data;
             }
         }
 

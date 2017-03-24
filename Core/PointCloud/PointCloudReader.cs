@@ -4,30 +4,34 @@ using System.Threading.Tasks;
 using Fusee.Base.Common;
 using Fusee.Base.Core;
 using Fusee.Math.Core;
+using System;
 
 namespace Fusee.Tutorial.Core
 {
     /// <summary>
-    /// This class loads an asset and creates a point cloud out of it. May be used in the future to load
+    /// This class loads an asset and fires callbacks whenever a new point gets loaded. May be used in the future to load
     /// points over a network stream.
     /// </summary>
     
     public class PointCloudReader
     {
-        public delegate void AddPointCloud(PointCloud pointCloud); // use this as callback
+        // callback for when new points gets added
         public delegate void OnNewPointAdded(Point point);
-
-        public const int TakeEveryPoint = 4; // take only every xth point in order to speed up, only for OnNewPointCallbacks, not for point cloud
-
-        private static string _assetName;
-        private static AddPointCloud _callback;
-
         public static OnNewPointAdded OnNewPointCallbacks;
-        
-        public static void ReadFromAsset(string assetName, AddPointCloud callback = null)
+
+        // callback when asset has been fully loaded
+        public static Action OnAssetLoadedCallbacks;
+
+        // store asset name to load from
+        private static string _assetName;
+
+        /// <summary>
+        /// Starts loading from the specified asset.
+        /// </summary>        
+        /// <param name="assetName">The path to the asset to load from.</param>
+        public static void ReadFromAsset(string assetName)
         {
             _assetName = assetName;
-            _callback = callback;
 
             Task task = new Task(StreamFromAsset);
             task.Start();
@@ -35,9 +39,6 @@ namespace Fusee.Tutorial.Core
 
         private static void StreamFromAsset()
         {
-            PointCloud pointCloud = new PointCloud();
-            int count = 0;
-
             Stream storage = IO.StreamFromFile("Assets/" + _assetName, FileMode.Open);
             using (var sr = new StreamReader(storage))
             {
@@ -53,6 +54,7 @@ namespace Fusee.Tutorial.Core
                     Point point = new Point();
 
                     // convert each string to float
+
                     float[] numbers = new float[textElements.Length];
                     for (var i = 0; i < numbers.Length; i++)
                     {
@@ -64,23 +66,15 @@ namespace Fusee.Tutorial.Core
                     if (numbers.Length == 9)
                     {
                         point.Color = new float3(numbers[3], numbers[4], numbers[5]);
+
                         point.EchoId = numbers[6];
                         point.ScanNr = numbers[8];
                     }
 
-                    bool newMeshCreated = pointCloud.AddPoint(point);
-                    
-                    if (newMeshCreated)
-                    {
-                        _callback?.Invoke(pointCloud);
-                        pointCloud = new PointCloud();
-                    }
-
-                    count++;
-
-                    if(count % TakeEveryPoint == 0)
-                        OnNewPointCallbacks?.Invoke(point);
+                    OnNewPointCallbacks?.Invoke(point);
                 }
+
+                OnAssetLoadedCallbacks?.Invoke();
             }
         }
     }

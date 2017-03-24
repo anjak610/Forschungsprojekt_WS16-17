@@ -4,13 +4,12 @@
 
 varying vec3 modelpos;
 varying vec3 normal;
-varying vec2 uv;
 
-varying vec3 albedo;
+uniform vec3 albedo;
 
 void main()
 {		
-	if( uv.x > 0.95 || uv.x < 0.05 || uv.y > 0.95 || uv.x < 0.05)
+	if( abs(modelpos.x) + abs(modelpos.y) > 1.975 || abs(modelpos.y) + abs(modelpos.z) > 1.975 || abs(modelpos.x) + abs(modelpos.z) > 1.975)
 	{
 		gl_FragColor = vec4(0, 0, 0, 1);  // black border    
 	}
