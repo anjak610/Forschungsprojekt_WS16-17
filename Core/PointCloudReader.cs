@@ -152,11 +152,14 @@ namespace Fusee.Forschungsprojekt.Core
                 }
                 catch
                 {
+                    System.Diagnostics.Debug.WriteLine("Line skipped");
                     continue; //skip line if wrong number format or whatever 
+                    
                 }
 
             }
             Core.PointVisualizationBase._pointCloud.Merge(pointCloud);//after reading all lines merge point cloud into existing one
+
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
@@ -28,12 +29,28 @@ namespace Fusee.Forschungsprojekt.Core
         private int _currentIndex; // index of the current point
         private long _totalNumberOfPoints = 0; // counts all points
 
+       public delegate void DataDisplayed();
+
+        public event DataDisplayed OnDataDisplayedEvent;
+
+        protected virtual void OnDataDisplayed()
+        {
+            DataDisplayed handler =  OnDataDisplayedEvent;
+            System.Diagnostics.Debug.WriteLine("Data displayed event raised");
+            if (handler != null)
+            {
+                handler();
+            }
+        }
+
+
         public PointCloud()
         {
             _limit = 0;
 
             _meshes = new List<Mesh>();
             ResetMesh();
+           
         }
 
         public PointCloud(long limit)
@@ -144,13 +161,18 @@ namespace Fusee.Forschungsprojekt.Core
             return newMeshCreated;
         }
 
+        
         // Takes another pointcloud and adds its meshes to the mesh array
         public void Merge(PointCloud pointCloud)
         {
             lock (_meshes)
             {
                 _meshes.AddRange(pointCloud.GetMeshes());
+                OnDataDisplayed();
+              
+   
             }
         }
+
     }
 }

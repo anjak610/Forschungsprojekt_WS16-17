@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.IO;
 using System.Collections;
+using System.Collections.Specialized;
 using System.Threading;
 
 namespace Server
@@ -35,34 +36,39 @@ namespace Server
 
         public void SendPackages(List<byte[]> packageList)
         {
-            for(int i = 0; i < packageList.Count; i++)
+            string msg = " ";
+            int count = 0;
+            while (count < packageList.Count)
             {
-                string msg = " ";
-                if (msg == "EOP")
+                if ((msg == "EOP") && (count+1 < packageList.Count))
                 {
-                    sendData(packageList[i + 1]);
-                    Console.Write("Sending package " + (i+1));
+                    count++;//only increment if it was received
+                    SendData(packageList[count]);
+                    Console.Write("Sending package " + (count));                  
                     msg = ListenFeedback();
-                }
-                else
+                }                              
+                else//first package or not received package
                 {
-                    sendData(packageList[i]);
-                    Console.Write("Sending package " + i + "\n");
+                    SendData(packageList[count]);
+                    Console.Write("Sending package " + (count));
                     msg = ListenFeedback();
                 }
 
-                if (i == (packageList.Count - 1))
+                if ( count == packageList.Count-1)//handle last package
                 {
                     string endMessage = "END";
-                    byte [] buffer = Encoding.Default.GetBytes(endMessage);
+                    byte[] buffer = Encoding.Default.GetBytes(endMessage);
                     sender.Send(buffer, 0, buffer.Length, 0);
                     System.Diagnostics.Debug.WriteLine("Sent END OF FILE Message");
+                    break;
                 }
-                
             }
+            Console.WriteLine("All packages submitted");                         
         }
+           
+                
 
-        public void sendData(byte[] file)
+        public void SendData(byte[] file)
         {
             Console.Write("Sending... ");
             try
@@ -105,7 +111,7 @@ namespace Server
             int rec = acceptor.Receive(receivebuffer, 0, receivebuffer.Length, SocketFlags.None);
             Array.Resize(ref receivebuffer, rec);
             string message = Encoding.Default.GetString(receivebuffer);
-            Console.WriteLine("Received feedback: " + message);
+            Console.WriteLine("/nReceived feedback: " + message);
 
             if (message == "EOP")
             {
@@ -173,8 +179,9 @@ namespace Server
             return b;
         }
 
+
         /// <summary>
-        /// Splits big file into chunks of 1048576 byte
+        /// Splits big file into chunks of 1048576 byte MAY DESTROY STRING DATA STRUCTURE AND CAUSE FORMAT ERRORS
         /// </summary>
 
         public List<byte[]> Split(byte[] filebytes)
@@ -202,13 +209,46 @@ namespace Server
 
                 Console.WriteLine(filebytes.Length);
 
-
-
             }
 
             return packages;
 
         }
+
+        public List<byte[]> SplitPointPackages(string filepath)
+        {
+            List<byte[]> packages = new List<byte[]>();
+            new Thread(() => //thread for receiving data
+            {               
+                using (StreamReader s = new StreamReader(filepath))
+                {
+                    string line; //each line represents one point
+
+                    int count = 0;
+                    int packagesize = 30000;
+                    int linelimit = packagesize; //50000 points per package
+                    string packagedata = "";
+                    while (((line = s.ReadLine()) != null) && (count <= linelimit)) // read per line
+                    {
+                        packagedata += line + "\n";
+                        count++;
+
+                        if (count == linelimit)
+                        {
+                            linelimit = count + packagesize; //iterate through the next package
+
+                            byte[] b = Encoding.UTF8.GetBytes(packagedata);
+                            packages.Add(b);
+                            Console.WriteLine("Package created. Linecount: " + count);
+                            packagedata = "";
+                        }
+                    }
+                }
+                
+            }).Start();
+            return packages;
+        }
+
         /// <SUMMARY>
         /// Tells you the IP Address of the remote host that you are sending files to.
         /// should be identical with fuseeIP ;)

@@ -5,6 +5,7 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.IO;
+using Fusee.Forschungsprojekt.Core;
 
 namespace Fusee.Forschungsprojekt.Desktop
 {
@@ -19,6 +20,15 @@ namespace Fusee.Forschungsprojekt.Desktop
         private byte[] data;
         public string serveraddress;
 
+        public void SendConfirmation()
+        {
+            byte[] buffer = Encoding.Default.GetBytes("EOP");//End of package
+            sender.Send(buffer, 0, buffer.Length, 0);
+            System.Diagnostics.Debug.WriteLine("\nSend confirmation: EOP");
+            receiving = true;
+            Receive();
+        }
+
         public ReceiverClient()
         {
             receiver = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -26,8 +36,7 @@ namespace Fusee.Forschungsprojekt.Desktop
             receiving = false;
             connected = false;
             completed = false;
-            this.DataReceived += OnDataReceived;//subscription for event
-
+            
         }
 
         public void ConnecttoServer(string serveraddress, string localip)//send on port 1234
@@ -52,6 +61,7 @@ namespace Fusee.Forschungsprojekt.Desktop
                 //System.Diagnostics.Debug.WriteLine("Socket accepting");
                 receiving = true;
                 completed = false;
+                Core.PointVisualizationBase._pointCloud.OnDataDisplayedEvent += SendConfirmation;
             }
             catch
             {
@@ -104,7 +114,8 @@ namespace Fusee.Forschungsprojekt.Desktop
                         }
                         else
                         {
-                            OnDataReceived(this, EventArgs.Empty);
+                           
+                            
                         }
                     }
 
@@ -126,15 +137,7 @@ namespace Fusee.Forschungsprojekt.Desktop
         sender.Close();
         }
 
-        public void SendConfirmation()
-        {
-            byte[] buffer = Encoding.Default.GetBytes("EOP");//End of package
-            sender.Send(buffer, 0, buffer.Length, 0);
-            System.Diagnostics.Debug.WriteLine("send confirmation: EOP");
-            receiving = true;
-            Receive();
-
-        }
+      
 
         public void SendFailure()
         {
@@ -144,36 +147,7 @@ namespace Fusee.Forschungsprojekt.Desktop
             receiving = true;
             Receive();
 
-        }
+        }       
 
-        //typical structure of a delegate with sender class and event argument parameters
-        public delegate void DataReceivedEventHandler(object sender, EventArgs e);//  public delegate void EventHandler(EventArgs e);
-        //event 'Data recieved' based on that delegate
-        public event DataReceivedEventHandler DataReceived;
-
-        public delegate void TransferFailedEventHandler(object sender, EventArgs e);
-
-        public event TransferFailedEventHandler DataTransferFailed;
-
-        //Event Handler methods should be protected, virtual and void
-        protected void  OnDataReceived (object sender, EventArgs e)
-        {
-            if (DataReceived != null)
-            {
-                System.Diagnostics.Debug.WriteLine("Event onDataReceived raised ");
-                SendConfirmation();
-            }
-        }
-
-        protected void OnDataTransferFailed(object sender, EventArgs e)
-        {
-            System.Diagnostics.Debug.WriteLine("Event Transfer failed raised");
-            SendFailure();
-        }
-
-
-     
-
-    
     }
 }
