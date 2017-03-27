@@ -98,13 +98,11 @@ namespace Fusee.Forschungsprojekt.Desktop
                     if (size == 0)
                     {
                         receiving = false;
+                        completed = true;
                         ms.Close();
                         data = ms.ToArray();
                         string datastring = Encoding.UTF8.GetString(data);
                         Core.PointCloudReader.receivedData = datastring;
-                        Core.PointCloudReader.DisplayReceived();
-                        ms.Dispose();
-                       
 
                         if (datastring == "END")
                         {
@@ -112,11 +110,10 @@ namespace Fusee.Forschungsprojekt.Desktop
                             Disconect();
                             System.Diagnostics.Debug.WriteLine("Disconnected");
                         }
-                        else
-                        {
-                           
-                            
-                        }
+
+                        Core.PointCloudReader.DisplayReceived();
+                        ms.Dispose();
+                                                                                    
                     }
 
                 }
