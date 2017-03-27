@@ -26,7 +26,7 @@ namespace Fusee.Tutorial.Core
 
         private const float VOXEL_SIZE = 2;
         private const int COMPUTE_EVERY = 1; // take only every xth point into account in order to speed up calculation
-        private const ViewMode VIEW_MODE = ViewMode.PointCloud;
+        private const ViewMode VIEW_MODE = ViewMode.VoxelSpace;
         
         public float ParticleSize = 0.05f; // maybe gets changed from platform specific classes
 
@@ -93,8 +93,8 @@ namespace Fusee.Tutorial.Core
 
             // start loading points
                         
-            PointCloudReader.ReadFromAsset("PointCloud_IPM.txt");
-            //PointCloudReader.ReceiveFromUDP(UDP_PORT); // for unity game or other
+            //PointCloudReader.ReadFromAsset("PointCloud_IPM.txt");
+            PointCloudReader.ReceiveFromUDP(UDP_PORT); // for unity game or other
 
             // read shaders from files
 
