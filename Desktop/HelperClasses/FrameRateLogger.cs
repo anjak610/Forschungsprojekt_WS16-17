@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using Fusee.Engine.Core;
 
-namespace Fusee.Tutorial.Android
+namespace Fusee.Tutorial.Desktop.HelperClasses
 {
     /// <summary>
     /// FrameRate displays the current FrameRate on a given text.

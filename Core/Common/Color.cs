@@ -1,11 +1,8 @@
-﻿using Fusee.Base.Common;
-using System;
-
-/// <summary>
+﻿/// <summary>
 /// Just a wrapper class for computing RGB values from HSV input
 /// </summary>
 
-namespace Fusee.Tutorial.Core
+namespace Fusee.Tutorial.Core.Common
 {
     public class Color
     {

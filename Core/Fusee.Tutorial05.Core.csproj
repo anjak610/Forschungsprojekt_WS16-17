@@ -115,33 +115,21 @@
     <Content Include="Assets\smoked_oak.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\TestPoints.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\AboutFuseeAssets.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Content Include="Assets\PixelShader.frag">
+    <Content Include="Assets\PixelShaderVSP.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Assets\Shaders\VoxelSpace\VertexShader.vert">
+    <Content Include="Assets\VertexShaderVSP.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Shaders\VoxelSpace\PixelShader.frag">
+    </Content>
+    <Content Include="Assets\PixelShaderPCL.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Cube.fus">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Shaders\PointCloud\PixelShader.frag">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Shaders\PointCloud\VertexShader.vert">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <Content Include="Assets\VertexShader.vert">
+    </Content>
+    <Content Include="Assets\VertexShaderPCL.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

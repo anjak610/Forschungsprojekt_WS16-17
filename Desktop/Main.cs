@@ -1,24 +1,23 @@
-using System;
-using System.Globalization;
 using System.IO;
 using Fusee.Base.Common;
 using Fusee.Base.Core;
 using Fusee.Base.Imp.Desktop;
 using Fusee.Engine.Core;
-using Fusee.Math.Core;
 using Fusee.Serialization;
 using Fusee.Tutorial.Core;
 using Path = Fusee.Base.Common.Path;
+using Fusee.Tutorial.Desktop.HelperClasses;
 
 namespace Fusee.Tutorial.Desktop
 {
     public class Simple
     {
-        private static FrameRateLogger _fRL;
-
         public static void Main()
         {
-            _fRL = new FrameRateLogger(); // start logging frame rate on console
+            //_fRL = new FrameRateLogger(); // start logging frame rate on console
+
+            // connect UDPReceiver with PointCloudReader
+            PointCloudReader.StartStreamingUDPCallback += new UDPReceiver().StreamFromUDP;
 
             // Inject Fusee.Engine.Base InjectMe dependencies
             IO.IOImp = new Fusee.Base.Imp.Desktop.IOImp();

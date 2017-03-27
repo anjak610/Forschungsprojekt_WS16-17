@@ -5,19 +5,15 @@ using Android.OS;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
-using Android.Runtime;
 using Fusee.Base.Common;
 using Fusee.Base.Core;
 using Fusee.Base.Imp.Android;
 using Fusee.Engine.Imp.Graphics.Android;
 using Fusee.Serialization;
 using Fusee.Tutorial.Core;
-using static Fusee.Engine.Core.Time; // frame rate
 using Font = Fusee.Base.Core.Font;
 using Path = Fusee.Base.Common.Path;
-using Fusee.Math.Core;
-using System;
-using System.Globalization;
+using Fusee.Tutorial.Android.HelperClasses;
 
 namespace Fusee.Tutorial.Android
 {
@@ -29,7 +25,6 @@ namespace Fusee.Tutorial.Android
 		ConfigurationChanges = ConfigChanges.KeyboardHidden, LaunchMode = LaunchMode.SingleTask)]
 	public class MainActivity : Activity
 	{
-	    private FrameRateLogger _fRL;
         private Button plusButton;
         private Button minusButton;
         //private Core.PointVisualizationBase app;
@@ -58,8 +53,6 @@ namespace Fusee.Tutorial.Android
            
 		    if (SupportedOpenGLVersion() >= 3)
 		    {
-                _fRL = new FrameRateLogger(); // start logging frame rate on console
-
                 // SetContentView(new LibPaintingView(ApplicationContext, null));
 
                 // Inject Fusee.Engine.Base InjectMe dependencies
@@ -106,10 +99,12 @@ namespace Fusee.Tutorial.Android
                 AssetStorage.RegisterProvider(fap);
 
                 var app = new Core.PointVisualizationBase();
-                
 
-		        // Inject Fusee.Engine InjectMe dependencies (hard coded)
-		        RenderCanvasImp rci = new RenderCanvasImp(ApplicationContext, null, delegate { app.Run(); });
+                // connect UDPReceiver with PointCloudReader
+                PointCloudReader.StartStreamingUDPCallback += new UDPReceiver().StreamFromUDP;
+                
+                // Inject Fusee.Engine InjectMe dependencies (hard coded)
+                RenderCanvasImp rci = new RenderCanvasImp(ApplicationContext, null, delegate { app.Run(); });
 		        app.CanvasImplementor = rci;
 		        app.ContextImplementor = new RenderContextImp(rci, ApplicationContext);
 

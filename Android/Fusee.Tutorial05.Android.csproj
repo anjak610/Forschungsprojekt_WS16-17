@@ -68,9 +68,10 @@
     <Reference Include="OpenTK" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FrameRateLogger.cs" />
+    <Compile Include="HelperClasses\FrameRateLogger.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
+    <Compile Include="HelperClasses\UDPReceiver.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\AndroidManifest.xml">

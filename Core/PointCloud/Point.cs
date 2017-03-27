@@ -6,7 +6,7 @@ using Fusee.Math.Core;
 /// For the mesh representation of a point see <see cref="PointMesh"/>. 
 /// </summary>
 
-namespace Fusee.Tutorial.Core
+namespace Fusee.Tutorial.Core.PointCloud
 {
     public class Point
     {

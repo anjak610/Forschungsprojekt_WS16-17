@@ -7,7 +7,7 @@ using System.Collections.Generic;
 /// 
 /// </summary>
 
-namespace Fusee.Tutorial.Core
+namespace Fusee.Tutorial.Core.Octree
 {
     public class OctreeNode<T>
     {

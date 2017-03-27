@@ -13,7 +13,7 @@ using System.Collections.Generic;
 /// octree.OnNodeAddedCallback += (OctreeNode<T> node) => { // do something }; 
 /// </summary>
 
-namespace Fusee.Tutorial.Core
+namespace Fusee.Tutorial.Core.Octree
 {
     public enum OctreeNodeStates
     {

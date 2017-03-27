@@ -56,7 +56,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup -->
   <ItemGroup>
-    <Compile Include="FrameRateLogger.cs" />
+    <Compile Include="HelperClasses\UDPReceiver.cs" />
+    <Compile Include="HelperClasses\FrameRateLogger.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
