@@ -92,6 +92,9 @@ namespace Fusee.Tutorial.Core
         public override void Init()
         {
             // octree
+
+            //Zoom Value
+            _zoom = 60;
             
             _octree = new Octree<OctreeNodeStates>(float3.Zero, VOXEL_SIZE);
             _octree.OnNodeAddedCallback += OnNewNodeAdded;
