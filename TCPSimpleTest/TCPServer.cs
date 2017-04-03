@@ -58,7 +58,7 @@ namespace Server
                 {
                     string endMessage = "END";
                     byte[] buffer = Encoding.Default.GetBytes(endMessage);
-                    sender.Send(buffer, 0, buffer.Length, 0);
+                    SendData(buffer);
                     System.Diagnostics.Debug.WriteLine("Sent END OF FILE Message");
                     break;
                 }
@@ -111,7 +111,7 @@ namespace Server
             int rec = acceptor.Receive(receivebuffer, 0, receivebuffer.Length, SocketFlags.None);
             Array.Resize(ref receivebuffer, rec);
             string message = Encoding.Default.GetString(receivebuffer);
-            Console.WriteLine("/nReceived feedback: " + message);
+            Console.WriteLine("\n Received feedback: " + message);
 
             if (message == "EOP")
             {

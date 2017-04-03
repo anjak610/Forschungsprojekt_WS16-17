@@ -102,18 +102,22 @@ namespace Fusee.Forschungsprojekt.Desktop
                         ms.Close();
                         data = ms.ToArray();
                         string datastring = Encoding.UTF8.GetString(data);
-                        Core.PointCloudReader.receivedData = datastring;
 
                         if (datastring == "END")
                         {
                             System.Diagnostics.Debug.WriteLine("Everything received");
                             Disconect();
                             System.Diagnostics.Debug.WriteLine("Disconnected");
+                            break;
                         }
-
-                        Core.PointCloudReader.DisplayReceived();
+                        else
+                        {
+                            Core.PointCloudReader.receivedData = datastring;
+                            Core.PointCloudReader.DisplayReceived();
+                            
+                        }
                         ms.Dispose();
-                                                                                    
+
                     }
 
                 }

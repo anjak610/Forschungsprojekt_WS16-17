@@ -117,7 +117,8 @@ namespace Fusee.Forschungsprojekt.Core
                 {
                     string tab = "\t";//split into numbers
                     List<string> pointStrings = new List<string>();
-                    pointStrings = pointElementLines[j].Split(tab.ToCharArray()).ToList();// line string split to point coordinates
+                    pointStrings = pointElementLines[j].Split(tab.ToCharArray()).ToList();//TODO fix format exceptions
+                    // line string split to point coordinates
                     Point point = new Point();
 
                     // convert each string to float and add to respective attributes of point objects

@@ -81,12 +81,19 @@
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReceiverClient.cs" />
+    <Compile Include="RenderControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="RenderControl.Designer.cs">
+      <DependentUpon>RenderControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="UIForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UIForm.Designer.cs">
       <DependentUpon>UIForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="WinformsHost.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Fusee.Base.Common">
@@ -138,6 +145,7 @@
     <Reference Include="System.Net" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Android\Fusee.Forschungsprojekt.Android.csproj">
