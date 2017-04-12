@@ -33,7 +33,7 @@ namespace Server
      //      file = server.ReadfromFile(path);
      //      packages = server.Split(file);       
 
-          packages = server.SplitPointPackages(path);
+          //packages = server.SplitPointPackages(path);
 
 
           server.Start();
@@ -56,8 +56,9 @@ namespace Server
           {
               try
               {
-                  server.SendPackages(packages);
-              }
+                    //server.SendPackages(packages);
+                    packages = server.SplitPointPackages(path);//split and send packages
+                }
               catch(Exception exception)
               {
                   Console.WriteLine("Error: " + exception);

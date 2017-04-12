@@ -203,7 +203,7 @@ namespace Server
 
 
 
-                packages.Add(chunk1024.ToArray<byte>());
+                packages.Add(chunk1024.ToArray<byte>()); 
 
                 filebytes = b.ToArray<byte>();
 
@@ -239,8 +239,11 @@ namespace Server
 
                             byte[] b = Encoding.UTF8.GetBytes(packagedata);
                             packages.Add(b);
+                            SendData(b);//TODO Send here
                             Console.WriteLine("Package created. Linecount: " + count);
                             packagedata = "";
+                             
+                           
                         }
                     }
                 }

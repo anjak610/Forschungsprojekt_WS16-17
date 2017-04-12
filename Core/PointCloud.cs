@@ -17,7 +17,7 @@ namespace Fusee.Forschungsprojekt.Core
         private long _limit = 0;
 
         // Because 1 mesh can only take up to 65.535 indices in the triangles ushort[] array,
-        // we need multiple meshes.
+        // we need multiple meshes. --> ushort can only take values from 0 to 65,535
         private List<Mesh> _meshes;
 
         //those lists refer to the properties of one mesh
