@@ -85,10 +85,11 @@
             this.Controls.Add(this.label_particle_size);
             this.Controls.Add(this.canvaspanel);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MinimumSize = new System.Drawing.Size(1150, 894);
             this.Name = "UIForm";
             this.Text = "Fusee Point Clouds";
+            this.Load += new System.EventHandler(this.UIForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
