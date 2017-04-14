@@ -17,7 +17,7 @@ namespace Fusee.Forschungsprojekt.Desktop
     ///     its contents
     ///     on the Windows form and to wire interactions to user input performed on the Windows form.
     /// </summary>
-    internal class WinformsHost : RenderCanvasWindowImp
+    internal class WinformsHost : RenderCanvasWindowImp, IInputImp
     {
         private bool _disposed;
 
@@ -26,6 +26,8 @@ namespace Fusee.Forschungsprojekt.Desktop
 
         private int _mouseWheelPos;
         private bool _initialized;
+        public RenderCanvasImp canvas = new RenderCanvasImp();
+        
 
         public WinformsHost(Control form, UIForm parent)
             : base(form.Handle, form.Width, form.Height)
@@ -34,6 +36,7 @@ namespace Fusee.Forschungsprojekt.Desktop
 
             _form = form;
             _parent = parent;
+            //canvas = new RenderCanvasImp();
 
             _mouseWheelPos = 0;
 
@@ -47,6 +50,8 @@ namespace Fusee.Forschungsprojekt.Desktop
                             Position = XLatePoint(args.Location)
                         });
             };
+
+        
 
             form.MouseUp += delegate(object sender, System.Windows.Forms.MouseEventArgs args)
             {
@@ -108,6 +113,10 @@ namespace Fusee.Forschungsprojekt.Desktop
                 DoRender();
             };
 
+            //canvas.Height = 200;
+            //canvas.Width = form.Width;
+
+
             Application.Idle += OnIdle;
         }
 
@@ -117,6 +126,7 @@ namespace Fusee.Forschungsprojekt.Desktop
             while (!PeekMessage(out message, IntPtr.Zero, 0, 0, 0))
             {
                 DoRender();
+                
             }
         }
 

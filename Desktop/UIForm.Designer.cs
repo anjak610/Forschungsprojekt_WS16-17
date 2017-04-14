@@ -36,11 +36,15 @@
             // 
             // canvaspanel
             // 
-            this.canvaspanel.Location = new System.Drawing.Point(3, 52);
-            this.canvaspanel.MinimumSize = new System.Drawing.Size(1125, 800);
+            this.canvaspanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.canvaspanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.canvaspanel.Location = new System.Drawing.Point(0, 0);
+            this.canvaspanel.Margin = new System.Windows.Forms.Padding(5);
+            this.canvaspanel.MinimumSize = new System.Drawing.Size(1180, 800);
             this.canvaspanel.Name = "canvaspanel";
-            this.canvaspanel.Size = new System.Drawing.Size(1125, 800);
+            this.canvaspanel.Size = new System.Drawing.Size(1182, 953);
             this.canvaspanel.TabIndex = 0;
+            this.canvaspanel.Paint += new System.Windows.Forms.PaintEventHandler(this.canvaspanel_Paint);
             // 
             // label_particle_size
             // 
@@ -79,14 +83,15 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1132, 847);
+            this.AutoSize = true;
+            this.ClientSize = new System.Drawing.Size(1182, 953);
             this.Controls.Add(this.minus_button);
             this.Controls.Add(this.plus_button);
             this.Controls.Add(this.label_particle_size);
             this.Controls.Add(this.canvaspanel);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
             this.Margin = new System.Windows.Forms.Padding(4);
-            this.MinimumSize = new System.Drawing.Size(1150, 894);
+            this.MinimumSize = new System.Drawing.Size(1200, 1000);
             this.Name = "UIForm";
             this.Text = "Fusee Point Clouds";
             this.Load += new System.EventHandler(this.UIForm_Load);

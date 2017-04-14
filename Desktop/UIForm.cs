@@ -34,7 +34,7 @@ namespace Fusee.Forschungsprojekt.Desktop
         public UIForm()
         {
             InitializeComponent();
-            renderPanel = new Panel();
+            renderPanel = this.Controls.Find("canvaspanel", true).FirstOrDefault() as Panel;
             panelHandle = renderPanel.Handle;
 
             var width = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.8f);
@@ -72,7 +72,7 @@ namespace Fusee.Forschungsprojekt.Desktop
                 Dock = DockStyle.Fill,
                 Name = "RenderControl",
                 TabIndex = 0
-            };
+            };         
 
             currentControl.HandleCreated += renderControl_HandleCreated; // <- This is crucial: Prepare for STEP TWO.
 
@@ -89,11 +89,10 @@ namespace Fusee.Forschungsprojekt.Desktop
 
             // Take this as an example how to hook up any FUSEE application with a given Winforms form:
 
-            // First create a WinformsHost around the control
-            currentHost = new WinformsHost(currentControl, this);
+           
 
             // Then instantiate your app (could be as well _currentApp = new MyOwnRenderCanvasDerivedClass(); )
-            currentApp = Simple.app;
+         
 
             // Now use the host as the canvas AND the input implementation of your App
             //currentApp.CanvasImplementor = currentHost;
@@ -173,26 +172,29 @@ namespace Fusee.Forschungsprojekt.Desktop
 
             AssetStorage.RegisterProvider(fap);
 
+            // First create a WinformsHost around the control
+            currentHost = new WinformsHost(currentControl, this);
+
             currentApp = new Core.PointVisualizationBase();
 
             // Inject Fusee.Engine InjectMe dependencies (hard coded)
-            currentApp.CanvasImplementor = new WinformsHost(currentControl, this);
+            currentApp.CanvasImplementor = currentHost;
             currentApp.ContextImplementor = new Fusee.Engine.Imp.Graphics.Desktop.RenderContextImp(currentApp.CanvasImplementor);
-            //Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Desktop.RenderCanvasInputDriverImp(currentApp.CanvasImplementor));
-            //Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Desktop.WindowsTouchInputDriverImp(currentApp.CanvasImplementor));
+            Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Desktop.RenderCanvasInputDriverImp(currentHost.canvas));
+
             //app.InputImplementor = new Fusee.Engine.Imp.Graphics.Desktop.InputImp(app.CanvasImplementor);
             //app.AudioImplementor = new Fusee.Engine.Imp.Sound.Desktop.AudioImp();
             //app.NetworkImplementor = new Fusee.Engine.Imp.Network.Desktop.NetworkImp();
             //app.InputDriverImplementor = new Fusee.Engine.Imp.Input.Desktop.InputDriverImp();
             //app.VideoManagerImplementor = ImpFactory.CreateIVideoManagerImp();
 
-
+            //// If not already done, show the window.
+            currentControl.Show();
 
             //// Then you can run the app
             currentApp.Run();
 
-            //// If not already done, show the window.
-            currentControl.Show();
+           
         }
 
         private void plus_button_Click(object sender, EventArgs e)
@@ -243,6 +245,11 @@ namespace Fusee.Forschungsprojekt.Desktop
         private void UIForm_Load(object sender, EventArgs e)
         {
             StartCurrentApp();
+        }
+
+        private void canvaspanel_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }

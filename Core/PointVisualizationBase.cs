@@ -36,8 +36,8 @@ namespace Fusee.Forschungsprojekt.Core
         public override void Init()
         {
             _pointCloud = new PointCloud();
-            //_pointCloud = AssetStorage.Get<PointCloud>("BasicPoints.txt");
-            //PointCloudReader.ReadFromAsset("PointCloud_IPM.txt", _pointCloud.Merge);
+            _pointCloud = AssetStorage.Get<PointCloud>("BasicPoints.txt");
+            PointCloudReader.ReadFromAsset("PointCloud_IPM.txt", _pointCloud.Merge);
             
             // read shaders from files
             var vertsh = AssetStorage.Get<string>("VertexShader.vert");
@@ -84,54 +84,54 @@ namespace Fusee.Forschungsprojekt.Core
 
         public void MoveInScene()
         {
-            // set origin to camera pivot
-            _xform = float4x4.CreateTranslation(-1 * _cameraPivot);
-
-            // rotate around camera pivot
-            if (Mouse.LeftButton || Touch.ActiveTouchpoints == 1)
-            {
-                float2 speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);
-
-                _rotationY -= speed.x * 0.0001f;
-                _rotationX -= speed.y * 0.0001f;
-
-                // clamp rotation x between min and max angle
-                _rotationX = _rotationX < _minAngleX ? _minAngleX : (_rotationX > _maxAngleX ? _maxAngleX : _rotationX);
-            }
-
-            var rotation = float4x4.CreateRotationX(_rotationX) * float4x4.CreateRotationY(_rotationY);
-            _xform = rotation * _xform;
-
-            // set camera to its position
-            _xform = float4x4.CreateTranslation(-1 * _cameraPosition) * _xform;
-
-            // --- move camera pivot
-            
-            float3 translation = float3.Zero;
-
-            if (Mouse.RightButton || Touch.TwoPoint)
-            {
-                float2 speed = Mouse.Velocity + Touch.TwoPointMidPointVel;
-                translation.x = speed.x * -0.005f;
-                translation.y = speed.y * 0.005f;
-            }
-
-            if (Mouse.Wheel != 0 || Touch.TwoPoint)
-            {
-                float speed = Mouse.WheelVel + Touch.TwoPointDistanceVel * 0.1f;
-                translation.z = speed * 0.1f;
-            }
-
-            if (translation.Length > 0)
-            {
-                rotation.Invert();
-                translation = rotation * translation;
-                _cameraPivot += translation;
-                //_xform = float4x4.CreateTranslation(translation) * _xform;
-            }
-
-            //Scale Points with W and A
-            if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0)
+          // set origin to camera pivot
+           _xform = float4x4.CreateTranslation(-1 * _cameraPivot);
+          //
+          //  // rotate around camera pivot
+           if (Mouse.LeftButton )//|| Touch.ActiveTouchpoints == 1)
+           {
+               float2 speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);
+          
+               _rotationY -= speed.x * 0.0001f;
+               _rotationX -= speed.y * 0.0001f;
+          
+               // clamp rotation x between min and max angle
+               _rotationX = _rotationX < _minAngleX ? _minAngleX : (_rotationX > _maxAngleX ? _maxAngleX : _rotationX);
+           }
+           
+           var rotation = float4x4.CreateRotationX(_rotationX) * float4x4.CreateRotationY(_rotationY);
+           _xform = rotation * _xform;
+          //
+          // set camera to its position
+          _xform = float4x4.CreateTranslation(-1 * _cameraPosition) * _xform;
+          //
+          // --- move camera pivot
+          //  
+          float3 translation = float3.Zero;
+          
+           if (Mouse.RightButton)// || Touch.TwoPoint)
+           {
+               float2 speed = Mouse.Velocity + Touch.TwoPointMidPointVel;
+               translation.x = speed.x * -0.005f;
+               translation.y = speed.y * 0.005f;
+           }
+          
+           if (Mouse.Wheel != 0)// || Touch.TwoPoint)
+           {
+               float speed = Mouse.WheelVel + Touch.TwoPointDistanceVel * 0.1f;
+               translation.z = speed * 0.1f;
+           }
+          
+           if (translation.Length > 0)
+           {
+               rotation.Invert();
+               translation = rotation * translation;
+               _cameraPivot += translation;
+               //_xform = float4x4.CreateTranslation(translation) * _xform;
+           }
+           
+          //  //Scale Points with W and A
+            if (Keyboard.ADAxis != 0)// || Keyboard.WSAxis != 0)
             {
                 _scaleKey = true;
             }
@@ -139,12 +139,12 @@ namespace Fusee.Forschungsprojekt.Core
             {
                 _scaleKey = false;
             }
-
+          
             if (_scaleKey)
             {
                 ParticleSize = ParticleSize + Keyboard.ADAxis * ParticleSize / 20;
             }
-
+          
             // --- projection matrix
 
             _xform = RC.Projection * _xform;

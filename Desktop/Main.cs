@@ -24,7 +24,7 @@ namespace Fusee.Forschungsprojekt.Desktop
         private static FrameRateLogger _fRL;
         public static ConnectionDialog SetupForm;
         public static UIForm UIWindow;
-        public static Core.PointVisualizationBase app;
+     
 
 
         //TODO Window Handle in einer Windows Form Component, Render Context anhängen
@@ -36,10 +36,6 @@ namespace Fusee.Forschungsprojekt.Desktop
 
             //SetupForm = new ConnectionDialog();
             // SetupForm.Show();
-            // UIWindow = new UIForm();
-
-
-
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
