@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using static Fusee.Engine.Core.Input;
 using Fusee.Engine.Imp.Graphics.Desktop;
 using Fusee.Engine.Common;
+using Fusee.Math.Core;
 using MouseEventArgs = Fusee.Engine.Common.MouseEventArgs;
 using KeyEventArgs = Fusee.Engine.Common.KeyEventArgs;
 
@@ -17,10 +18,10 @@ namespace Fusee.Forschungsprojekt.Desktop
     ///     its contents
     ///     on the Windows form and to wire interactions to user input performed on the Windows form.
     /// </summary>
-    internal class WinformsHost : RenderCanvasWindowImp, IInputImp
+    internal class WinformsHost : RenderCanvasWindowImp
     {
         private bool _disposed;
-
+        
         private Control _form;
         private readonly UIForm _parent;
 

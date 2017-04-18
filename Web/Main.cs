@@ -38,24 +38,24 @@ namespace Fusee.Forschungsprojekt.Web
                         return Path.GetExtension(id).ToLower().Contains("ttf");
                     }
                 });
-            fap.RegisterTypeHandler( 
-                new AssetHandler
-                {
-                    ReturnedType = typeof(SceneContainer),
-                    Decoder = delegate(string id, object storage)
-                    {
-                        if (Path.GetExtension(id).ToLower().Contains("fus"))
-                        {
-                            var ser = new Serializer();
-                            return ser.Deserialize(IO.StreamFromFile("Assets/" + id, Base.Common.FileMode.Open), null, typeof(SceneContainer)) as SceneContainer;
-                        }
-                        return null;
-                    },
-                    Checker = delegate (string id)
-                    {
-                        return Path.GetExtension(id).ToLower().Contains("fus");
-                    }
-                });
+            //fap.RegisterTypeHandler( 
+            //    new AssetHandler
+            //    {
+            //        ReturnedType = typeof(SceneContainer),
+            //        Decoder = delegate(string id, object storage)
+            //        {
+            //            if (Path.GetExtension(id).ToLower().Contains("fus"))
+            //            {
+            //                var ser = new Serializer();
+            //                return ser.Deserialize(IO.StreamFromFile("Assets/" + id, Base.Common.FileMode.Open), null, typeof(SceneContainer)) as SceneContainer;
+            //            }
+            //            return null;
+            //        },
+            //        Checker = delegate (string id)
+            //        {
+            //            return Path.GetExtension(id).ToLower().Contains("fus");
+            //        }
+            //    });
 
 
             AssetStorage.RegisterProvider(fap);
@@ -64,7 +64,7 @@ namespace Fusee.Forschungsprojekt.Web
 
             // Inject Fusee.Engine InjectMe dependencies (hard coded)
            // app.CanvasImplementor = new Fusee.Engine.Imp.Graphics.Web.RenderCanvasImp();
-           /// app.ContextImplementor = new Fusee.Engine.Imp.Graphics.Web.RenderContextImp(app.CanvasImplementor);
+           // app.ContextImplementor = new Fusee.Engine.Imp.Graphics.Web.RenderContextImp(app.CanvasImplementor);
            // Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Web.RenderCanvasInputDriverImp(app.CanvasImplementor));
           //  Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Desktop.WindowsTouchInputDriverImp(app.CanvasImplementor));
             // app.AudioImplementor = new Fusee.Engine.Imp.Sound.Web.AudioImp();

@@ -21,6 +21,7 @@ using System.Net.Sockets;
 using System.Globalization;
 using System.Text;
 using System.Net;
+using ProtoBuf;
 
 namespace Fusee.Forschungsprojekt.Android
 {
@@ -82,24 +83,25 @@ namespace Fusee.Forschungsprojekt.Android
                             return Path.GetExtension(id).ToLower().Contains("ttf");
                         }
                     });
-                fap.RegisterTypeHandler(
-                    new AssetHandler
-                    {
-                        ReturnedType = typeof(SceneContainer),
-                        Decoder = delegate (string id, object storage)
-                        {
-                            if (Path.GetExtension(id).ToLower().Contains("fus"))
-                            {
-                                var ser = new Serializer();
-                                return ser.Deserialize((Stream)storage, null, typeof(SceneContainer)) as SceneContainer;
-                            }
-                            return null;
-                        },
-                        Checker = delegate (string id)
-                        {
-                            return Path.GetExtension(id).ToLower().Contains("fus");
-                        }
-                    });
+               //fap.RegisterTypeHandler(
+               //    handler: new AssetHandler
+               //    {
+               //        ReturnedType = typeof(SceneContainer),
+               //        Decoder = delegate (string id, object storage)
+               //        {
+               //            if (Path.GetExtension(id).ToLower().Contains("fus"))
+               //            {
+               //                var ser = new Serialization.Serializer();
+               //                return ser.Deserialize((Stream)storage, null, typeof(SceneContainer)) as SceneContainer;
+               //            }
+               //            return null;
+               //            
+               //        },
+               //        Checker = delegate (string id)
+               //        {
+               //            return Path.GetExtension(id).ToLower().Contains("fus");
+               //        }
+               //    });
                 fap.RegisterTypeHandler( // TO-DO: ending shouldn't be .txt
                     new AssetHandler
                     {

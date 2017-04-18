@@ -114,19 +114,19 @@ namespace Fusee.Forschungsprojekt.Desktop
                     },
                     Checker = id => Path.GetExtension(id).ToLower().Contains("ttf")
                 });
-            fap.RegisterTypeHandler(
-                new AssetHandler
-                {
-                    ReturnedType = typeof(SceneContainer),
-                    Decoder = delegate (string id, object storage)
-                    {
-                        if (!Path.GetExtension(id).ToLower().Contains("fus")) return null;
-                        var ser = new Serializer();
-
-                        return ser.Deserialize((Stream)storage, null, typeof(SceneContainer)) as SceneContainer;
-                    },
-                    Checker = id => Path.GetExtension(id).ToLower().Contains("fus")
-                });
+            //fap.RegisterTypeHandler(
+            //    new AssetHandler
+            //    {
+            //        ReturnedType = typeof(SceneContainer),
+            //        Decoder = delegate (string id, object storage)
+            //        {
+            //            if (!Path.GetExtension(id).ToLower().Contains("fus")) return null;
+            //            var ser = new Serializer();
+            //DESERIALIZE ERROR?? --> protobuf reference missing?
+            //            return ser.Deserialize((Stream)storage, null, typeof(SceneContainer)) as SceneContainer;
+            //        },
+            //        Checker = id => Path.GetExtension(id).ToLower().Contains("fus")
+            //    });
             fap.RegisterTypeHandler( // TO-DO: ending shouldn't be .txt
                 new AssetHandler
                 {
