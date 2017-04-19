@@ -1,8 +1,9 @@
 ﻿using Fusee.Engine.Core;
 using Fusee.Math.Core;
+using Fusee.Tutorial.Core;
 using System.Collections.Generic;
 
-namespace Fusee.Tutorial.Core.Common
+namespace Fusee.Tutorial05.Core.Common
 {
 
     /// <summary>
@@ -38,12 +39,16 @@ namespace Fusee.Tutorial.Core.Common
         private List<float2> _uvs;
         private List<uint> _colors;
 
+        // Render context in order to dispose old meshes
+        private List<Mesh> _meshesToRemove;
+
         /// <summary>
         /// Initializes lists in order to prepare for getting other meshes in.
         /// </summary>
         public DynamicMesh()
         {
             _meshes = new List<Mesh>();
+            _meshesToRemove = new List<Mesh>();
             _temporaryMesh = new Mesh();
 
             ResetLists();
@@ -55,7 +60,7 @@ namespace Fusee.Tutorial.Core.Common
         /// <returns>List of meshes.</returns>
         public List<Mesh> GetMeshes()
         {
-            if(_temporaryMesh.Vertices == null)
+            if (_temporaryMesh.Vertices == null)
             {
                 return _meshes;
             }
@@ -68,6 +73,17 @@ namespace Fusee.Tutorial.Core.Common
 
                 return result;
             }
+        }
+
+        /// <summary>
+        /// Returns the meshes which should be deleted.
+        /// </summary>
+        public List<Mesh> GetMeshesToRemove()
+        {
+            List<Mesh> returnMeshes = _meshesToRemove;
+            _meshesToRemove = new List<Mesh>();
+
+            return returnMeshes;
         }
         
         /// <summary>
@@ -86,22 +102,22 @@ namespace Fusee.Tutorial.Core.Common
                 Bake();
             }
 
-            ushort currentIndex = (ushort) _vertices.Count; // index of next value, not the last one (that would be -1)
+            ushort currentIndex = (ushort)_vertices.Count; // index of next value, not the last one (that would be -1)
 
             _vertices.AddRange(mesh.Vertices);
 
-            if(mesh.Normals != null)
+            if (mesh.Normals != null)
                 _normals.AddRange(mesh.Normals);
 
-            if(mesh.UVs != null)
+            if (mesh.UVs != null)
                 _uvs.AddRange(mesh.UVs);
 
-            if(mesh.Colors != null)
+            if (mesh.Colors != null)
                 _colors.AddRange(mesh.Colors);
 
             // now comes the tricky part: the triangles
 
-            if(mesh.Triangles != null)
+            if (mesh.Triangles != null)
             {
                 foreach (ushort vertexIndex in mesh.Triangles)
                 {
@@ -123,6 +139,7 @@ namespace Fusee.Tutorial.Core.Common
             mesh.UVs = _uvs.ToArray();
             mesh.Colors = _colors.ToArray();
 
+            _meshesToRemove.Add(_temporaryMesh);
             _temporaryMesh = mesh;
 
             // do not reset lists, they will be resetted in Bake(), when the _temporaryMesh is full or Bake() gets called
@@ -146,12 +163,21 @@ namespace Fusee.Tutorial.Core.Common
         }
 
         /// <summary>
+        /// Empties every list and mesh that is contained by this class.
+        /// </summary>
+        public void Reset()
+        {
+            ResetLists();
+
+            _meshesToRemove.Add(_temporaryMesh);
+            _meshesToRemove.AddRange(_meshes);
+        }
+
+        /// <summary>
         /// Resets the lists, in which values of other meshes are stored.
         /// </summary>
         private void ResetLists()
         {
-            _temporaryMesh = new Mesh();
-
             _vertices = new List<float3>();
             _normals = new List<float3>();
             _triangles = new List<ushort>();
