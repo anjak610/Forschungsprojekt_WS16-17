@@ -1,12 +1,12 @@
 attribute vec3 fuVertex;
 attribute vec3 fuNormal;
 attribute vec2 fuUV;
+//attribute vec3 fuOffset;
 
 uniform mat4 FUSEE_MV;
 uniform mat4 FUSEE_MVP;
 uniform vec2 yBounds; // x = min, y = max
 
-varying vec3 modelpos;
 varying vec3 normal;
 varying vec2 uv;
 varying vec3 albedo;
@@ -22,7 +22,7 @@ vec3 hsv2rgb(in vec3 c)
 
 void main()
 {
-	modelpos = fuVertex;
+	vec3 modelpos = fuVertex; // + fuOffset;
 	normal = normalize(mat3(FUSEE_MV) * fuNormal);
 
 	uv = fuUV;
@@ -32,5 +32,5 @@ void main()
 	float hue = (modelpos.y - yBounds.x) / (yBounds.y - yBounds.x);
 	albedo = hsv2rgb( vec3(hue, 1, 1) );
 
-	gl_Position = FUSEE_MVP * vec4(fuVertex, 1.0);
+	gl_Position = FUSEE_MVP * vec4(modelpos, 1.0);
 }

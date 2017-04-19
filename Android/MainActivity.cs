@@ -14,6 +14,7 @@ using Fusee.Tutorial.Core;
 using Font = Fusee.Base.Core.Font;
 using Path = Fusee.Base.Common.Path;
 using Fusee.Tutorial.Android.HelperClasses;
+using Fusee.Tutorial.Core.PointCloud;
 
 namespace Fusee.Tutorial.Android
 {

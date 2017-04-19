@@ -2,7 +2,6 @@
 	precision highp float;
 #endif
 
-varying vec3 modelpos;
 varying vec3 normal;
 varying vec2 uv;
 

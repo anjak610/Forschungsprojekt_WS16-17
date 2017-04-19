@@ -39,8 +39,12 @@ namespace Fusee.Tutorial.Core.PointCloud
         {
             _assetName = assetName;
 
+            //*
             Task task = new Task(StreamFromAsset);
             task.Start();
+            //*/
+
+            //StreamFromAsset();
         }
 
         public static void ReceiveFromUDP(int port)
@@ -103,6 +107,7 @@ namespace Fusee.Tutorial.Core.PointCloud
             return floatArr;
         }
 
+        // Called from StreamFromAsset()
         private static Point ConvertTextToPoint(string line)
         {
             string delimiter = "\t";
