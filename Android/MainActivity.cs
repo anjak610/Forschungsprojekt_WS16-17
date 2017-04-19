@@ -14,6 +14,9 @@ using Font = Fusee.Base.Core.Font;
 using Path = Fusee.Base.Common.Path;
 using Fusee.Tutorial.Android.HelperClasses;
 using Fusee.Tutorial.Core.PointCloud;
+using Android.Runtime;
+using Fusee.Tutorial.Core;
+using Java.IO;
 
 namespace Fusee.Tutorial.Android
 {
@@ -27,7 +30,9 @@ namespace Fusee.Tutorial.Android
 	{
         private Button plusButton;
         private Button minusButton;
-        //private Core.PointVisualizationBase app;
+	    private Button viewMode;
+        private Core.PointVisualizationBase app;
+        private RelativeLayout canvas_view;
 
         protected override void OnCreate (Bundle savedInstanceState)
 		{
@@ -36,22 +41,14 @@ namespace Fusee.Tutorial.Android
             RequestWindowFeature(WindowFeatures.NoTitle);
 
             SetContentView(Resource.Layout.main_activity_layout);
+            canvas_view = FindViewById<RelativeLayout>(Tutorial.Android.Resource.Id.canvas_container);
             plusButton = FindViewById<Button>(Resource.Id.plus_btn);
             minusButton = FindViewById<Button>(Resource.Id.minus_btn);
-            //onclick: increase or decrease size of particles    
-            /*
-            plusButton.Click += (sender, e) =>
-            {
-                app.ParticleSize = app.ParticleSize + app.ParticleSize / 2;
-            };
+		    viewMode = FindViewById<Button>(Resource.Id.view_btn);
 
-            minusButton.Click += (sender, e) =>
-            {
-                app.ParticleSize = app.ParticleSize - app.ParticleSize / 2;
-            };
-            */
-           
-		    if (SupportedOpenGLVersion() >= 3)
+
+
+            if (SupportedOpenGLVersion() >= 3)
 		    {
                 // SetContentView(new LibPaintingView(ApplicationContext, null));
 
@@ -100,6 +97,39 @@ namespace Fusee.Tutorial.Android
 
                 var app = new Core.PointVisualizationBase();
 
+                plusButton.Click += (sender, e) =>
+                {
+                    app.ParticleSize = app.ParticleSize + app.ParticleSize / 2;
+                };
+
+                minusButton.Click += (sender, e) =>
+                {
+                    app.ParticleSize = app.ParticleSize - app.ParticleSize / 2;
+                };
+
+
+                //Change Shader dependent on ViewMode
+                viewMode.Click += (sender, e) =>
+                {
+                    var nextView = app._ViewMode == PointVisualizationBase.ViewMode.PointCloud ? PointVisualizationBase.ViewMode.VoxelSpace : PointVisualizationBase.ViewMode.PointCloud;
+                    app.SetViewMode(nextView);
+                    System.Diagnostics.Debug.WriteLine(nextView);
+
+                   // if (app._ViewMode == PointVisualizationBase.ViewMode.PointCloud)
+                   // {
+                   //      app._ViewMode = PointVisualizationBase.ViewMode.VoxelSpace;
+                   //     System.Diagnostics.Debug.WriteLine("Voxel should be active");
+                   //     System.Diagnostics.Debug.WriteLine(app._ViewMode);
+                   //
+                   //
+                   // }
+                   //if (app._ViewMode == PointVisualizationBase.ViewMode.VoxelSpace)
+                   // {
+                   //   app._ViewMode = PointVisualizationBase.ViewMode.PointCloud;//app.SetViewMode(PointVisualizationBase.ViewMode.PointCloud);
+                   //     System.Diagnostics.Debug.WriteLine("Pointcloud should be active");
+                   // }
+                };
+
                 // connect UDPReceiver with PointCloudReader
                 PointCloudReader.StartStreamingUDPCallback += new UDPReceiver().StreamFromUDP;
                 
@@ -108,11 +138,12 @@ namespace Fusee.Tutorial.Android
 		        app.CanvasImplementor = rci;
 		        app.ContextImplementor = new RenderContextImp(rci, ApplicationContext);
 
-		        SetContentView(rci.View);
+		       // SetContentView(rci.View);
+                canvas_view.AddView(rci.View);
 
                 //app.ParticleSize = 0.05f;
                 //show display dimensions for testing
-                // IWindowManager wm = ApplicationContext.GetSystemService(WindowService).JavaCast<IWindowManager>() ;
+                IWindowManager wm = ApplicationContext.GetSystemService(WindowService).JavaCast<IWindowManager>() ;
                 //Display display = wm.DefaultDisplay;
                 //app._screenSize = new float2(display.Width, display.Height);
                 // float pixel_height = display.Height;

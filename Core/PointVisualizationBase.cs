@@ -7,6 +7,7 @@ using static Fusee.Engine.Core.Time;
 using Fusee.Tutorial.Core.Common;
 using Fusee.Base.Common;
 using System.Collections.Generic;
+using Android.Text.Method;
 using Fusee.Tutorial.Core.Octree;
 using Fusee.Tutorial.Core.PointCloud;
 using Fusee.Tutorial05.Core.Common;
@@ -20,6 +21,8 @@ namespace Fusee.Tutorial.Core
         {
             PointCloud, VoxelSpace
         }
+
+        //public PointVisualizationBase.ViewMode ModeProperty { get; set; }
 
         #region Fields
 
@@ -39,6 +42,18 @@ namespace Fusee.Tutorial.Core
 
         private int _pointCounter = 0;
         private ViewMode _viewMode = ViewMode.PointCloud;
+
+        public ViewMode _ViewMode    // the Name property
+        {
+            get
+            {
+                return _viewMode;
+            }
+            set
+            {
+                _viewMode = value;
+            }
+        }
 
         // --- mesh data / pointcloud / voxelspace
 
@@ -168,6 +183,9 @@ namespace Fusee.Tutorial.Core
             // Clear GPU memory
             ClearDynamicMeshes();
 
+            //Change Particle Size
+            ChangeParticleSize();
+
             // Render
             RC.ModelView = MoveInScene();
            
@@ -193,23 +211,23 @@ namespace Fusee.Tutorial.Core
             }
 
             // Zoom & Roll
-            if (Touch.TwoPoint)
+            if (Input.Touch.TwoPoint)
             {
                 if (!_twoTouchRepeated)
                 {
                     _twoTouchRepeated = true;
-                    _angleRollInit = Touch.TwoPointAngle - _angleRoll;
+                    _angleRollInit = Input.Touch.TwoPointAngle - _angleRoll;
                     _maxPinchSpeed = 0;
                 }
-                _zoomVel = Touch.TwoPointDistanceVel * -0.01f;
-                _angleRoll = Touch.TwoPointAngle - _angleRollInit;
-                float pinchSpeed = Touch.TwoPointDistanceVel;
+                _zoomVel = Input.Touch.TwoPointDistanceVel * -0.01f;
+                _angleRoll = Input.Touch.TwoPointAngle - _angleRollInit;
+                float pinchSpeed = Input.Touch.TwoPointDistanceVel;
                 if (pinchSpeed > _maxPinchSpeed) _maxPinchSpeed = pinchSpeed; // _maxPinchSpeed is used for debugging only.
             }
             else
             {
                 _twoTouchRepeated = false;
-                _zoomVel = Mouse.WheelVel * -0.5f;
+                _zoomVel = Mouse.WheelVel * -0.05f;
                 _angleRoll *= curDamp * 0.8f;
                 _offset *= curDamp * 0.8f;
             }
@@ -221,11 +239,11 @@ namespace Fusee.Tutorial.Core
                 _angleVelHorz = Mouse.XVel * 0.0002f;
                 _angleVelVert = Mouse.YVel * 0.0002f;
             }
-            else if (Touch.GetTouchActive(TouchPoints.Touchpoint_0) && !Touch.TwoPoint)
+            else if (Input.Touch.GetTouchActive(TouchPoints.Touchpoint_0) && !Input.Touch.TwoPoint)
             {
                 _keys = false;
                 float2 touchVel;
-                touchVel = Touch.GetVelocity(TouchPoints.Touchpoint_0);
+                touchVel = Input.Touch.GetVelocity(TouchPoints.Touchpoint_0);
                 _angleVelHorz = -RotationSpeed * touchVel.x * 0.0002f;
                 _angleVelVert = -RotationSpeed * touchVel.y * 0.0002f;
             }
@@ -245,27 +263,11 @@ namespace Fusee.Tutorial.Core
 
             _zoom += _zoomVel;
 
-            if (Mouse.RightButton || Touch.TwoPoint)
+            if (Mouse.RightButton || Input.Touch.TwoPoint)
             {
-                float2 speed = Mouse.Velocity + Touch.TwoPointMidPointVel;
-                MoveX += speed.x * -0.005f;
-                MoveY += speed.y * -0.005f;
-            }
-
-
-            // Scale Points with W and A
-            if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0)
-            {
-                _scaleKey = true;
-            }
-            else
-            {
-                _scaleKey = false;
-            }
-
-            if (_scaleKey)
-            {
-                ParticleSize = ParticleSize + Keyboard.ADAxis * ParticleSize / 20;
+                float2 speed = Mouse.Velocity + Input.Touch.TwoPointMidPointVel;
+                MoveX += speed.x * -0.0005f;
+                MoveY += speed.y * -0.0005f;
             }
 
             _angleHorz += _angleVelHorz;
@@ -289,11 +291,29 @@ namespace Fusee.Tutorial.Core
             var MtxRot = float4x4.CreateRotationZ(_angleRoll) * float4x4.CreateRotationX(_angleVert) * float4x4.CreateRotationY(_angleHorz);
             float4x4 ModelView = MtxCam * MtxRot * view;
 
-           
-
             return ModelView;
 
         }
+
+        public float ChangeParticleSize()
+        {
+        
+            if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0)
+            {
+                _scaleKey = true;
+            }
+            else
+            {
+                _scaleKey = false;
+            }
+
+            if (_scaleKey)
+            {
+                ParticleSize = ParticleSize + Keyboard.ADAxis * ParticleSize / 20;
+            }
+            return ParticleSize;
+        }
+
 
         // Is called when the window was resized
         public override void Resize()
