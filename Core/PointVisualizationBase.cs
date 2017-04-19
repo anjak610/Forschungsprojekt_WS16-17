@@ -177,6 +177,11 @@ namespace Fusee.Tutorial.Core
                 SetViewMode(nextViewMode);
             }
 
+            if (_viewMode == ViewMode.PointCloud)
+            {
+                ChangeParticleSize(RC.CreateShader(vertsh_PCL, pixsh_PCL));
+            }
+
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
 
@@ -184,7 +189,7 @@ namespace Fusee.Tutorial.Core
             ClearDynamicMeshes();
 
             //Change Particle Size
-            ChangeParticleSize();
+           // ChangeParticleSize();
 
             // Render
             RC.ModelView = MoveInScene();
@@ -244,8 +249,8 @@ namespace Fusee.Tutorial.Core
                 _keys = false;
                 float2 touchVel;
                 touchVel = Input.Touch.GetVelocity(TouchPoints.Touchpoint_0);
-                _angleVelHorz = -RotationSpeed * touchVel.x * 0.0002f;
-                _angleVelVert = -RotationSpeed * touchVel.y * 0.0002f;
+                _angleVelHorz = -RotationSpeed * touchVel.x * 0.00002f;
+                _angleVelVert = -RotationSpeed * touchVel.y * -0.00002f;
             }
             else
             {
@@ -295,9 +300,8 @@ namespace Fusee.Tutorial.Core
 
         }
 
-        public float ChangeParticleSize()
+        public void ChangeParticleSize(ShaderProgram shader)
         {
-        
             if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0)
             {
                 _scaleKey = true;
@@ -311,7 +315,10 @@ namespace Fusee.Tutorial.Core
             {
                 ParticleSize = ParticleSize + Keyboard.ADAxis * ParticleSize / 20;
             }
-            return ParticleSize;
+
+            _particleSizeParam = RC.GetShaderParam(shader, "particleSize");
+            RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize));
+            // return ParticleSize;
         }
 
 
@@ -469,6 +476,7 @@ namespace Fusee.Tutorial.Core
             {
                 _particleSizeParam = RC.GetShaderParam(shader, "particleSize");
                 RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize));
+              
             }
             else
             {

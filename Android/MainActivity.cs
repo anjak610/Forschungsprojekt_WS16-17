@@ -114,20 +114,6 @@ namespace Fusee.Tutorial.Android
                     var nextView = app._ViewMode == PointVisualizationBase.ViewMode.PointCloud ? PointVisualizationBase.ViewMode.VoxelSpace : PointVisualizationBase.ViewMode.PointCloud;
                     app.SetViewMode(nextView);
                     System.Diagnostics.Debug.WriteLine(nextView);
-
-                   // if (app._ViewMode == PointVisualizationBase.ViewMode.PointCloud)
-                   // {
-                   //      app._ViewMode = PointVisualizationBase.ViewMode.VoxelSpace;
-                   //     System.Diagnostics.Debug.WriteLine("Voxel should be active");
-                   //     System.Diagnostics.Debug.WriteLine(app._ViewMode);
-                   //
-                   //
-                   // }
-                   //if (app._ViewMode == PointVisualizationBase.ViewMode.VoxelSpace)
-                   // {
-                   //   app._ViewMode = PointVisualizationBase.ViewMode.PointCloud;//app.SetViewMode(PointVisualizationBase.ViewMode.PointCloud);
-                   //     System.Diagnostics.Debug.WriteLine("Pointcloud should be active");
-                   // }
                 };
 
                 // connect UDPReceiver with PointCloudReader
@@ -141,7 +127,7 @@ namespace Fusee.Tutorial.Android
 		       // SetContentView(rci.View);
                 canvas_view.AddView(rci.View);
 
-                //app.ParticleSize = 0.05f;
+                app.ParticleSize = 0.05f;
                 //show display dimensions for testing
                 IWindowManager wm = ApplicationContext.GetSystemService(WindowService).JavaCast<IWindowManager>() ;
                 //Display display = wm.DefaultDisplay;
