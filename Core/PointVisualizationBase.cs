@@ -3,6 +3,7 @@ using Fusee.Engine.Common;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using static Fusee.Engine.Core.Input;
+using static Fusee.Engine.Core.Time;
 using Fusee.Tutorial.Core.Common;
 using Fusee.Base.Common;
 using System.Collections.Generic;
@@ -79,6 +80,24 @@ namespace Fusee.Tutorial.Core
         private float _minAngleX = (float) -System.Math.PI / 4;
         private float _maxAngleX = (float) System.Math.PI / 4;
 
+        private float4x4 _projection;
+
+        // --- beginn camera values
+        private static float _zoom, _zoomVel, _angleHorz = M.PiOver6 * 2.0f, _angleVert = -M.PiOver6 * 0.5f, _angleVelHorz, _angleVelVert, _angleRoll, _angleRollInit;
+        private bool _twoTouchRepeated;
+        private float _maxPinchSpeed;
+
+        private float MoveX;
+        private float MoveY;
+
+        private float2 _offset;
+        private static float2 _offsetInit;
+        private const float Damping = 2f;
+        private const float RotationSpeed = 4;
+
+        private bool _scaleKey;
+        private bool _keys;
+
         #endregion
 
         /// <summary>
@@ -89,6 +108,9 @@ namespace Fusee.Tutorial.Core
             // --- 1. Start loading resources
 
             // octree
+
+            //Zoom Value
+            _zoom = 60;
             
             _octree = new Octree<OctreeNodeStates>(float3.Zero, VOXEL_SIZE);
             _octree.OnNodeAddedCallback += OnNewNodeAdded;
@@ -148,87 +170,129 @@ namespace Fusee.Tutorial.Core
 
             // Render
             RC.ModelView = MoveInScene();
-
+           
             List<Mesh> meshes = _viewMode == ViewMode.PointCloud ? _pointCloud.GetMeshes() : _voxelSpace.GetMeshes();
             for(var i=0; i<meshes.Count; i++)
             {
                 RC.Render(meshes[i]);
             }
 
-            /*
-            if(_viewMode == ViewMode.PointCloud)
-            {
-                _iaPCL.AddOffsets(_positionsPCL);
-                _positionsPCL = new List<float3>();
-
-                RC.RenderAsInstance(_pointMesh, _iaPCL);
-            }
-            else
-            {
-                _iaVSP.AddOffsets(_positionsVSP);
-                _positionsVSP = new List<float3>();
-
-                RC.SetShaderParam(_yBoundsParam, _yBounds);
-                RC.RenderAsInstance(_cube, _iaVSP);
-            }
-            //*/
-
+            RC.Projection = _projection;
+			
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
         }
         
         private float4x4 MoveInScene()
         {
-            // set origin to camera pivot
-            float4x4 xform = float4x4.CreateTranslation(-1 * ( _cameraPivot + _cameraPivotOffset ));
-            
-            // rotate around camera pivot
-            if (Mouse.LeftButton || Touch.ActiveTouchpoints == 1)
+          var curDamp = (float)System.Math.Exp(-Damping * DeltaTime);
+
+            if (Keyboard.LeftRightAxis != 0 || Keyboard.UpDownAxis != 0)
             {
-                float2 speed = Mouse.Velocity + Touch.GetVelocity(TouchPoints.Touchpoint_0);
-
-                _rotationY -= speed.x * 0.0001f;
-                _rotationX -= speed.y * 0.0001f;
-
-                // clamp rotation x between min and max angle
-                _rotationX = _rotationX < _minAngleX ? _minAngleX : (_rotationX > _maxAngleX ? _maxAngleX : _rotationX);
+                _keys = true;
             }
 
-            var rotation = float4x4.CreateRotationX(_rotationX) * float4x4.CreateRotationY(_rotationY);
-            xform = rotation * xform;
-
-            // --- move camera position
-            
-            if (Mouse.Wheel != 0 || Touch.TwoPoint)
+            // Zoom & Roll
+            if (Touch.TwoPoint)
             {
-                float speed = Mouse.WheelVel + Touch.TwoPointDistanceVel * 0.1f;
-                _cameraPosition.z += speed * 0.1f;
+                if (!_twoTouchRepeated)
+                {
+                    _twoTouchRepeated = true;
+                    _angleRollInit = Touch.TwoPointAngle - _angleRoll;
+                    _maxPinchSpeed = 0;
+                }
+                _zoomVel = Touch.TwoPointDistanceVel * -0.01f;
+                _angleRoll = Touch.TwoPointAngle - _angleRollInit;
+                float pinchSpeed = Touch.TwoPointDistanceVel;
+                if (pinchSpeed > _maxPinchSpeed) _maxPinchSpeed = pinchSpeed; // _maxPinchSpeed is used for debugging only.
+            }
+            else
+            {
+                _twoTouchRepeated = false;
+                _zoomVel = Mouse.WheelVel * -0.5f;
+                _angleRoll *= curDamp * 0.8f;
+                _offset *= curDamp * 0.8f;
             }
 
-            xform = float4x4.CreateTranslation(-1 * _cameraPosition) * xform;
-            
-            // --- move camera pivot
-            /*
-            float3 translation = float3.Zero;
+            // UpDown / LeftRight rotation
+            if (Mouse.LeftButton)
+            {
+                _keys = false;
+                _angleVelHorz = Mouse.XVel * 0.0002f;
+                _angleVelVert = Mouse.YVel * 0.0002f;
+            }
+            else if (Touch.GetTouchActive(TouchPoints.Touchpoint_0) && !Touch.TwoPoint)
+            {
+                _keys = false;
+                float2 touchVel;
+                touchVel = Touch.GetVelocity(TouchPoints.Touchpoint_0);
+                _angleVelHorz = -RotationSpeed * touchVel.x * 0.0002f;
+                _angleVelVert = -RotationSpeed * touchVel.y * 0.0002f;
+            }
+            else
+            {
+                if (_keys)
+                {
+                    _angleVelHorz = -RotationSpeed * Keyboard.LeftRightAxis * 0.002f;
+                    _angleVelVert = -RotationSpeed * Keyboard.UpDownAxis * 0.002f;
+                }
+                else
+                {
+                    _angleVelHorz *= curDamp;
+                    _angleVelVert *= curDamp;
+                }
+            }
+
+            _zoom += _zoomVel;
 
             if (Mouse.RightButton || Touch.TwoPoint)
             {
                 float2 speed = Mouse.Velocity + Touch.TwoPointMidPointVel;
-                translation.x = speed.x * -0.005f;
-                translation.y = speed.y * 0.005f;
+                MoveX += speed.x * -0.005f;
+                MoveY += speed.y * -0.005f;
             }
-            
-            if (translation.Length > 0)
-            {
-                rotation.Invert();
-                translation = rotation * translation;
-                _cameraPivotOffset += translation;
-                //_xform = float4x4.CreateTranslation(translation) * _xform;
-            }
-            */
-            // --- projection matrix
 
-            return xform;
+
+            // Scale Points with W and A
+            if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0)
+            {
+                _scaleKey = true;
+            }
+            else
+            {
+                _scaleKey = false;
+            }
+
+            if (_scaleKey)
+            {
+                ParticleSize = ParticleSize + Keyboard.ADAxis * ParticleSize / 20;
+            }
+
+            _angleHorz += _angleVelHorz;
+            // Wrap-around to keep _angleHorz between -PI and + PI
+            _angleHorz = M.MinAngle(_angleHorz);
+
+            _angleVert += _angleVelVert;
+            // Limit pitch to the range between [-PI/2, + PI/2]
+            _angleVert = M.Clamp(_angleVert, -M.PiOver2, M.PiOver2);
+
+            // Wrap-around to keep _angleRoll between -PI and + PI
+            _angleRoll = M.MinAngle(_angleRoll);
+
+            // List<float3> positions = _pointCloud.GetPositions();
+
+           // StartNumber StrPoint = new StartNumber(StrP);
+            //float3 _startPoint = StrPoint(new float3(0, 0, 0));//positions[1]; //TODO: solution for Android!! Points aren't read at that Time
+            var view = float4x4.CreateTranslation(-1 * _cameraPivot);
+
+            var MtxCam = float4x4.LookAt(0, 0, _zoom, 0, 0, 0, 0, 1, 0) * float4x4.CreateTranslation(MoveX, MoveY, 0);
+            var MtxRot = float4x4.CreateRotationZ(_angleRoll) * float4x4.CreateRotationX(_angleVert) * float4x4.CreateRotationY(_angleHorz);
+            float4x4 ModelView = MtxCam * MtxRot * view;
+
+           
+
+            return ModelView;
+
         }
 
         // Is called when the window was resized
@@ -239,12 +303,12 @@ namespace Fusee.Tutorial.Core
 
             // Create a new projection matrix generating undistorted images on the new aspect ratio.
             float aspectRatio = Width / (float) Height;
-            
+
             // 0.25*PI Rad -> 45° Opening angle along the vertical direction. Horizontal opening angle is calculated based on the aspect ratio
             // Front clipping happens at 1 (Objects nearer than 1 world unit get clipped)
             // Back clipping happens at 2000 (Anything further away from the camera than 2000 world units gets clipped, polygons will be cut)
-            
-            RC.Projection = float4x4.CreatePerspectiveFieldOfView(3.141592f * 0.25f, aspectRatio, 1, 20000);
+
+            _projection = float4x4.CreatePerspectiveFieldOfView(3.141592f * 0.25f, aspectRatio, 1, 20000);
         }
 
         #endregion
