@@ -75,7 +75,7 @@ namespace Fusee.Forschungsprojekt.Desktop
             {
                 while (connected && receiving)
                 {
-                    System.Diagnostics.Debug.WriteLine("Socket accepting");
+                    System.Diagnostics.Debug.WriteLine("Client Socket accepting");
                     byte[] sizebuffer = new byte[4];
                     acceptor.Receive(sizebuffer, 0, sizebuffer.Length, 0);
                     //receive length of data                 

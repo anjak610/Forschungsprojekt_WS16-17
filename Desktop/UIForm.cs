@@ -251,5 +251,12 @@ namespace Fusee.Forschungsprojekt.Desktop
         {
 
         }
+
+        private void setup_btn_Click(object sender, EventArgs e)
+        {
+
+            ConnectionDialog SetupForm = new ConnectionDialog();
+            SetupForm.Show();
+        }
     }
 }

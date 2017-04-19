@@ -17,6 +17,9 @@ namespace Server
         private Socket listener;
         private Socket sender;
         private Socket acceptor;
+        private string msg = "0";
+
+        private int count = 0;
 
         private int maxConnections { get; set; }
 
@@ -34,36 +37,24 @@ namespace Server
         
         }
 
-        public void SendPackages(List<byte[]> packageList)
-        {
-            string msg = " ";
-            int count = 0;
-            while (count < packageList.Count)
-            {
-                if ((msg == "EOP") && (count+1 < packageList.Count))
-                {
-                    count++;//only increment if it was received
-                    SendData(packageList[count]);
-                    Console.Write("Sending package " + (count));                  
-                    msg = ListenFeedback();
-                }                              
-                else//first package or not received package
-                {
-                    SendData(packageList[count]);
-                    Console.Write("Sending package " + (count));
-                    msg = ListenFeedback();
+        public string SendPackage(byte[] package)
+        {                   
+                if (msg == "EOP" || msg == "0") {                
+                    SendData(package);
+                    Console.Write("Sending package");                 
+                    msg = ListenFeedback();                 
                 }
 
-                if ( count == packageList.Count-1)//handle last package
-                {
-                    string endMessage = "END";
-                    byte[] buffer = Encoding.Default.GetBytes(endMessage);
-                    SendData(buffer);
-                    System.Diagnostics.Debug.WriteLine("Sent END OF FILE Message");
-                    break;
-                }
+            if (package.Length == 0)//handle last package
+            {
+                string endMessage = "END";
+                byte[] buffer = Encoding.Default.GetBytes(endMessage);
+                SendData(buffer);
+                System.Diagnostics.Debug.WriteLine("Sent END OF FILE Message");
+                Console.WriteLine("All packages submitted");
             }
-            Console.WriteLine("All packages submitted");                         
+         
+            return msg;                                      
         }
            
                 
@@ -178,44 +169,9 @@ namespace Server
             Console.WriteLine("File converted to byte stream");
             return b;
         }
+       
 
-
-        /// <summary>
-        /// Splits big file into chunks of 1048576 byte MAY DESTROY STRING DATA STRUCTURE AND CAUSE FORMAT ERRORS
-        /// </summary>
-
-        public List<byte[]> Split(byte[] filebytes)
-        {
-
-            List<byte[]> packages = new List<byte[]>();
-            Console.WriteLine("Splitting file into packages");
-            for (int i = 0; i < filebytes.Length; i++)
-
-            {
-
-                IEnumerable<byte> b = filebytes.Cast<byte>();
-
-                IEnumerable<byte> chunk1024 = b.Take<byte>(1048576);//one MB packages
-
-                IEnumerable<byte> leftovers = b.Skip<byte>(1048576);
-
-                b = leftovers;
-
-
-
-                packages.Add(chunk1024.ToArray<byte>()); 
-
-                filebytes = b.ToArray<byte>();
-
-                Console.WriteLine(filebytes.Length);
-
-            }
-
-            return packages;
-
-        }
-
-        public List<byte[]> SplitPointPackages(string filepath)
+        public List<byte[]> SplitandSendPackages(string filepath)
         {
             List<byte[]> packages = new List<byte[]>();
             new Thread(() => //thread for receiving data
@@ -225,12 +181,17 @@ namespace Server
                     string line; //each line represents one point
 
                     int count = 0;
-                    int packagesize = 30000;
-                    int linelimit = packagesize; //50000 points per package
+                    int packagesize = 20000;
+                    int linelimit = packagesize;
                     string packagedata = "";
                     while (((line = s.ReadLine()) != null) && (count <= linelimit)) // read per line
                     {
-                        packagedata += line + "\n";
+                        packagedata += line + "\n";//adds new line character after each point
+                       
+                        if (count == 0)
+                        {
+                            Console.WriteLine("Preparing packages...");
+                        }
                         count++;
 
                         if (count == linelimit)
@@ -239,12 +200,13 @@ namespace Server
 
                             byte[] b = Encoding.UTF8.GetBytes(packagedata);
                             packages.Add(b);
-                            SendData(b);//TODO Send here
                             Console.WriteLine("Package created. Linecount: " + count);
-                            packagedata = "";
-                             
-                           
+                            SendPackage(b);
+                                               
+                            packagedata = "";                                                     
                         }
+                      
+
                     }
                 }
                 

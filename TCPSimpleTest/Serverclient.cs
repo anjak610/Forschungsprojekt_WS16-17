@@ -33,7 +33,6 @@ namespace Server
      //      file = server.ReadfromFile(path);
      //      packages = server.Split(file);       
 
-          //packages = server.SplitPointPackages(path);
 
 
           server.Start();
@@ -56,24 +55,24 @@ namespace Server
           {
               try
               {
-                    //server.SendPackages(packages);
-                    packages = server.SplitPointPackages(path);//split and send packages
+                    packages = server.SplitandSendPackages(path);//split and send packages, store them 
                 }
               catch(Exception exception)
               {
                   Console.WriteLine("Error: " + exception);
-              }
+                  Console.WriteLine("Press <enter> to stop server");
+                    pressed = Console.ReadKey();
+                    if (pressed.Key == ConsoleKey.Enter)
+                    {
+
+                        server.Stop();
+                        Console.WriteLine("Server stopped");
+                    }
+                }
           }
      
      
-          Console.WriteLine("Press <enter> to stop server");
-          pressed = Console.ReadKey();
-          if (pressed.Key == ConsoleKey.Enter)
-          {
-     
-              server.Stop();
-              Console.WriteLine("Server stopped");
-          }
+          
 
             Console.Read();//Console waits for input, so window doesn't close immediately
             }

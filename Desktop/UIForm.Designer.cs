@@ -32,11 +32,14 @@
             this.label_particle_size = new System.Windows.Forms.Label();
             this.plus_button = new System.Windows.Forms.Button();
             this.minus_button = new System.Windows.Forms.Button();
+            this.setup_btn = new System.Windows.Forms.Button();
+            this.canvaspanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // canvaspanel
             // 
             this.canvaspanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.canvaspanel.Controls.Add(this.setup_btn);
             this.canvaspanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.canvaspanel.Location = new System.Drawing.Point(0, 0);
             this.canvaspanel.Margin = new System.Windows.Forms.Padding(5);
@@ -79,6 +82,17 @@
             this.minus_button.UseVisualStyleBackColor = true;
             this.minus_button.Click += new System.EventHandler(this.minus_button_Click);
             // 
+            // setup_btn
+            // 
+            this.setup_btn.Location = new System.Drawing.Point(246, 6);
+            this.setup_btn.MinimumSize = new System.Drawing.Size(150, 40);
+            this.setup_btn.Name = "setup_btn";
+            this.setup_btn.Size = new System.Drawing.Size(150, 40);
+            this.setup_btn.TabIndex = 0;
+            this.setup_btn.Text = "Setup Connection";
+            this.setup_btn.UseVisualStyleBackColor = false;
+            this.setup_btn.Click += new System.EventHandler(this.setup_btn_Click);
+            // 
             // UIForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
@@ -95,6 +109,7 @@
             this.Name = "UIForm";
             this.Text = "Fusee Point Clouds";
             this.Load += new System.EventHandler(this.UIForm_Load);
+            this.canvaspanel.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -106,5 +121,6 @@
         private System.Windows.Forms.Label label_particle_size;
         private System.Windows.Forms.Button plus_button;
         private System.Windows.Forms.Button minus_button;
+        private System.Windows.Forms.Button setup_btn;
     }
 }

@@ -34,16 +34,18 @@ namespace Fusee.Forschungsprojekt.Desktop
         {
             // _fRL = new FrameRateLogger(); // start logging frame rate on console     
 
-            //SetupForm = new ConnectionDialog();
-            // SetupForm.Show();
+           
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new UIForm());
+
+            //SetupForm = new ConnectionDialog();
+            //SetupForm.Show();
             //UIWindow.Show();
             // Start the app
             //app.Run();
-           
+
 
 
         }
