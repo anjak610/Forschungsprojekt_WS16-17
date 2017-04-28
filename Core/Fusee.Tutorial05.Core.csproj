@@ -46,7 +46,8 @@
     <Compile Include="Common\Color.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
-    <Compile Include="Common\DynamicMesh.cs" />
+    <Compile Include="Common\AttributesList.cs" />
+    <Compile Include="Common\MeshList.cs" />
     <Compile Include="Octree\Octree.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>

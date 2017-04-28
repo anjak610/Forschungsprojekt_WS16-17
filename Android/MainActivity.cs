@@ -46,7 +46,7 @@ namespace Fusee.Tutorial.Android
             minusButton = FindViewById<Button>(Resource.Id.minus_btn);
 		    viewMode = FindViewById<Button>(Resource.Id.view_btn);
 
-
+            FrameRateLogger frl = new FrameRateLogger();
 
             if (SupportedOpenGLVersion() >= 3)
 		    {

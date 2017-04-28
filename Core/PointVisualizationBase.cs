@@ -5,12 +5,10 @@ using Fusee.Math.Core;
 using static Fusee.Engine.Core.Input;
 using static Fusee.Engine.Core.Time;
 using Fusee.Tutorial.Core.Common;
-using Fusee.Base.Common;
 using System.Collections.Generic;
-using Android.Text.Method;
 using Fusee.Tutorial.Core.Octree;
 using Fusee.Tutorial.Core.PointCloud;
-using Fusee.Tutorial05.Core.Common;
+using System.Threading;
 
 namespace Fusee.Tutorial.Core
 {
@@ -22,23 +20,26 @@ namespace Fusee.Tutorial.Core
             PointCloud, VoxelSpace
         }
 
-        //public PointVisualizationBase.ViewMode ModeProperty { get; set; }
-
         #region Fields
 
-        // --- constants
+        #region Constants
 
         private const float VOXEL_SIZE = 1;
+        
         private const int COMPUTE_EVERY = 1; // take only every xth point into account in order to speed up calculation
         private const int UPDATE_PCL_EVERY = 1000; // every xth point the point cloud should update its meshes
         
         public float ParticleSize = 0.05f; // maybe gets changed from platform specific classes
 
-        // connection details to receive from
+        #endregion
 
+        #region Connection Details
+        
         private const int UDP_PORT = 8001;
 
-        // helper variables
+        #endregion
+
+        #region Helper Variables
 
         private int _pointCounter = 0;
         private ViewMode _viewMode = ViewMode.PointCloud;
@@ -55,26 +56,29 @@ namespace Fusee.Tutorial.Core
             }
         }
 
-        // --- mesh data / pointcloud / voxelspace
+        #endregion
 
-        /*
-        private InstanceAttributes _iaPCL = new InstanceAttributes();
-        private InstanceAttributes _iaVSP = new InstanceAttributes();
+        #region Mesh Data / Pointcloud / Voxelspace
+        
+        // These are the objects where new vertices are stored. Also look at the description of the class(es) for more information.
+        private DynamicAttributes _positionsVSP = new DynamicAttributes(); // no need for separation of buffers
+        private AttributesList _positionsPCL = new AttributesList(65000); // <- limit of how many vertices one buffer should hold ( may be randomly )
 
-        private List<float3> _positionsPCL = new List<float3>();
-        private List<float3> _positionsVSP = new List<float3>();
-        //*/
-
-        private DynamicMesh _pointCloud = new DynamicMesh();
-        private DynamicMesh _voxelSpace = new DynamicMesh();
-
-        private PointMesh _pointMesh = new PointMesh(float3.Zero);
+        // when adding each point to the instance attributes, computation gets slow.
+        // so temporarily store vertices in list, and add it when it reaches some length, e.g. 1000 => see UPDATE_PCL_EVERY
+        private List<float3> _tmpPositionsPCL = new List<float3>(); 
+        
+        // multiple cubes will be rendered on different positions
         private Cube _cube = new Cube();
 
         private BoundingBox _boundingBox;
-        Octree<OctreeNodeStates> _octree;
+        private Octree<OctreeNodeStates> _octree;
 
-        // --- shader params
+        #endregion
+
+        #region Shader Params
+
+        private ShaderProgram _shader;
 
         private string vertsh_PCL, vertsh_VSP, pixsh_PCL, pixsh_VSP;
         
@@ -83,7 +87,17 @@ namespace Fusee.Tutorial.Core
 
         private IShaderParam _particleSizeParam;
 
-        // --- camera positioning
+        // TO-DO: set shader param for voxelsize?
+
+        #endregion
+
+        #region Multithreading
+
+        private AutoResetEvent _signalEvent = new AutoResetEvent(true);
+
+        #endregion
+
+        #region Camera Positioning
 
         private float _rotationY = (float) System.Math.PI;
         private float _rotationX = (float) System.Math.PI / -8;
@@ -97,7 +111,10 @@ namespace Fusee.Tutorial.Core
 
         private float4x4 _projection;
 
-        // --- beginn camera values
+        #endregion
+
+        #region Begin Camera Values
+        
         private static float _zoom, _zoomVel, _angleHorz = M.PiOver6 * 2.0f, _angleVert = -M.PiOver6 * 0.5f, _angleVelHorz, _angleVelVert, _angleRoll, _angleRollInit;
         private bool _twoTouchRepeated;
         private float _maxPinchSpeed;
@@ -115,18 +132,20 @@ namespace Fusee.Tutorial.Core
 
         #endregion
 
+        #endregion
+
         /// <summary>
-        /// Initializes variables (very good summary).
+        /// Initializes variables.
         /// </summary>
         public override void Init()
         {
             // --- 1. Start loading resources
 
-            // octree
-
             //Zoom Value
             _zoom = 60;
-            
+
+            // octree
+
             _octree = new Octree<OctreeNodeStates>(float3.Zero, VOXEL_SIZE);
             _octree.OnNodeAddedCallback += OnNewNodeAdded;
             
@@ -134,11 +153,7 @@ namespace Fusee.Tutorial.Core
             
             _boundingBox = new BoundingBox();
             _boundingBox.UpdateCallbacks += OnBoundingBoxUpdate;
-
-            // pointcloud and voxelspace
-
-            // TO-DO: set shader param for voxelsize
-
+            
             // callbacks for various readings and stuff
 
             PointCloudReader.OnNewPointCallbacks += OnNewPointAdded;
@@ -146,8 +161,8 @@ namespace Fusee.Tutorial.Core
 
             // start loading points
                         
-            //PointCloudReader.ReadFromAsset("PointCloud_IPM.txt");
-            PointCloudReader.ReceiveFromUDP(UDP_PORT); // for unity game or other
+            PointCloudReader.ReadFromAsset("PointCloud_IPM.txt");
+            //PointCloudReader.ReceiveFromUDP(UDP_PORT); // for unity game or other
 
             // --- 2. Set RC/GL related variables
 
@@ -165,8 +180,10 @@ namespace Fusee.Tutorial.Core
         }
 
         #region Rendering
-
-        // RenderAFrame is called once a frame
+        
+        /// <summary>
+        /// RenderAFrame is called once a frame.
+        /// </summary>
         public override void RenderAFrame()
         {
             // check on key down
@@ -176,29 +193,34 @@ namespace Fusee.Tutorial.Core
                 ViewMode nextViewMode = _viewMode == ViewMode.PointCloud ? ViewMode.VoxelSpace : ViewMode.PointCloud;
                 SetViewMode(nextViewMode);
             }
-
-            if (_viewMode == ViewMode.PointCloud)
+            else
             {
-                ChangeParticleSize(RC.CreateShader(vertsh_PCL, pixsh_PCL));
+                SetShaderParams();
             }
 
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
-
-            // Clear GPU memory
-            ClearDynamicMeshes();
-
-            //Change Particle Size
-           // ChangeParticleSize();
-
+            
             // Render
+
             RC.ModelView = MoveInScene();
-           
-            List<Mesh> meshes = _viewMode == ViewMode.PointCloud ? _pointCloud.GetMeshes() : _voxelSpace.GetMeshes();
-            for(var i=0; i<meshes.Count; i++)
+
+            _signalEvent.WaitOne(); // stop other thread from adding points until these points have been written to the gpu memory
+            
+            if (_viewMode == ViewMode.PointCloud)
             {
-                RC.Render(meshes[i]);
+                List<DynamicAttributes> ias = _positionsPCL.GetAttributesList();
+                for(var i=0; i<ias.Count; i++)
+                {
+                    RC.RenderAsPoints(ias[i]);
+                }
             }
+            else
+            {
+                RC.RenderAsInstance(_cube, _positionsVSP);
+            }
+
+            _signalEvent.Set(); // allow other thread again to add points
 
             RC.Projection = _projection;
 			
@@ -206,6 +228,9 @@ namespace Fusee.Tutorial.Core
             Present();
         }
         
+        /// <summary>
+        /// Computes the modelview matrix.
+        /// </summary>
         private float4x4 MoveInScene()
         {
           var curDamp = (float)System.Math.Exp(-Damping * DeltaTime);
@@ -300,29 +325,9 @@ namespace Fusee.Tutorial.Core
 
         }
 
-        public void ChangeParticleSize(ShaderProgram shader)
-        {
-            if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0)
-            {
-                _scaleKey = true;
-            }
-            else
-            {
-                _scaleKey = false;
-            }
-
-            if (_scaleKey)
-            {
-                ParticleSize = ParticleSize + Keyboard.ADAxis * ParticleSize / 20;
-            }
-
-            _particleSizeParam = RC.GetShaderParam(shader, "particleSize");
-            RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize));
-            // return ParticleSize;
-        }
-
-
-        // Is called when the window was resized
+        /// <summary>
+        /// Is called when the window was resized.
+        /// </summary>
         public override void Resize()
         {
             // Set the new rendering area to the entire new windows size
@@ -339,31 +344,8 @@ namespace Fusee.Tutorial.Core
         }
 
         #endregion
-
-        #region Helper
-
-        /// <summary>
-        /// Clears the meshes and the corresponding GPU memory.
-        /// </summary>
-        private void ClearDynamicMeshes()
-        {
-            // point cloud
-            List<Mesh> meshesToRemove = _pointCloud.GetMeshesToRemove();
-            for (var i = 0; i < meshesToRemove.Count; i++)
-            {
-                RC.Remove(meshesToRemove[i]);
-            }
-
-            List<Mesh> meshesToRemove2 = _voxelSpace.GetMeshesToRemove();
-            for (var i = 0; i < meshesToRemove2.Count; i++)
-            {
-                RC.Remove(meshesToRemove2[i]);
-            }
-        }
-
-        #endregion
-
-        #region Various Event Handler
+        
+        #region Various Event Handlers
 
         /// <summary>
         /// Event handler for when a new node gets added to the octree.
@@ -373,30 +355,9 @@ namespace Fusee.Tutorial.Core
         {
             if (node.Data == OctreeNodeStates.Occupied && node.SideLength == VOXEL_SIZE)
             {
-                // add voxel position as new offset attribute
-                //_positionsVSP.Add(node.Position);
-
-                // create single cube with VoxelSideLength at specified position
-
-                Cube cube = new Cube();
-
-                for (var i = 0; i < cube.Vertices.Length; i++)
-                {
-                    float3 vertex = cube.Vertices[i];
-
-                    // scale cube (vertices) according to voxel side length
-                    vertex *= VOXEL_SIZE; // no dividing by 2 neccessary, because vertex is already 0.5
-
-                    // position vertex according to voxel center position
-                    vertex += node.Position;
-
-                    // apply to mesh
-                    cube.Vertices[i] = vertex;
-                }
-
-                // --- add cube mesh to final mesh
-                _voxelSpace.AddMesh(cube);
-                _voxelSpace.Apply();
+                _signalEvent.WaitOne();
+                _positionsVSP.AddAttribute(node.Position);
+                _signalEvent.Set();
             }
         }
 
@@ -413,25 +374,15 @@ namespace Fusee.Tutorial.Core
             
             _boundingBox.Update(point.Position);
 
-            // add point to offset as attribute
-            //_positionsPCL.Add(point.Position);
+            _tmpPositionsPCL.Add(point.Position);
 
-            // add point to point cloud
-
-            PointMesh pointMesh = new PointMesh(point.Position);
-
-            if (point.Color != null)
+            if(_pointCounter % UPDATE_PCL_EVERY == 0)
             {
-                uint color = (uint)new ColorUint((float3)point.Color, 1);
-                pointMesh.Colors = new uint[] { color, color, color, color };
+                _signalEvent.WaitOne();
+                _positionsPCL.AddAttributes(_tmpPositionsPCL);
+                _tmpPositionsPCL = new List<float3>();
+                _signalEvent.Set();
             }
-
-            _pointCloud.AddMesh(pointMesh);
-
-            //*
-            if (_pointCounter % UPDATE_PCL_EVERY == 0)
-                _pointCloud.Apply();
-            //*/
 
             // add point to octree
 
@@ -443,9 +394,6 @@ namespace Fusee.Tutorial.Core
         /// </summary>
         private void OnAssetLoaded()
         {
-            // apply remaining vertices etc.
-            _pointCloud.Bake();
-            _voxelSpace.Bake();
         }
         
         // update cameraPivot, whenever bounding box of point cloud gets updated
@@ -461,6 +409,9 @@ namespace Fusee.Tutorial.Core
 
         #region Public Members
 
+        /// <summary>
+        /// Changes the current view to either pointcloud or voxelspace.
+        /// </summary>
         public void SetViewMode(ViewMode viewMode)
         {
             _viewMode = viewMode;
@@ -469,18 +420,46 @@ namespace Fusee.Tutorial.Core
 
             // read shaders from files
 
-            var shader = _viewMode == ViewMode.PointCloud ? RC.CreateShader(vertsh_PCL, pixsh_PCL) : RC.CreateShader(vertsh_VSP, pixsh_VSP);
-            RC.SetShader(shader);
+            _shader = _viewMode == ViewMode.PointCloud ? RC.CreateShader(vertsh_PCL, pixsh_PCL) : RC.CreateShader(vertsh_VSP, pixsh_VSP);
+            RC.SetShader(_shader);
 
+            SetShaderParams();
+        }
+
+        #endregion
+
+        #region Private Members
+
+        /// <summary>
+        /// Sets the shader params. Gets Called either every frame or from SetViewMode() (via Android button).
+        /// </summary>
+        private void SetShaderParams()
+        {
             if (_viewMode == ViewMode.PointCloud)
             {
-                _particleSizeParam = RC.GetShaderParam(shader, "particleSize");
+                // no point size implementation at the moment
+                /*
+                if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0)
+                {
+                    _scaleKey = true;
+                }
+                else
+                {
+                    _scaleKey = false;
+                }
+
+                if (_scaleKey)
+                {
+                    ParticleSize = ParticleSize + Keyboard.ADAxis * ParticleSize / 20;
+                }
+
+                _particleSizeParam = RC.GetShaderParam(_shader, "particleSize");
                 RC.SetShaderParam(_particleSizeParam, new float2(ParticleSize, ParticleSize));
-              
+                //*/
             }
             else
             {
-                _yBoundsParam = RC.GetShaderParam(shader, "yBounds");
+                _yBoundsParam = RC.GetShaderParam(_shader, "yBounds");
                 RC.SetShaderParam(_yBoundsParam, _yBounds);
             }
         }

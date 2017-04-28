@@ -14,7 +14,7 @@ namespace Fusee.Tutorial.Desktop
     {
         public static void Main()
         {
-            //_fRL = new FrameRateLogger(); // start logging frame rate on console
+            FrameRateLogger _fRL = new FrameRateLogger(); // start logging frame rate on console
 
             // connect UDPReceiver with PointCloudReader
             PointCloudReader.StartStreamingUDPCallback += new UDPReceiver().StreamFromUDP;

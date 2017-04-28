@@ -20,7 +20,7 @@ namespace Fusee.Tutorial.Android.HelperClasses
 
         private void PrintFrameRate(Object state)
         {
-            Console.WriteLine(Time.FramePerSecond.ToString());
+            Console.WriteLine(Time.FramesPerSecondAverage.ToString());
         }
     }
 }

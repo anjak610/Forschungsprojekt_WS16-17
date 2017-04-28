@@ -1,7 +1,7 @@
 attribute vec3 fuVertex;
 attribute vec3 fuNormal;
 attribute vec2 fuUV;
-//attribute vec3 fuOffset;
+attribute vec3 fuInstance;
 
 uniform mat4 FUSEE_MV;
 uniform mat4 FUSEE_MVP;
@@ -22,7 +22,7 @@ vec3 hsv2rgb(in vec3 c)
 
 void main()
 {
-	vec3 modelpos = fuVertex; // + fuOffset;
+	vec3 modelpos = fuVertex + fuInstance;
 	normal = normalize(mat3(FUSEE_MV) * fuNormal);
 
 	uv = fuUV;
