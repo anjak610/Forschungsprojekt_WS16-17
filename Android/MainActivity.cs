@@ -5,25 +5,22 @@ using Android.OS;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
-using Android.Runtime;
 using Fusee.Base.Common;
 using Fusee.Base.Core;
 using Fusee.Base.Imp.Android;
 using Fusee.Engine.Imp.Graphics.Android;
 using Fusee.Serialization;
-using Fusee.Forschungsprojekt.Core;
-using static Fusee.Engine.Core.Time; // frame rate
 using Font = Fusee.Base.Core.Font;
 using Path = Fusee.Base.Common.Path;
-using Fusee.Math.Core;
-using System;
-using System.Net.Sockets;
-using System.Globalization;
-using System.Text;
-using System.Net;
+using Fusee.Tutorial.Android.HelperClasses;
+using Fusee.Tutorial.Core.PointCloud;
+using Android.Runtime;
+using Fusee.Tutorial.Core;
+using Java.IO;
 
-namespace Fusee.Forschungsprojekt.Android
+namespace Fusee.Tutorial.Android
 {
+
 	[Activity (Label = "@string/app_name", MainLauncher = true, Icon = "@drawable/icon",
 #if __ANDROID_11__
 		HardwareAccelerated=false,
@@ -31,35 +28,29 @@ namespace Fusee.Forschungsprojekt.Android
 		ConfigurationChanges = ConfigChanges.KeyboardHidden, LaunchMode = LaunchMode.SingleTask)]
 	public class MainActivity : Activity
 	{
-	    private FrameRateLogger _fRL;
-        private RelativeLayout canvas_view;
         private Button plusButton;
         private Button minusButton;
+	    private Button viewMode;
         private Core.PointVisualizationBase app;
-
+        private RelativeLayout canvas_view;
 
         protected override void OnCreate (Bundle savedInstanceState)
 		{
+
 			base.OnCreate (savedInstanceState);
-            RequestWindowFeature(WindowFeatures.ActionBar);
+            RequestWindowFeature(WindowFeatures.NoTitle);
 
-            //Setup UI Elements
-            SetContentView(Forschungsprojekt.Android.Resource.Layout.main_activity_layout);
-            canvas_view = FindViewById<RelativeLayout>(Forschungsprojekt.Android.Resource.Id.canvas_container);
-            plusButton = FindViewById<Button>(Forschungsprojekt.Android.Resource.Id.plus_btn);
-            minusButton = FindViewById<Button>(Forschungsprojekt.Android.Resource.Id.minus_btn);
+            SetContentView(Resource.Layout.main_activity_layout);
+            canvas_view = FindViewById<RelativeLayout>(Tutorial.Android.Resource.Id.canvas_container);
+            plusButton = FindViewById<Button>(Resource.Id.plus_btn);
+            minusButton = FindViewById<Button>(Resource.Id.minus_btn);
+		    viewMode = FindViewById<Button>(Resource.Id.view_btn);
 
-            this.ActionBar.SetTitle(Forschungsprojekt.Android.Resource.String.app_name);
-            this.ActionBar.Show();
-            
+
 
             if (SupportedOpenGLVersion() >= 3)
 		    {
-                //_fRL = new FrameRateLogger(); // start logging frame rate on console
-
-                //SetContentView(new LibPaintingView(ApplicationContext, null));
-
-                              
+                // SetContentView(new LibPaintingView(ApplicationContext, null));
 
                 // Inject Fusee.Engine.Base InjectMe dependencies
                 IO.IOImp = new IOImp(ApplicationContext);
@@ -100,54 +91,12 @@ namespace Fusee.Forschungsprojekt.Android
                             return Path.GetExtension(id).ToLower().Contains("fus");
                         }
                     });
-                fap.RegisterTypeHandler( // TO-DO: ending shouldn't be .txt
-                    new AssetHandler
-                    {
-                        ReturnedType = typeof(PointCloud),
-                        Decoder = delegate (string id, object storage)
-                        {
-                            if (!Path.GetExtension(id).ToLower().Contains("txt")) return null;
-
-                            PointCloud pointCloud = new PointCloud();
-
-                            using (var sr = new StreamReader((Stream)storage, System.Text.Encoding.Default, true))
-                            {
-                                string line;
-                                while ((line = sr.ReadLine()) != null) // read per line
-                                {
-                                    string delimiter = "\t";
-                                    string[] textElements = line.Split(delimiter.ToCharArray());
-
-                                    if (textElements.Length == 1) // empty line
-                                        continue;
-
-                                    Point point = new Point();
-                                    float[] numbers = Array.ConvertAll(textElements, n => float.Parse(n, CultureInfo.InvariantCulture.NumberFormat));
-
-                                    point.Position = new float3(numbers[0], numbers[1], numbers[2]);
-
-                                    if (numbers.Length == 9)
-                                    {
-                                        point.Color = new float3(numbers[3], numbers[4], numbers[5]);
-                                        point.EchoId = numbers[6];
-                                        point.ScanNr = numbers[8];
-                                    }
-
-                                    pointCloud.AddPoint(point);
-                                }
-                            }
-
-                            pointCloud.FlushPoints();
-                            return pointCloud;
-                        },
-                        Checker = id => Path.GetExtension(id).ToLower().Contains("txt")
-                    });
+                
 
                 AssetStorage.RegisterProvider(fap);
 
                 var app = new Core.PointVisualizationBase();
 
-                //buttons to increase or decrease particle size
                 plusButton.Click += (sender, e) =>
                 {
                     app.ParticleSize = app.ParticleSize + app.ParticleSize / 2;
@@ -159,26 +108,35 @@ namespace Fusee.Forschungsprojekt.Android
                 };
 
 
+                //Change Shader dependent on ViewMode
+                viewMode.Click += (sender, e) =>
+                {
+                    var nextView = app._ViewMode == PointVisualizationBase.ViewMode.PointCloud ? PointVisualizationBase.ViewMode.VoxelSpace : PointVisualizationBase.ViewMode.PointCloud;
+                    app.SetViewMode(nextView);
+                    System.Diagnostics.Debug.WriteLine(nextView);
+                };
+
+                // connect UDPReceiver with PointCloudReader
+                PointCloudReader.StartStreamingUDPCallback += new UDPReceiver().StreamFromUDP;
+                
                 // Inject Fusee.Engine InjectMe dependencies (hard coded)
                 RenderCanvasImp rci = new RenderCanvasImp(ApplicationContext, null, delegate { app.Run(); });
 		        app.CanvasImplementor = rci;
 		        app.ContextImplementor = new RenderContextImp(rci, ApplicationContext);
 
-                //SetContentView(rci.View);
+		       // SetContentView(rci.View);
                 canvas_view.AddView(rci.View);
+
                 app.ParticleSize = 0.05f;
-
-
-
                 //show display dimensions for testing
                 IWindowManager wm = ApplicationContext.GetSystemService(WindowService).JavaCast<IWindowManager>() ;
                 //Display display = wm.DefaultDisplay;
-                ////app._screenSize = new float2(display.Width, display.Height);
-                //float pixel_height = display.Height;
+                //app._screenSize = new float2(display.Width, display.Height);
+                // float pixel_height = display.Height;
                 //float pixel_width = display.Width;
-                //string output = "Width: " + pixel_height + " Height:" + pixel_width;
-                ////Show roasted bread
-                //Toast.MakeText(ApplicationContext, output, ToastLength.Short).Show();
+                // string output = "Width: " + pixel_height + " Height:" + pixel_width;
+                //Show roasted bread
+                //  Toast.MakeText(ApplicationContext, output, ToastLength.Short).Show();
 
                 Engine.Core.Input.AddDriverImp(
 		            new Fusee.Engine.Imp.Graphics.Android.RenderCanvasInputDriverImp(app.CanvasImplementor));
@@ -192,38 +150,11 @@ namespace Fusee.Forschungsprojekt.Android
             }
         }
 
-        /// <summary>
-        /// Inflates Menu Layout
-        /// </summary>
-
-        public override bool OnCreateOptionsMenu(IMenu menu)
-        {
-            var inflater = MenuInflater;
-            inflater.Inflate(Forschungsprojekt.Android.Resource.Menu.menu_main, menu);
-            return true;
-        }
-
-        /// <summary>
-        /// Sets up the actions that happen when menu buttons are clicked
-        /// </summary>
-        public override bool OnOptionsItemSelected(IMenuItem item)
-        {
-            var id = item.ItemId;
-            //If someone clicks on the Add Service button
-            if (id == Resource.Id.action_open_conn_dialog)
-            {
-                //Create a new dialog and all show on
-                //That dialog
-                var dialog = ConnectionDialog.NewInstance();
-                dialog.Show(FragmentManager, "dialog");
-            }
-            return base.OnOptionsItemSelected(item);
-        }
 
         /// <summary>
         /// Gets the supported OpenGL ES version of device.
         /// </summary>
-        /// <returns>Highest supported version of OpenGL ES</returns>
+        /// <returns>Hieghest supported version of OpenGL ES</returns>
         private long SupportedOpenGLVersion()
         {
             //based on https://android.googlesource.com/platform/cts/+/master/tests/tests/graphics/src/android/opengl/cts/OpenGlEsVersionTest.java

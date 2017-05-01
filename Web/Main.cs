@@ -8,9 +8,9 @@ using Fusee.Base.Core;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using Fusee.Serialization;
-using Fusee.Forschungsprojekt.Core;
+using Fusee.Tutorial.Core;
 using Path = Fusee.Base.Common.Path;
-namespace Fusee.Forschungsprojekt.Web
+namespace Fusee.Tutorial.Web
 {
     public class Tutorial
     {
@@ -60,7 +60,7 @@ namespace Fusee.Forschungsprojekt.Web
 
             AssetStorage.RegisterProvider(fap);
 
-            var app = new Fusee.Forschungsprojekt.Core.PointVisualizationBase();
+            var app = new Fusee.Tutorial.Core.PointVisualizationBase();
 
             // Inject Fusee.Engine InjectMe dependencies (hard coded)
            // app.CanvasImplementor = new Fusee.Engine.Imp.Graphics.Web.RenderCanvasImp();
