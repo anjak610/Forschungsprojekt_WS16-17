@@ -6,7 +6,7 @@ using Fusee.Engine.Core;
 using Fusee.Serialization;
 using Path = Fusee.Base.Common.Path;
 using Fusee.Tutorial.Desktop.HelperClasses;
-using Fusee.Tutorial.Core.PointCloud;
+using Fusee.Tutorial.Core;
 
 namespace Fusee.Tutorial.Desktop
 {

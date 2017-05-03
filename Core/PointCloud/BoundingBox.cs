@@ -4,7 +4,7 @@
 /// Represents a bounding box of some point cloud or whatever.
 /// </summary>
 
-namespace Fusee.Tutorial.Core.PointCloud
+namespace Fusee.Tutorial.Core
 {
     public class BoundingBox
     {

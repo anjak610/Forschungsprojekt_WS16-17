@@ -7,12 +7,12 @@ namespace Fusee.Tutorial.Core.Common
     /// Holds and manages a list of <see cref="DynamicMesh"/>. Whenever a <see cref="DynamicMesh"/> is full, it gets added to the meshes 
     /// list, while <see cref="GetMeshes()"/> returns the meshes list as well as the current dynamic mesh.
     /// </summary>
-    public class MeshList
+    public class DynamicMeshList
     {
         private List<DynamicMesh> _meshes; // where all full meshes are stored
         private DynamicMesh _currentMesh; // to this mesh everything gets added
 
-        public MeshList()
+        public DynamicMeshList()
         {
             _meshes = new List<DynamicMesh>();
             _currentMesh = new DynamicMesh();

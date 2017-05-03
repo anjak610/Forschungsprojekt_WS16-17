@@ -47,7 +47,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
     <Compile Include="Common\AttributesList.cs" />
-    <Compile Include="Common\MeshList.cs" />
+    <Compile Include="Common\DynamicMeshList.cs" />
+    <Compile Include="Common\StaticMeshList.cs" />
     <Compile Include="Octree\Octree.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
@@ -60,10 +61,12 @@
     <Compile Include="Common\PointMesh.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
+    <Compile Include="PointCloud\PointCloud.cs" />
     <Compile Include="PointCloud\PointCloudReader.cs" />
     <Compile Include="PointCloud\Point.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
+    <Compile Include="PointCloud\VoxelSpace.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PointVisualizationBase.cs" />
   </ItemGroup>
