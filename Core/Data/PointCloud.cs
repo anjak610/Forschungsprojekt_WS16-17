@@ -26,7 +26,9 @@ namespace Fusee.Tutorial.Core
 
         #region Shader Params
 
-        public readonly string VertexShader, PixelShader;
+        private RenderContext _rc;
+
+        public readonly ShaderProgram Shader;
         private IShaderParam _particleSizeParam;
 
         #endregion
@@ -51,10 +53,15 @@ namespace Fusee.Tutorial.Core
         /// <summary>
         /// Constructor, which loads the shader programs.
         /// </summary>
-        public PointCloud()
+        /// <param name="rc">The render context.</param>
+        public PointCloud(RenderContext rc)
         {
-            VertexShader = AssetStorage.Get<string>("VertexShaderPCL.vert");
-            PixelShader = AssetStorage.Get<string>("PixelShaderPCL.frag");
+            _rc = rc;
+
+            string vertsh = AssetStorage.Get<string>("VertexShaderPCL.vert");
+            string pixsh = AssetStorage.Get<string>("PixelShaderPCL.frag");
+
+            Shader = _rc.CreateShader(vertsh, pixsh);
         }
 
         /// <summary>
@@ -79,32 +86,30 @@ namespace Fusee.Tutorial.Core
         }
 
         /// <summary>
-        /// Gets called every frame. Takes of rendering the point cloud.
+        /// Gets called every frame. Takes care of rendering the point cloud.
         /// </summary>
-        /// <param name="rc">The render context.</param>
-        public void Render(RenderContext rc)
+        public void Render()
         {
             List<Mesh> meshesToRemove = _meshList.GetMeshesToRemove();
             for (var i = 0; i < meshesToRemove.Count; i++)
             {
-                rc.Remove(meshesToRemove[i]);
+                _rc.Remove(meshesToRemove[i]);
             }
 
             List<Mesh> meshes = _meshList.GetMeshes();
             for (var i = 0; i < meshes.Count; i++)
             {
-                rc.Render(meshes[i]);
+                _rc.Render(meshes[i]);
             }
         }
 
         /// <summary>
         /// Sets the shader params for the point cloud.
         /// </summary>
-        /// <param name="rc">The render context.</param>
-        public void SetShaderParams(RenderContext rc, ShaderProgram shader)
+        public void SetShaderParams()
         {
-            _particleSizeParam = rc.GetShaderParam(shader, "particleSize");
-            rc.SetShaderParam(_particleSizeParam, ParticleSize);
+            _particleSizeParam = _rc.GetShaderParam(Shader, "particleSize");
+            _rc.SetShaderParam(_particleSizeParam, ParticleSize);
         }
 
         /// <summary>

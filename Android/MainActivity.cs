@@ -117,8 +117,8 @@ namespace Fusee.Tutorial.Android
                     System.Diagnostics.Debug.WriteLine(nextView);
                 };
 
-                // connect UDPReceiver with PointCloudReader
-                PointCloudReader.StartStreamingUDPCallback += new UDPReceiver().StreamFromUDP;
+                // connect UDPReceiver
+                app.UDPReceiver = new UDPReceiver();
                 
                 // Inject Fusee.Engine InjectMe dependencies (hard coded)
                 RenderCanvasImp rci = new RenderCanvasImp(ApplicationContext, null, delegate { app.Run(); });

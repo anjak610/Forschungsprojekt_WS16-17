@@ -18,12 +18,14 @@ namespace Fusee.Tutorial.Core
 
         private const float VOXEL_SIZE = 1;
         private const int COMPUTE_EVERY = 1; // take only every xth point into account in order to speed up calculation
-        
+
         #endregion
 
         #region Shader Params
 
-        public readonly string VertexShader, PixelShader;
+        private RenderContext _rc;
+
+        public readonly ShaderProgram Shader;
 
         private IShaderParam _yBoundsParam;
         private float2 _yBounds;
@@ -59,12 +61,17 @@ namespace Fusee.Tutorial.Core
         /// Constructor, which loads the shader programs.
         /// </summary>
         /// <param name="boundingBox">Needs a reference to the bounding box for rendering.</param>
-        public VoxelSpace(BoundingBox boundingBox)
+        /// <param name="rc">The render context.</param>
+        public VoxelSpace(RenderContext rc, BoundingBox boundingBox)
         {
             boundingBox.UpdateCallbacks += OnBoundingBoxUpdate;
 
-            VertexShader = AssetStorage.Get<string>("VertexShaderVSP.vert");
-            PixelShader = AssetStorage.Get<string>("PixelShaderVSP.frag");
+            _rc = rc;
+
+            string vertsh = AssetStorage.Get<string>("VertexShaderVSP.vert");
+            string pixsh = AssetStorage.Get<string>("PixelShaderVSP.frag");
+
+            Shader = _rc.CreateShader(vertsh, pixsh);
 
             _octree = new Octree<OctreeNodeStates>(float3.Zero, VOXEL_SIZE);
             _octree.OnNodeAddedCallback += OnNewNodeAdded;
@@ -97,22 +104,34 @@ namespace Fusee.Tutorial.Core
         }
 
         /// <summary>
-        /// Gets called every frame. Takes of rendering the point cloud.
+        /// Overload method for <see cref="AddPoint(Point)"/>. 
         /// </summary>
-        /// <param name="rc">The render context.</param>
-        public void Render(RenderContext rc)
+        /// <param name="position"></param>
+        public void AddPoint(float3 position)
         {
-            rc.RenderAsInstance(_cube, _positions);
+            _pointCounter++;
+
+            if (_pointCounter % COMPUTE_EVERY != 0 && COMPUTE_EVERY != 1)
+                return;
+
+            _octree.Add(position, OctreeNodeStates.Occupied);
+        }
+
+        /// <summary>
+        /// Gets called every frame. Takes care of rendering the voxel space.
+        /// </summary>
+        public void Render()
+        {
+            _rc.RenderAsInstance(_cube, _positions);
         }
 
         /// <summary>
         /// Sets the shader params for the point cloud.
         /// </summary>
-        /// <param name="rc">The render context.</param>
-        public void SetShaderParams(RenderContext rc, ShaderProgram shader)
+        public void SetShaderParams()
         {
-            _yBoundsParam = rc.GetShaderParam(shader, "yBounds");
-            rc.SetShaderParam(_yBoundsParam, _yBounds);
+            _yBoundsParam = _rc.GetShaderParam(Shader, "yBounds");
+            _rc.SetShaderParam(_yBoundsParam, _yBounds);
         }
 
         /// <summary>

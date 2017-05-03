@@ -6,7 +6,6 @@ using Fusee.Engine.Core;
 using Fusee.Serialization;
 using Path = Fusee.Base.Common.Path;
 using Fusee.Tutorial.Desktop.HelperClasses;
-using Fusee.Tutorial.Core;
 
 namespace Fusee.Tutorial.Desktop
 {
@@ -15,10 +14,7 @@ namespace Fusee.Tutorial.Desktop
         public static void Main()
         {
             FrameRateLogger _fRL = new FrameRateLogger(); // start logging frame rate on console
-
-            // connect UDPReceiver with PointCloudReader
-            PointCloudReader.StartStreamingUDPCallback += new UDPReceiver().StreamFromUDP;
-
+            
             // Inject Fusee.Engine.Base InjectMe dependencies
             IO.IOImp = new Fusee.Base.Imp.Desktop.IOImp();
 
@@ -51,6 +47,8 @@ namespace Fusee.Tutorial.Desktop
             AssetStorage.RegisterProvider(fap);
 
             var app = new Core.PointVisualizationBase();
+
+            app.UDPReceiver = new UDPReceiver();
 
             // Inject Fusee.Engine InjectMe dependencies (hard coded)
             app.CanvasImplementor = new Fusee.Engine.Imp.Graphics.Desktop.RenderCanvasImp();
