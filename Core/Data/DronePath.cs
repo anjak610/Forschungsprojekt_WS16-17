@@ -1,5 +1,4 @@
 ﻿using Fusee.Base.Core;
-using Fusee.Engine.Common;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using Fusee.Tutorial.Core.Common;
@@ -11,38 +10,20 @@ namespace Fusee.Tutorial.Core
     /// Contains all the settings and variables needed for rendering the drone path. Render context related programming is encapsulated in this class
     /// for better readability.
     /// </summary>
-    public class DronePath
+    public class DronePath : IRenderEntitiy
     {
         #region Fields
-
-        #region Constants
-
+        
         private const float LineWidth = 2f;
-
-        #endregion
-
-        #region Shader Params
-
+        
         private RenderContext _rc;
-
-        public readonly ShaderProgram Shader;
-        private IShaderParam _lineWidthParam;
-
-        #endregion
-
-        #region Data
-
+        public ShaderProgram Shader { get; }
+        
         // This is the object where new vertices are stored. Also look at the description of the class(es) for more information.
         private AttributesList _positions = new AttributesList(65000);
-
-        #endregion
-
-        #region Other
-
+        
         private float3 _lastPosition = float3.Zero;
-
-        #endregion
-
+        
         #endregion
 
         #region Methods
@@ -88,13 +69,9 @@ namespace Fusee.Tutorial.Core
         /// <summary>
         /// Sets the shader params for the point cloud.
         /// </summary>
-        /// <param name="rc">The render context.</param>
         public void SetShaderParams()
         {
-            /*
-            _particleSizeParam = _rc.GetShaderParam(Shader, "particleSize");
-            _rc.SetShaderParam(_particleSizeParam, ParticleSize);
-            //*/
+            // no uniform variables available. Line width is set in Render().
         }
 
         #endregion

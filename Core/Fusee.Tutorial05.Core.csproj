@@ -47,6 +47,7 @@
     <Compile Include="Common\Color.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
+    <Compile Include="Common\IRenderEntitiy.cs" />
     <Compile Include="Common\StaticMeshList.cs" />
     <Compile Include="Data Transmission\AssetReader.cs" />
     <Compile Include="Data Transmission\IUDPReceiver.cs" />

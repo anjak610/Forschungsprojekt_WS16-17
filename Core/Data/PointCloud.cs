@@ -10,42 +10,26 @@ namespace Fusee.Tutorial.Core
     /// Contains all the settings and variables needed for rendering the point cloud. Render context related programming is encapsulated in this class
     /// for better readability.
     /// </summary>
-    public class PointCloud
+    public class PointCloud : IRenderEntitiy
     {
         #region Fields
-
-        #region Constants
-
+        
         private const int UPDATE_EVERY = 1000; // every xth point the point cloud should update its meshes
         private const int COMPUTE_EVERY = 1; // take only every xth point into account in order to speed up calculation
 
         private float ParticleSize = 0.05f; // maybe gets changed from platform specific classes
         public const float ParticleSizeInterval = 0.025f;
-
-        #endregion
-
-        #region Shader Params
-
+        
         private RenderContext _rc;
 
-        public readonly ShaderProgram Shader;
+        public ShaderProgram Shader { get; }
         private IShaderParam _particleSizeParam;
-
-        #endregion
-
-        #region Data
-
+        
         // This is the object where new vertices are stored. Also look at the description of the class(es) for more information.
         private StaticMeshList _meshList = new StaticMeshList();
-
-        #endregion
-
-        #region Other
-
+        
         private int _pointCounter = 0;
-
-        #endregion
-
+        
         #endregion
 
         #region Methods

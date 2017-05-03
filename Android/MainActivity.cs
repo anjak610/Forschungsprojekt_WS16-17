@@ -112,9 +112,8 @@ namespace Fusee.Tutorial.Android
                 //Change Shader dependent on ViewMode
                 viewMode.Click += (sender, e) =>
                 {
-                    var nextView = app._ViewMode == PointVisualizationBase.ViewMode.PointCloud ? PointVisualizationBase.ViewMode.VoxelSpace : PointVisualizationBase.ViewMode.PointCloud;
-                    app.SetViewMode(nextView);
-                    System.Diagnostics.Debug.WriteLine(nextView);
+                    app.SwitchViewMode();
+                    System.Diagnostics.Debug.WriteLine(app.ViewMode);
                 };
 
                 // connect UDPReceiver

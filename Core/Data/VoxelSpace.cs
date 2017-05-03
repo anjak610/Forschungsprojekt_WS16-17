@@ -2,6 +2,7 @@
 using Fusee.Engine.Common;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
+using Fusee.Tutorial.Core.Common;
 using Fusee.Tutorial.Core.Octree;
 
 namespace Fusee.Tutorial.Core
@@ -10,32 +11,22 @@ namespace Fusee.Tutorial.Core
     /// Contains all the settings and variables needed for rendering the voxel space. Render context related programming is encapsulated in this class
     /// for better readability.
     /// </summary>
-    public class VoxelSpace
+    public class VoxelSpace : IRenderEntitiy
     {
         #region Fields
-
-        #region Constants
-
+        
         private const float VOXEL_SIZE = 1;
         private const int COMPUTE_EVERY = 1; // take only every xth point into account in order to speed up calculation
-
-        #endregion
-
-        #region Shader Params
-
+        
         private RenderContext _rc;
 
-        public readonly ShaderProgram Shader;
+        public ShaderProgram Shader { get; }
 
         private IShaderParam _yBoundsParam;
         private float2 _yBounds;
 
         // TO-DO: set shader param for voxelsize?
-
-        #endregion
-
-        #region Data
-
+        
         // This is the object where new vertices are stored. Also look at the description of the class(es) for more information.
         private DynamicAttributes _positions = new DynamicAttributes(); // no need for separation of buffers
         
@@ -44,15 +35,9 @@ namespace Fusee.Tutorial.Core
 
         // An octree for better searchability, of when to add a new voxel.
         private Octree<OctreeNodeStates> _octree;
-
-        #endregion
-
-        #region Other
-
+        
         private int _pointCounter = 0;
-
-        #endregion
-
+        
         #endregion
 
         #region Methods
