@@ -111,7 +111,6 @@ namespace Fusee.Tutorial.Core
             // callbacks for various readings and stuff
 
             PointCloudReader.OnNewPointCallbacks += OnNewPointAdded;
-            PointCloudReader.OnAssetLoadedCallbacks += OnAssetLoaded;
 
             // start loading points
                         
@@ -303,13 +302,6 @@ namespace Fusee.Tutorial.Core
             _signalEvent.Set();
 
             _boundingBox.Update(point.Position);
-        }
-
-        /// <summary>
-        /// Event handler for when asset has finished loading.
-        /// </summary>
-        private void OnAssetLoaded()
-        {
         }
         
         // update cameraPivot, whenever bounding box of point cloud gets updated
