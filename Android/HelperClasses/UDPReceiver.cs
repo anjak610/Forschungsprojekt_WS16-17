@@ -1,5 +1,5 @@
 using Fusee.Math.Core;
-using Fusee.Tutorial.Core;
+using Fusee.Tutorial.Core.Common;
 using Fusee.Tutorial.Core.Data_Transmission;
 using System;
 using System.Linq;

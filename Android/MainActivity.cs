@@ -14,8 +14,7 @@ using Font = Fusee.Base.Core.Font;
 using Path = Fusee.Base.Common.Path;
 using Fusee.Tutorial.Android.HelperClasses;
 using Android.Runtime;
-using Fusee.Tutorial.Core;
-using Java.IO;
+using Fusee.Tutorial.Core.Data;
 
 namespace Fusee.Tutorial.Android
 {
@@ -98,13 +97,13 @@ namespace Fusee.Tutorial.Android
 
                 plusButton.Click += (sender, e) =>
                 {
-                    app._pointCloud.IncreaseParticleSize();
+                    PointCloud.IncreaseParticleSize();
                     //app.ParticleSize = app.ParticleSize + app.ParticleSize / 2;
                 };
 
                 minusButton.Click += (sender, e) =>
                 {
-                    app._pointCloud.DecreaseParticleSize();
+                    PointCloud.DecreaseParticleSize();
                     //app.ParticleSize = app.ParticleSize - app.ParticleSize / 2;
                 };
 
@@ -121,13 +120,15 @@ namespace Fusee.Tutorial.Android
                 
                 // Inject Fusee.Engine InjectMe dependencies (hard coded)
                 RenderCanvasImp rci = new RenderCanvasImp(ApplicationContext, null, delegate { app.Run(); });
+
 		        app.CanvasImplementor = rci;
 		        app.ContextImplementor = new RenderContextImp(rci, ApplicationContext);
 
-		       // SetContentView(rci.View);
-                canvas_view.AddView(rci.View);
+                PointCloud.SetParticleSize(0.05f);
 
-                app._pointCloud.SetParticleSize(0.05f);
+                // SetContentView(rci.View);
+                canvas_view.AddView(rci.View);
+                
                 //show display dimensions for testing
                 IWindowManager wm = ApplicationContext.GetSystemService(WindowService).JavaCast<IWindowManager>() ;
                 //Display display = wm.DefaultDisplay;

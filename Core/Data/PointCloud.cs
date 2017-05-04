@@ -4,25 +4,25 @@ using Fusee.Engine.Core;
 using Fusee.Tutorial.Core.Common;
 using System.Collections.Generic;
 
-namespace Fusee.Tutorial.Core
+namespace Fusee.Tutorial.Core.Data
 {
     /// <summary>
     /// Contains all the settings and variables needed for rendering the point cloud. Render context related programming is encapsulated in this class
     /// for better readability.
     /// </summary>
-    public class PointCloud : IRenderEntitiy
+    public class PointCloud : RenderEntitiy
     {
         #region Fields
         
         private const int UPDATE_EVERY = 1000; // every xth point the point cloud should update its meshes
         private const int COMPUTE_EVERY = 1; // take only every xth point into account in order to speed up calculation
 
-        private float ParticleSize = 0.05f; // maybe gets changed from platform specific classes
+        private static float ParticleSize = 0.05f; // maybe gets changed from platform specific classes
         public const float ParticleSizeInterval = 0.025f;
         
         private RenderContext _rc;
 
-        public ShaderProgram Shader { get; }
+        public override ShaderProgram Shader { get; }
         private IShaderParam _particleSizeParam;
         
         // This is the object where new vertices are stored. Also look at the description of the class(es) for more information.
@@ -52,7 +52,7 @@ namespace Fusee.Tutorial.Core
         /// Adds another point to this point cloud.
         /// </summary>
         /// <param name="point">The point to add.</param>
-        public void AddPoint(Point point)
+        public void AddPoint(Common.Point point)
         {
             _pointCounter++;
 
@@ -72,7 +72,7 @@ namespace Fusee.Tutorial.Core
         /// <summary>
         /// Gets called every frame. Takes care of rendering the point cloud.
         /// </summary>
-        public void Render()
+        public override void Render()
         {
             List<Mesh> meshesToRemove = _meshList.GetMeshesToRemove();
             for (var i = 0; i < meshesToRemove.Count; i++)
@@ -90,7 +90,7 @@ namespace Fusee.Tutorial.Core
         /// <summary>
         /// Sets the shader params for the point cloud.
         /// </summary>
-        public void SetShaderParams()
+        public override void SetShaderParams()
         {
             _particleSizeParam = _rc.GetShaderParam(Shader, "particleSize");
             _rc.SetShaderParam(_particleSizeParam, ParticleSize);
@@ -100,7 +100,7 @@ namespace Fusee.Tutorial.Core
         /// Increases the particle size.
         /// </summary>
         /// <param name="interval">How much the particle size should increase.</param>
-        public void IncreaseParticleSize(float interval = ParticleSizeInterval)
+        public static void IncreaseParticleSize(float interval = ParticleSizeInterval)
         {
             ParticleSize += interval;
         }
@@ -109,7 +109,7 @@ namespace Fusee.Tutorial.Core
         /// Decreases the particle size.
         /// </summary>
         /// <param name="interval">How much the particle size should decrease.</param>
-        public void DecreaseParticleSize(float interval = ParticleSizeInterval)
+        public static void DecreaseParticleSize(float interval = ParticleSizeInterval)
         {
             ParticleSize -= interval;
         }
@@ -118,7 +118,7 @@ namespace Fusee.Tutorial.Core
         /// Sets directly the particle size.
         /// </summary>
         /// <param name="particleSize">The particle size to set.</param>
-        public void SetParticleSize(float particleSize)
+        public static void SetParticleSize(float particleSize)
         {
             ParticleSize = particleSize;
         }

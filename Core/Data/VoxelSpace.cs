@@ -5,13 +5,13 @@ using Fusee.Math.Core;
 using Fusee.Tutorial.Core.Common;
 using Fusee.Tutorial.Core.Octree;
 
-namespace Fusee.Tutorial.Core
+namespace Fusee.Tutorial.Core.Data
 {
     /// <summary>
     /// Contains all the settings and variables needed for rendering the voxel space. Render context related programming is encapsulated in this class
     /// for better readability.
     /// </summary>
-    public class VoxelSpace : IRenderEntitiy
+    public class VoxelSpace : RenderEntitiy
     {
         #region Fields
         
@@ -20,7 +20,7 @@ namespace Fusee.Tutorial.Core
         
         private RenderContext _rc;
 
-        public ShaderProgram Shader { get; }
+        public override ShaderProgram Shader { get; }
 
         private IShaderParam _yBoundsParam;
         private float2 _yBounds;
@@ -78,7 +78,7 @@ namespace Fusee.Tutorial.Core
         /// Adds another point for the octree.
         /// </summary>
         /// <param name="point">The point to add.</param>
-        public void AddPoint(Point point)
+        public void AddPoint(Common.Point point)
         {
             _pointCounter++;
 
@@ -105,7 +105,7 @@ namespace Fusee.Tutorial.Core
         /// <summary>
         /// Gets called every frame. Takes care of rendering the voxel space.
         /// </summary>
-        public void Render()
+        public override void Render()
         {
             _rc.RenderAsInstance(_cube, _positions);
         }
@@ -113,7 +113,7 @@ namespace Fusee.Tutorial.Core
         /// <summary>
         /// Sets the shader params for the point cloud.
         /// </summary>
-        public void SetShaderParams()
+        public override void SetShaderParams()
         {
             _yBoundsParam = _rc.GetShaderParam(Shader, "yBounds");
             _rc.SetShaderParam(_yBoundsParam, _yBounds);

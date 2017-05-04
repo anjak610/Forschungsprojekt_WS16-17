@@ -1,12 +1,12 @@
-﻿using Fusee.Engine.Common;
-using Fusee.Engine.Core;
+﻿using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using static Fusee.Engine.Core.Input;
 using static Fusee.Engine.Core.Time;
 using System.Threading;
 using Fusee.Tutorial.Core.Data_Transmission;
 using Fusee.Base.Common;
-using Fusee.Tutorial.Core.Common;
+using Fusee.Tutorial.Core.Data;
+using Fusee.Engine.Common;
 
 namespace Fusee.Tutorial.Core
 {
@@ -52,15 +52,12 @@ namespace Fusee.Tutorial.Core
         }
 
         // data
-        public PointCloud _pointCloud; // particle size needs to be changed from outside
+        private PointCloud _pointCloud; // particle size needs to be changed from outside
         private VoxelSpace _voxelSpace;
         private DronePath _dronePath;
 
         private BoundingBox _boundingBox;
-        
-        // shader related
-        private ShaderProgram _shader;
-        
+                
         // due to multithreading
         private AutoResetEvent _signalEvent = new AutoResetEvent(true);
 
@@ -177,7 +174,7 @@ namespace Fusee.Tutorial.Core
 
                 if (_scaleKey)
                 {
-                    _pointCloud.IncreaseParticleSize(Keyboard.ADAxis * PointCloud.ParticleSizeInterval / 20);
+                    PointCloud.IncreaseParticleSize(Keyboard.ADAxis * PointCloud.ParticleSizeInterval / 20);
                 }
             }
 
@@ -335,7 +332,7 @@ namespace Fusee.Tutorial.Core
         /// Whenever a new point gets loaded, this is what happens with him.
         /// </summary>
         /// <param name="point">Point data structure containing position and stuff.</param>
-        private void OnNewPointAdded(Point point)
+        private void OnNewPointAdded(Common.Point point)
         {   
             _signalEvent.WaitOne();
 

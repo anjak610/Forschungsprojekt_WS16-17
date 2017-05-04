@@ -15,7 +15,7 @@ namespace Fusee.Tutorial.Core.Data_Transmission
     public class AssetReader
     {
         // callback for when new points gets added
-        public delegate void OnNewPointAdded(Point point);
+        public delegate void OnNewPointAdded(Common.Point point);
         public static OnNewPointAdded OnNewPointCallbacks;
 
         // callback when asset has been fully loaded
@@ -51,7 +51,7 @@ namespace Fusee.Tutorial.Core.Data_Transmission
                 string line;
                 while ((line = sr.ReadLine()) != null) // read per line
                 {
-                    Point point = ConvertTextToPoint(line);
+                    Common.Point point = ConvertTextToPoint(line);
 
                     if (point != null)
                         OnNewPointCallbacks?.Invoke(point);
@@ -66,7 +66,7 @@ namespace Fusee.Tutorial.Core.Data_Transmission
         /// </summary>
         /// <param name="line">Text line.</param>
         /// <returns>Point object</returns>
-        private static Point ConvertTextToPoint(string line)
+        private static Common.Point ConvertTextToPoint(string line)
         {
             string delimiter = "\t";
             string[] textElements = line.Split(delimiter.ToCharArray());
@@ -74,7 +74,7 @@ namespace Fusee.Tutorial.Core.Data_Transmission
             if (textElements.Length == 1) // empty line
                 return null;
 
-            Point point = new Point();
+            Common.Point point = new Common.Point();
 
             // convert each string to float
 
