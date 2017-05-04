@@ -176,86 +176,86 @@ namespace Fusee.Tutorial.Core
         {
           var curDamp = (float)System.Math.Exp(-Damping * DeltaTime);
 
-            if (Keyboard.LeftRightAxis != 0 || Keyboard.UpDownAxis != 0)
-            {
-                _keys = true;
-            }
-
-            // Zoom & Roll
-            if (Input.Touch.TwoPoint)
-            {
-                if (!_twoTouchRepeated)
-                {
-                    _twoTouchRepeated = true;
-                    _angleRollInit = Input.Touch.TwoPointAngle - _angleRoll;
-                    _maxPinchSpeed = 0;
-                }
-                _zoomVel = Input.Touch.TwoPointDistanceVel * -0.01f;
-                _angleRoll = Input.Touch.TwoPointAngle - _angleRollInit;
-                float pinchSpeed = Input.Touch.TwoPointDistanceVel;
-                if (pinchSpeed > _maxPinchSpeed) _maxPinchSpeed = pinchSpeed; // _maxPinchSpeed is used for debugging only.
-            }
-            else
-            {
-                _twoTouchRepeated = false;
-                _zoomVel = Mouse.WheelVel * -0.05f;
-                _angleRoll *= curDamp * 0.8f;
-                _offset *= curDamp * 0.8f;
-            }
-
-            // UpDown / LeftRight rotation
-            if (Mouse.LeftButton)
-            {
-                _keys = false;
-                _angleVelHorz = Mouse.XVel * 0.0002f;
-                _angleVelVert = Mouse.YVel * 0.0002f;
-            }
-            else if (Input.Touch.GetTouchActive(TouchPoints.Touchpoint_0) && !Input.Touch.TwoPoint)
-            {
-                _keys = false;
-                float2 touchVel;
-                touchVel = Input.Touch.GetVelocity(TouchPoints.Touchpoint_0);
-                _angleVelHorz = -RotationSpeed * touchVel.x * 0.00002f;
-                _angleVelVert = -RotationSpeed * touchVel.y * -0.00002f;
-            }
-            else
-            {
-                if (_keys)
-                {
-                    _angleVelHorz = -RotationSpeed * Keyboard.LeftRightAxis * 0.002f;
-                    _angleVelVert = -RotationSpeed * Keyboard.UpDownAxis * 0.002f;
-                }
-                else
-                {
-                    _angleVelHorz *= curDamp;
-                    _angleVelVert *= curDamp;
-                }
-            }
-
-            _zoom += _zoomVel;
-
-            if (Mouse.RightButton || Input.Touch.TwoPoint)
-            {
-                float2 speed = Mouse.Velocity + Input.Touch.TwoPointMidPointVel;
-                MoveX += speed.x * -0.0005f;
-                MoveY += speed.y * -0.0005f;
-            }
-
+           // if (Keyboard.LeftRightAxis != 0 || Keyboard.UpDownAxis != 0)
+           // {
+           //     _keys = true;
+           // }
+           //
+           // // Zoom & Roll
+           // if (Input.Touch.TwoPoint)
+           // {
+           //     if (!_twoTouchRepeated)
+           //     {
+           //         _twoTouchRepeated = true;
+           //         _angleRollInit = Input.Touch.TwoPointAngle - _angleRoll;
+           //         _maxPinchSpeed = 0;
+           //     }
+           //     _zoomVel = Input.Touch.TwoPointDistanceVel * -0.01f;
+           //     _angleRoll = Input.Touch.TwoPointAngle - _angleRollInit;
+           //     float pinchSpeed = Input.Touch.TwoPointDistanceVel;
+           //     if (pinchSpeed > _maxPinchSpeed) _maxPinchSpeed = pinchSpeed; // _maxPinchSpeed is used for debugging only.
+           // }
+           // else
+           // {
+           //     _twoTouchRepeated = false;
+           //     _zoomVel = Mouse.WheelVel * -0.05f;
+           //     _angleRoll *= curDamp * 0.8f;
+           //     _offset *= curDamp * 0.8f;
+           // }
+           //
+           // // UpDown / LeftRight rotation
+           // if (Mouse.LeftButton)
+           // {
+           //     _keys = false;
+           //     _angleVelHorz = Mouse.XVel * 0.0002f;
+           //     _angleVelVert = Mouse.YVel * 0.0002f;
+           // }
+           // else if (Input.Touch.GetTouchActive(TouchPoints.Touchpoint_0) && !Input.Touch.TwoPoint)
+           // {
+           //     _keys = false;
+           //     float2 touchVel;
+           //     touchVel = Input.Touch.GetVelocity(TouchPoints.Touchpoint_0);
+           //     _angleVelHorz = -RotationSpeed * touchVel.x * 0.00002f;
+           //     _angleVelVert = -RotationSpeed * touchVel.y * -0.00002f;
+           // }
+           // else
+           // {
+           //     if (_keys)
+           //     {
+           //         _angleVelHorz = -RotationSpeed * Keyboard.LeftRightAxis * 0.002f;
+           //         _angleVelVert = -RotationSpeed * Keyboard.UpDownAxis * 0.002f;
+           //     }
+           //     else
+           //     {
+           //         _angleVelHorz *= curDamp;
+           //         _angleVelVert *= curDamp;
+           //     }
+           // }
+           //
+           // _zoom += _zoomVel;
+           //
+           // if (Mouse.RightButton || Input.Touch.TwoPoint)
+           // {
+           //     float2 speed = Mouse.Velocity + Input.Touch.TwoPointMidPointVel;
+           //     MoveX += speed.x * -0.0005f;
+           //     MoveY += speed.y * -0.0005f;
+           // }
+           //
             _angleHorz += _angleVelHorz;
-            // Wrap-around to keep _angleHorz between -PI and + PI
+           // Wrap-around to keep _angleHorz between -PI and + PI
             _angleHorz = M.MinAngle(_angleHorz);
-
+           
             _angleVert += _angleVelVert;
-            // Limit pitch to the range between [-PI/2, + PI/2]
+           // // Limit pitch to the range between [-PI/2, + PI/2]
             _angleVert = M.Clamp(_angleVert, -M.PiOver2, M.PiOver2);
-
-            // Wrap-around to keep _angleRoll between -PI and + PI
+           
+           // Wrap-around to keep _angleRoll between -PI and + PI
             _angleRoll = M.MinAngle(_angleRoll);
-
-            // List<float3> positions = _pointCloud.GetPositions();
-
+           //
+           // List<float3> positions = _pointCloud.GetPositions();
+           //
            // StartNumber StrPoint = new StartNumber(StrP);
-            //float3 _startPoint = StrPoint(new float3(0, 0, 0));//positions[1]; //TODO: solution for Android!! Points aren't read at that Time
+           //float3 _startPoint = StrPoint(new float3(0, 0, 0));//positions[1]; //TODO: solution for Android!! Points aren't read at that Time
             var view = float4x4.CreateTranslation(-1 * _cameraPivot);
 
             var MtxCam = float4x4.LookAt(0, 0, _zoom, 0, 0, 0, 0, 1, 0) * float4x4.CreateTranslation(MoveX, MoveY, 0);

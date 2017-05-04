@@ -29,16 +29,18 @@
         private void InitializeComponent()
         {
             this.canvaspanel = new System.Windows.Forms.Panel();
+            this.setup_btn = new System.Windows.Forms.Button();
             this.label_particle_size = new System.Windows.Forms.Label();
             this.plus_button = new System.Windows.Forms.Button();
             this.minus_button = new System.Windows.Forms.Button();
-            this.setup_btn = new System.Windows.Forms.Button();
+            this.chg_view_btn = new System.Windows.Forms.Button();
             this.canvaspanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // canvaspanel
             // 
             this.canvaspanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.canvaspanel.Controls.Add(this.chg_view_btn);
             this.canvaspanel.Controls.Add(this.setup_btn);
             this.canvaspanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.canvaspanel.Location = new System.Drawing.Point(0, 0);
@@ -48,6 +50,18 @@
             this.canvaspanel.Size = new System.Drawing.Size(1182, 953);
             this.canvaspanel.TabIndex = 0;
             this.canvaspanel.Paint += new System.Windows.Forms.PaintEventHandler(this.canvaspanel_Paint);
+            // 
+            // setup_btn
+            // 
+            this.setup_btn.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.setup_btn.Location = new System.Drawing.Point(246, 6);
+            this.setup_btn.MinimumSize = new System.Drawing.Size(150, 40);
+            this.setup_btn.Name = "setup_btn";
+            this.setup_btn.Size = new System.Drawing.Size(150, 40);
+            this.setup_btn.TabIndex = 0;
+            this.setup_btn.Text = "Setup Connection";
+            this.setup_btn.UseVisualStyleBackColor = false;
+            this.setup_btn.Click += new System.EventHandler(this.setup_btn_Click);
             // 
             // label_particle_size
             // 
@@ -82,16 +96,17 @@
             this.minus_button.UseVisualStyleBackColor = true;
             this.minus_button.Click += new System.EventHandler(this.minus_button_Click);
             // 
-            // setup_btn
+            // chg_view_btn
             // 
-            this.setup_btn.Location = new System.Drawing.Point(246, 6);
-            this.setup_btn.MinimumSize = new System.Drawing.Size(150, 40);
-            this.setup_btn.Name = "setup_btn";
-            this.setup_btn.Size = new System.Drawing.Size(150, 40);
-            this.setup_btn.TabIndex = 0;
-            this.setup_btn.Text = "Setup Connection";
-            this.setup_btn.UseVisualStyleBackColor = false;
-            this.setup_btn.Click += new System.EventHandler(this.setup_btn_Click);
+            this.chg_view_btn.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.chg_view_btn.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.chg_view_btn.Location = new System.Drawing.Point(426, 6);
+            this.chg_view_btn.MinimumSize = new System.Drawing.Size(180, 40);
+            this.chg_view_btn.Name = "chg_view_btn";
+            this.chg_view_btn.Size = new System.Drawing.Size(181, 40);
+            this.chg_view_btn.TabIndex = 1;
+            this.chg_view_btn.Text = "Change View";
+            this.chg_view_btn.UseVisualStyleBackColor = false;
             // 
             // UIForm
             // 
@@ -122,5 +137,6 @@
         private System.Windows.Forms.Button plus_button;
         private System.Windows.Forms.Button minus_button;
         private System.Windows.Forms.Button setup_btn;
+        private System.Windows.Forms.Button chg_view_btn;
     }
 }

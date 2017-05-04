@@ -2,6 +2,7 @@ using Fusee.Tutorial.Core;
 using System;
 using System.Net;
 using System.Net.Sockets;
+using Fusee.Tutorial.Core.PointClouds;
 
 namespace Fusee.Tutorial.Android.HelperClasses
 {

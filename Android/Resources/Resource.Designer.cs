@@ -64,20 +64,44 @@ namespace Fusee.Tutorial.Android
 		public partial class Id
 		{
 			
-			// aapt resource value: 0x7f050000
-			public const int ToolbarTitle = 2131034112;
+			// aapt resource value: 0x7f060000
+			public const int IPLabel = 2131099648;
 			
-			// aapt resource value: 0x7f050004
-			public const int canvas_container = 2131034116;
+			// aapt resource value: 0x7f060001
+			public const int IPinputField = 2131099649;
 			
-			// aapt resource value: 0x7f050002
-			public const int minus_btn = 2131034114;
+			// aapt resource value: 0x7f060007
+			public const int ToolbarTitle = 2131099655;
 			
-			// aapt resource value: 0x7f050001
-			public const int plus_btn = 2131034113;
+			// aapt resource value: 0x7f06000c
+			public const int action_open_conn_dialog = 2131099660;
 			
-			// aapt resource value: 0x7f050003
-			public const int view_btn = 2131034115;
+			// aapt resource value: 0x7f06000b
+			public const int canvas_container = 2131099659;
+			
+			// aapt resource value: 0x7f060002
+			public const int connectBtn = 2131099650;
+			
+			// aapt resource value: 0x7f060006
+			public const int disconnectBtn = 2131099654;
+			
+			// aapt resource value: 0x7f060009
+			public const int minus_btn = 2131099657;
+			
+			// aapt resource value: 0x7f060008
+			public const int plus_btn = 2131099656;
+			
+			// aapt resource value: 0x7f060003
+			public const int statusLabel = 2131099651;
+			
+			// aapt resource value: 0x7f060004
+			public const int statusScrollView = 2131099652;
+			
+			// aapt resource value: 0x7f060005
+			public const int statusTextView = 2131099653;
+			
+			// aapt resource value: 0x7f06000a
+			public const int view_btn = 2131099658;
 			
 			static Id()
 			{
@@ -93,7 +117,10 @@ namespace Fusee.Tutorial.Android
 		{
 			
 			// aapt resource value: 0x7f030000
-			public const int main_activity_layout = 2130903040;
+			public const int connection_dialog_layout = 2130903040;
+			
+			// aapt resource value: 0x7f030001
+			public const int main_activity_layout = 2130903041;
 			
 			static Layout()
 			{
@@ -101,6 +128,22 @@ namespace Fusee.Tutorial.Android
 			}
 			
 			private Layout()
+			{
+			}
+		}
+		
+		public partial class Menu
+		{
+			
+			// aapt resource value: 0x7f050000
+			public const int menu_main = 2131034112;
+			
+			static Menu()
+			{
+				global::Android.Runtime.ResourceIdManager.UpdateIdValues();
+			}
+			
+			private Menu()
 			{
 			}
 		}
@@ -114,11 +157,14 @@ namespace Fusee.Tutorial.Android
 			// aapt resource value: 0x7f040000
 			public const int Hello = 2130968576;
 			
+			// aapt resource value: 0x7f040003
+			public const int actionbar_title = 2130968579;
+			
 			// aapt resource value: 0x7f040002
 			public const int app_name = 2130968578;
 			
-			// aapt resource value: 0x7f040003
-			public const int unsupported = 2130968579;
+			// aapt resource value: 0x7f040004
+			public const int unsupported = 2130968580;
 			
 			static String()
 			{
