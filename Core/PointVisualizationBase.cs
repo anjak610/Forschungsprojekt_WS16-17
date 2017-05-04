@@ -4,7 +4,7 @@ using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using static Fusee.Engine.Core.Input;
 using static Fusee.Engine.Core.Time;
-using Fusee.Tutorial.Core.Octree;
+using Fusee.Tutorial.Core.PointClouds;
 using System.Threading;
 
 namespace Fusee.Tutorial.Core
@@ -292,7 +292,7 @@ namespace Fusee.Tutorial.Core
         /// Whenever a new point gets loaded, this is what happens with him.
         /// </summary>
         /// <param name="point">Point data structure containing position and stuff.</param>
-        private void OnNewPointAdded(Point point)
+        private void OnNewPointAdded(PointClouds.Point point)
         {   
             _signalEvent.WaitOne();
 

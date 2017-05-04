@@ -15,6 +15,7 @@ using Path = Fusee.Base.Common.Path;
 using Fusee.Tutorial.Android.HelperClasses;
 using Android.Runtime;
 using Fusee.Tutorial.Core;
+using Fusee.Tutorial.Core.PointClouds;
 using Java.IO;
 
 namespace Fusee.Tutorial.Android

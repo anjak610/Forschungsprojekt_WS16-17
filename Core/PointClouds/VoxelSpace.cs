@@ -4,7 +4,7 @@ using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using Fusee.Tutorial.Core.Octree;
 
-namespace Fusee.Tutorial.Core
+namespace Fusee.Tutorial.Core.PointClouds
 {
     /// <summary>
     /// Contains all the settings and variables needed for rendering the voxel space. Render context related programming is encapsulated in this class
@@ -35,7 +35,7 @@ namespace Fusee.Tutorial.Core
         #region Data
 
         // This is the object where new vertices are stored. Also look at the description of the class(es) for more information.
-        private DynamicAttributes _positions = new DynamicAttributes(); // no need for separation of buffers
+        //private DynamicAttributes _positions = new DynamicAttributes(); // no need for separation of buffers
         
         // multiple cubes will be rendered on different positions
         private Cube _cube = new Cube();
@@ -78,7 +78,7 @@ namespace Fusee.Tutorial.Core
         {
             if (node.Data == OctreeNodeStates.Occupied && node.SideLength == VOXEL_SIZE)
             {
-                _positions.AddAttribute(node.Position);
+              //  _positions.AddAttribute(node.Position);
             }
         }
 
@@ -102,7 +102,7 @@ namespace Fusee.Tutorial.Core
         /// <param name="rc">The render context.</param>
         public void Render(RenderContext rc)
         {
-            rc.RenderAsInstance(_cube, _positions);
+          //  rc.RenderAsInstance(_cube, _positions);
         }
 
         /// <summary>

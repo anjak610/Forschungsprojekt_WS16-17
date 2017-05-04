@@ -6,7 +6,7 @@ using Fusee.Base.Core;
 using Fusee.Math.Core;
 using System;
 
-namespace Fusee.Tutorial.Core
+namespace Fusee.Tutorial.Core.PointClouds
 {
     /// <summary>
     /// This class loads an asset and fires callbacks whenever a new point gets loaded. May be used in the future to load

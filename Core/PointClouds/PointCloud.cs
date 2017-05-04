@@ -4,7 +4,7 @@ using Fusee.Engine.Core;
 using Fusee.Tutorial.Core.Common;
 using System.Collections.Generic;
 
-namespace Fusee.Tutorial.Core
+namespace Fusee.Tutorial.Core.PointClouds
 {
     /// <summary>
     /// Contains all the settings and variables needed for rendering the point cloud. Render context related programming is encapsulated in this class

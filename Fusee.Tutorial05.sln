@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fusee.Tutorial05.Web", "Web
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fusee.Tutorial05.Android", "Android\Fusee.Tutorial05.Android.csproj", "{73A74ADF-6308-42A0-8BA6-2B5D53238546}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TCPSimpleTest", "D:\Studium\Master\Semester 2\Forschungsprojekt\Branch_TCP_Tanja_270417\TCPSimpleTest\TCPSimpleTest.csproj", "{AFA59C7D-7AA0-4707-8448-DEAFD736CE46}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,6 +56,14 @@ Global
 		{73A74ADF-6308-42A0-8BA6-2B5D53238546}.Release|x86.ActiveCfg = Release|Any CPU
 		{73A74ADF-6308-42A0-8BA6-2B5D53238546}.Release|x86.Build.0 = Release|Any CPU
 		{73A74ADF-6308-42A0-8BA6-2B5D53238546}.Release|x86.Deploy.0 = Release|Any CPU
+		{AFA59C7D-7AA0-4707-8448-DEAFD736CE46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFA59C7D-7AA0-4707-8448-DEAFD736CE46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFA59C7D-7AA0-4707-8448-DEAFD736CE46}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AFA59C7D-7AA0-4707-8448-DEAFD736CE46}.Debug|x86.Build.0 = Debug|Any CPU
+		{AFA59C7D-7AA0-4707-8448-DEAFD736CE46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFA59C7D-7AA0-4707-8448-DEAFD736CE46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFA59C7D-7AA0-4707-8448-DEAFD736CE46}.Release|x86.ActiveCfg = Release|Any CPU
+		{AFA59C7D-7AA0-4707-8448-DEAFD736CE46}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
