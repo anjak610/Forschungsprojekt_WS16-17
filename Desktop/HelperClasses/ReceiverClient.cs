@@ -7,7 +7,7 @@ using System.Net.Sockets;
 using System.IO;
 using Fusee.Tutorial.Core;
 
-namespace Fusee.Forschungsprojekt.Desktop
+namespace Fusee.Tutorial.Desktop.HelperClasses
 {
     public class ReceiverClient
     {
@@ -16,18 +16,10 @@ namespace Fusee.Forschungsprojekt.Desktop
         private Socket acceptor;
         public bool receiving;
         private bool connected;
-        public bool completed;
         private byte[] data;
         public string serveraddress;
 
-        public void SendConfirmation()
-        {
-            byte[] buffer = Encoding.Default.GetBytes("EOP");//End of package
-            sender.Send(buffer, 0, buffer.Length, 0);
-            System.Diagnostics.Debug.WriteLine("\nSend confirmation: EOP");
-            receiving = true;
-            Receive();
-        }
+   
 
         public ReceiverClient()
         {
@@ -35,7 +27,7 @@ namespace Fusee.Forschungsprojekt.Desktop
             sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             receiving = false;
             connected = false;
-            completed = false;
+
             
         }
 
@@ -51,16 +43,14 @@ namespace Fusee.Forschungsprojekt.Desktop
 
         }
 
-        public void SetupReceiving()//Receive on port 1994
+        public void SetupReceiving()//Receive on port 50123
         {
             try
             {
-                receiver.Bind(new IPEndPoint(0, 1994));
+                receiver.Bind(new IPEndPoint(0, 50123));
                 receiver.Listen(0);
                 acceptor = receiver.Accept();
-                //System.Diagnostics.Debug.WriteLine("Socket accepting");
                 receiving = true;
-                completed = false;
 
             }
             catch
@@ -84,38 +74,23 @@ namespace Fusee.Forschungsprojekt.Desktop
 
                     while (size > 0)
                     {
-                        byte[] buffer;
-                        buffer = size < acceptor.ReceiveBufferSize ? new byte[size] : new byte[acceptor.ReceiveBufferSize];
+                        var buffer = size < acceptor.ReceiveBufferSize ? new byte[size] : new byte[acceptor.ReceiveBufferSize];
 
                         int receive = acceptor.Receive(buffer, 0, buffer.Length, 0);
                         //subtract the size of the received data from the size
                         size -= receive;
                         //write the received data to the memory stream
                         ms.Write(buffer, 0, buffer.Length);
-
                     }
 
                     if (size == 0)
                     {
-                        receiving = false;
-                        completed = true;
+
                         ms.Close();
                         data = ms.ToArray();
+                        //TODO convert to float not to string
                         string datastring = Encoding.UTF8.GetString(data);
-
-                        if (datastring == "END")
-                        {
-                            System.Diagnostics.Debug.WriteLine("Everything received");
-                            Disconect();
-                            System.Diagnostics.Debug.WriteLine("Disconnected");
-                            break;
-                        }
-                        else
-                        {
-                            //Core.PointCloudReader.receivedData = datastring;
-                            //Core.PointCloudReader.DisplayReceived();
-                            
-                        }
+                        Core.PointClouds.PointCloudReader.ReadFromString(datastring);
                         ms.Dispose();
 
                     }
@@ -137,18 +112,7 @@ namespace Fusee.Forschungsprojekt.Desktop
         acceptor.Close();
         sender.Close();
         }
-
-      
-
-        public void SendFailure()
-        {
-            byte[] buffer = Encoding.Default.GetBytes("FAILED");//End of package
-            sender.Send(buffer, 0, buffer.Length, 0);
-            System.Diagnostics.Debug.WriteLine("send confirmation: FAILED");
-            receiving = true;
-            Receive();
-
-        }       
+   
 
     }
 }

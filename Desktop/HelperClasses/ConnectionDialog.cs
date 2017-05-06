@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Windows.Forms;
-using Fusee.Forschungsprojekt.Desktop;
+using Fusee.Tutorial.Desktop;
 
 //using tutorial: https://www.youtube.com/watch?v=-mYoJBT9XIg&list=PLAC179D21AF94D28F&index=6
 /// <summary>
@@ -57,25 +57,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
                                statusText.Text += ("\nConnected.\nReceiving data...");
                            });
 
-                           client.Receive();
-                         
-                           if (client.completed) {
-                               System.Diagnostics.Debug.WriteLine("Data transfer complete");
-                               Invoke((MethodInvoker)delegate
-                               {                                 
-                                   statusText.Text += "\nData transfer complete!";
-                                                                 
-                               });
-                           }
-                           else
-                           {
-                               System.Diagnostics.Debug.WriteLine("Data transfer not completed");
-                               Invoke((MethodInvoker)delegate
-                               {
-                                   statusText.Text += "\nData transfer not completed!";
-                                   
-                               });
-                           }                          
+                           client.Receive();                                                                          
                        }
                        catch (Exception exp) //catch socket exceptions
                        {

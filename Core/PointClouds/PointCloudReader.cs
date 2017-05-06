@@ -5,6 +5,7 @@ using Fusee.Base.Common;
 using Fusee.Base.Core;
 using Fusee.Math.Core;
 using System;
+using System.Collections.Generic;
 
 namespace Fusee.Tutorial.Core.PointClouds
 {
@@ -72,6 +73,29 @@ namespace Fusee.Tutorial.Core.PointClouds
             }
         }
 
+        public static void ReadFromString(string file)
+        {
+          
+            string separator = "\n";
+            string[] lineList = file.Split(separator.ToCharArray());
+
+            for (int i = 0; i < lineList.Length; i++)
+            {
+                try
+                {
+                    Point point = ConvertTextToPoint(lineList[i]);
+
+                    if (point != null)
+                        OnNewPointCallbacks?.Invoke(point);//add point to point cloud after creation 
+                }
+                catch (Exception e)
+                {
+                    System.Diagnostics.Debug.WriteLine(e);                    
+                }            
+            }
+                OnAssetLoadedCallbacks?.Invoke();
+            }
+        
         private static void StreamFromUDP()
         {
             // i have port and ip, so what now?
