@@ -20,9 +20,6 @@ namespace Fusee.Tutorial.Core.Data
         private static float ParticleSize = 0.05f; // maybe gets changed from platform specific classes
         public const float ParticleSizeInterval = 0.025f;
         
-        private RenderContext _rc;
-
-        public override ShaderProgram Shader { get; }
         private IShaderParam _particleSizeParam;
         
         // This is the object where new vertices are stored. Also look at the description of the class(es) for more information.
@@ -38,14 +35,8 @@ namespace Fusee.Tutorial.Core.Data
         /// Constructor, which loads the shader programs.
         /// </summary>
         /// <param name="rc">The render context.</param>
-        public PointCloud(RenderContext rc)
+        public PointCloud(RenderContext rc) : base(rc)
         {
-            _rc = rc;
-
-            string vertsh = AssetStorage.Get<string>("VertexShaderPCL.vert");
-            string pixsh = AssetStorage.Get<string>("PixelShaderPCL.frag");
-
-            Shader = _rc.CreateShader(vertsh, pixsh);
         }
 
         /// <summary>
@@ -74,6 +65,8 @@ namespace Fusee.Tutorial.Core.Data
         /// </summary>
         public override void Render()
         {
+            base.Render();
+
             List<Mesh> meshesToRemove = _meshList.GetMeshesToRemove();
             for (var i = 0; i < meshesToRemove.Count; i++)
             {
@@ -92,7 +85,7 @@ namespace Fusee.Tutorial.Core.Data
         /// </summary>
         public override void SetShaderParams()
         {
-            _particleSizeParam = _rc.GetShaderParam(Shader, "particleSize");
+            _particleSizeParam = _rc.GetShaderParam(_shader, "particleSize");
             _rc.SetShaderParam(_particleSizeParam, ParticleSize);
         }
 
@@ -121,6 +114,17 @@ namespace Fusee.Tutorial.Core.Data
         public static void SetParticleSize(float particleSize)
         {
             ParticleSize = particleSize;
+        }
+
+        /// <summary>
+        /// Create shader program with vertex and fragment shader for this render entity.
+        /// </summary>
+        protected override ShaderProgram CreateShaderProgram()
+        {
+            string vertsh = AssetStorage.Get<string>("VertexShaderPCL.vert");
+            string pixsh = AssetStorage.Get<string>("PixelShaderPCL.frag");
+
+            return _rc.CreateShader(vertsh, pixsh);
         }
 
         #endregion

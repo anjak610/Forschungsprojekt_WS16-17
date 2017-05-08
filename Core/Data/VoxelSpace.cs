@@ -18,10 +18,6 @@ namespace Fusee.Tutorial.Core.Data
         private const float VOXEL_SIZE = 1;
         private const int COMPUTE_EVERY = 1; // take only every xth point into account in order to speed up calculation
         
-        private RenderContext _rc;
-
-        public override ShaderProgram Shader { get; }
-
         private IShaderParam _yBoundsParam;
         private float2 _yBounds;
 
@@ -47,17 +43,10 @@ namespace Fusee.Tutorial.Core.Data
         /// </summary>
         /// <param name="boundingBox">Needs a reference to the bounding box for rendering.</param>
         /// <param name="rc">The render context.</param>
-        public VoxelSpace(RenderContext rc, BoundingBox boundingBox)
+        public VoxelSpace(RenderContext rc, BoundingBox boundingBox) : base(rc)
         {
             boundingBox.UpdateCallbacks += OnBoundingBoxUpdate;
-
-            _rc = rc;
-
-            string vertsh = AssetStorage.Get<string>("VertexShaderVSP.vert");
-            string pixsh = AssetStorage.Get<string>("PixelShaderVSP.frag");
-
-            Shader = _rc.CreateShader(vertsh, pixsh);
-
+            
             _octree = new Octree<OctreeNodeStates>(float3.Zero, VOXEL_SIZE);
             _octree.OnNodeAddedCallback += OnNewNodeAdded;
         }
@@ -107,6 +96,7 @@ namespace Fusee.Tutorial.Core.Data
         /// </summary>
         public override void Render()
         {
+            base.Render();
             _rc.RenderAsInstance(_cube, _positions);
         }
 
@@ -115,7 +105,7 @@ namespace Fusee.Tutorial.Core.Data
         /// </summary>
         public override void SetShaderParams()
         {
-            _yBoundsParam = _rc.GetShaderParam(Shader, "yBounds");
+            _yBoundsParam = _rc.GetShaderParam(_shader, "yBounds");
             _rc.SetShaderParam(_yBoundsParam, _yBounds);
         }
 
@@ -127,6 +117,17 @@ namespace Fusee.Tutorial.Core.Data
         {
             _yBounds.x = boundingBox.GetMinValues().y;
             _yBounds.y = boundingBox.GetMaxValues().y;
+        }
+
+        /// <summary>
+        /// Create shader program with vertex and fragment shader for this render entity.
+        /// </summary>
+        protected override ShaderProgram CreateShaderProgram()
+        {
+            string vertsh = AssetStorage.Get<string>("VertexShaderVSP.vert");
+            string pixsh = AssetStorage.Get<string>("PixelShaderVSP.frag");
+
+            return _rc.CreateShader(vertsh, pixsh);
         }
 
         #endregion

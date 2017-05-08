@@ -14,11 +14,8 @@ namespace Fusee.Tutorial.Core.Data
     {
         #region Fields
         
-        private const float LineWidth = 5; // pixel
-        
-        private RenderContext _rc;
-        public override ShaderProgram Shader { get; }
-        
+        private const float LineWidth = 4; // pixel
+                
         // This is the object where new vertices are stored. Also look at the description of the class(es) for more information.
         private AttributesList _positions = new AttributesList(65000);
         
@@ -29,16 +26,10 @@ namespace Fusee.Tutorial.Core.Data
         #region Methods
 
         /// <summary>
-        /// Constructor, which loads the shader programs.
+        /// Constructor, which loads the shader programs (see base class).
         /// </summary>
-        public DronePath(RenderContext rc)
-        {
-            _rc = rc;
-
-            string vertsh = AssetStorage.Get<string>("VertexShaderDP.vert");
-            string pixsh = AssetStorage.Get<string>("PixelShaderDP.frag");
-
-            Shader = _rc.CreateShader(vertsh, pixsh);
+        public DronePath(RenderContext rc) : base(rc)
+        { 
         }
 
         /// <summary>
@@ -59,6 +50,8 @@ namespace Fusee.Tutorial.Core.Data
         /// </summary>
         public override void Render()
         {
+            base.Render();
+
             List<DynamicAttributes> buffers = _positions.GetAttributesList();
             for(var i=0; i<buffers.Count; i++)
             {
@@ -72,6 +65,17 @@ namespace Fusee.Tutorial.Core.Data
         public override void SetShaderParams()
         {
             // no uniform variables available. Line width is set in Render().
+        }
+
+        /// <summary>
+        /// Create shader program with vertex and fragment shader for this render entity.
+        /// </summary>
+        protected override ShaderProgram CreateShaderProgram()
+        {
+            string vertsh = AssetStorage.Get<string>("VertexShaderDP.vert");
+            string pixsh = AssetStorage.Get<string>("PixelShaderDP.frag");
+
+            return _rc.CreateShader(vertsh, pixsh);
         }
 
         #endregion

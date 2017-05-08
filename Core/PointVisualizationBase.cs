@@ -15,9 +15,9 @@ namespace Fusee.Tutorial.Core
     {
         #region Enums
 
-        public enum RenderMode
+        public enum ViewMode
         {
-            PointCloud, VoxelSpace, DronePath
+            PointCloud, VoxelSpace
         }
 
         #endregion
@@ -36,23 +36,10 @@ namespace Fusee.Tutorial.Core
         #region Helper
 
         // current view mode: either pointcloud or voxelspace
-        private RenderMode _viewMode = RenderMode.PointCloud;
-
-        public RenderMode ViewMode    // the Name property
-        {
-            get
-            {
-                return _viewMode;
-            }
-            set
-            {
-                if(_viewMode != RenderMode.DronePath)
-                    _viewMode = value;
-            }
-        }
+        public ViewMode CurrentViewMode { get; set; } = ViewMode.PointCloud;
 
         // data
-        private PointCloud _pointCloud; // particle size needs to be changed from outside
+        private PointCloud _pointCloud; // particle size gets changed via static methods
         private VoxelSpace _voxelSpace;
         private DronePath _dronePath;
 
@@ -134,9 +121,6 @@ namespace Fusee.Tutorial.Core
             UDPReceiver.StreamFrom(UDP_PORT);
             //*/
 
-            // Set RC/GL related variables
-            SetViewMode(_viewMode);
-
             // Set the clear color for the backbuffer
             RC.ClearColor = new float4(0.95f, 0.95f, 0.95f, 1);
         }
@@ -154,14 +138,10 @@ namespace Fusee.Tutorial.Core
             {
                 SwitchViewMode();
             }
-            else
-            {
-                SetRenderMode(_viewMode);
-            }
 
             // check on particle size change
 
-            if(_viewMode == RenderMode.PointCloud)
+            if(CurrentViewMode == ViewMode.PointCloud)
             {
                 if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0)
                 {
@@ -187,7 +167,7 @@ namespace Fusee.Tutorial.Core
 
             _signalEvent.WaitOne(); // stop other thread from adding points until these points have been written to the gpu memory
             
-            if (_viewMode == RenderMode.PointCloud)
+            if (CurrentViewMode == ViewMode.PointCloud)
             {
                 _pointCloud.Render();
             }
@@ -195,11 +175,8 @@ namespace Fusee.Tutorial.Core
             {
                 _voxelSpace.Render();
             }
-
-            //*
-            SetRenderMode(RenderMode.DronePath);
+            
             _dronePath.Render();
-            //*/
 
             _signalEvent.Set(); // allow other thread again to add points
 
@@ -368,47 +345,8 @@ namespace Fusee.Tutorial.Core
         /// </summary>
         public void SwitchViewMode()
         {
-            RenderMode nextViewMode = _viewMode == RenderMode.PointCloud ? RenderMode.VoxelSpace : RenderMode.PointCloud;
-            SetViewMode(nextViewMode);
-        }
-
-        /// <summary>
-        /// Changes the current view mode.
-        /// </summary>
-        public void SetViewMode(RenderMode viewMode)
-        {
-            if (viewMode == RenderMode.DronePath)
-                return;
-
-            _viewMode = viewMode;
-            SetRenderMode(_viewMode);
-        }
-
-        #endregion
-
-        #region Private Members
-
-        /// <summary>
-        /// Sets the shader and shader params according to the given render mode.
-        /// </summary>
-        /// <param name="renderMode">The render mode to set.</param>
-        private void SetRenderMode(RenderMode renderMode)
-        {
-            switch (renderMode)
-            {
-                case RenderMode.PointCloud:
-                    RC.SetShader(_pointCloud.Shader);
-                    _pointCloud.SetShaderParams();
-                    break;
-                case RenderMode.VoxelSpace:
-                    RC.SetShader(_voxelSpace.Shader);
-                    _voxelSpace.SetShaderParams();
-                    break;
-                case RenderMode.DronePath:
-                    RC.SetShader(_dronePath.Shader);
-                    _dronePath.SetShaderParams();
-                    break;
-            }
+            ViewMode nextViewMode = CurrentViewMode == ViewMode.PointCloud ? ViewMode.VoxelSpace : ViewMode.PointCloud;
+            CurrentViewMode = nextViewMode;
         }
 
         #endregion

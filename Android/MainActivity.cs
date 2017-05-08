@@ -112,7 +112,7 @@ namespace Fusee.Tutorial.Android
                 viewMode.Click += (sender, e) =>
                 {
                     app.SwitchViewMode();
-                    System.Diagnostics.Debug.WriteLine(app.ViewMode);
+                    System.Diagnostics.Debug.WriteLine(app.CurrentViewMode);
                 };
 
                 // connect UDPReceiver
