@@ -89,6 +89,10 @@ namespace Fusee.Tutorial.Core
         private IShaderParam _zZoomParam;
         private float _zoom = 60f;
 
+        private IShaderParam _TexParam;
+        private ITexture _tex;
+        private Dictionary<string, ITexture> _textueLookUp = new Dictionary<string, ITexture>();
+
 
         // --- camera positioning
 
@@ -165,9 +169,15 @@ namespace Fusee.Tutorial.Core
             vertsh_VSP = AssetStorage.Get<string>("VertexShaderVSP.vert");
             pixsh_VSP = AssetStorage.Get<string>("PixelShaderVSP.frag");
 
-        
+            var texture = AssetStorage.Get<ImageData>("BlackPoint.png");
+
+
             GetZoomValue(RC.CreateShader(vertsh_PCL, pixsh_PCL), _zoom);
-            
+
+            //Load texture and save into ITexture _newTex           
+            _tex = RC.CreateTexture(texture);
+            _textueLookUp.Add("black_sphere.png", _tex);
+          
 
             //_zZoomParam = RC.GetShaderParam(RC.CreateShader(vertsh_PCL, pixsh_PCL), "zZoom");
             //RC.SetShaderParam(_zZoomParam, _zoom);
@@ -506,6 +516,9 @@ namespace Fusee.Tutorial.Core
 
                _zBoundsParam = RC.GetShaderParam(shader, "zBounds");
                RC.SetShaderParam(_zBoundsParam, _zBounds);
+
+                _TexParam = RC.GetShaderParam(shader, "tex");
+                RC.SetShaderParamTexture(_TexParam, _tex);
             }
             else
             {
