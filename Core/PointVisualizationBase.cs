@@ -107,7 +107,9 @@ namespace Fusee.Tutorial.Core
 
             //Zoom Value
             _zoom = 60;
-            
+
+            _pointCloud.GetZoomValue(RC, _shader, _zoom);
+
             // callbacks for various readings and stuff
 
             PointCloudReader.OnNewPointCallbacks += OnNewPointAdded;
@@ -241,6 +243,9 @@ namespace Fusee.Tutorial.Core
                 MoveY += speed.y * -0.0005f;
             }
 
+            _pointCloud.GetZoomValue(RC,_shader , _zoom);
+
+
             _angleHorz += _angleVelHorz;
             // Wrap-around to keep _angleHorz between -PI and + PI
             _angleHorz = M.MinAngle(_angleHorz);
@@ -265,6 +270,9 @@ namespace Fusee.Tutorial.Core
             return ModelView;
 
         }
+
+       
+
 
         /// <summary>
         /// Is called when the window was resized.

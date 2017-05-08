@@ -3,6 +3,7 @@ using Fusee.Engine.Common;
 using Fusee.Engine.Core;
 using Fusee.Tutorial.Core.Common;
 using System.Collections.Generic;
+using Fusee.Math.Core;
 
 namespace Fusee.Tutorial.Core
 {
@@ -22,6 +23,19 @@ namespace Fusee.Tutorial.Core
         private float ParticleSize = 0.05f; // maybe gets changed from platform specific classes
         public const float ParticleSizeInterval = 0.025f;
 
+        private IShaderParam _zBoundsParam;
+        private float2 _zBounds = float2.Zero;
+
+        private IShaderParam _zZoomParam;
+        private float _zoom = 60f;
+
+        public IShaderParam _zZoom
+        {
+            get { return _zBoundsParam; }
+
+            set { _zBoundsParam = value; }
+        }
+
         #endregion
 
         #region Shader Params
@@ -40,6 +54,23 @@ namespace Fusee.Tutorial.Core
 
         #region Other
 
+        public void SetZNearFarPlane(RenderContext rc, ShaderProgram shader)
+        {
+            _zBoundsParam = rc.GetShaderParam(shader, "zBounds");
+            rc.SetShaderParam(_zBoundsParam, _zBounds);
+        }
+
+        public void GetZoomValue(RenderContext rc, ShaderProgram shader, float _zoom)
+        {
+            _zZoomParam = rc.GetShaderParam(shader, "zZoom");
+            rc.SetShaderParam(_zZoomParam, _zoom);
+        }
+
+        private void OnBoundingBoxUpdate(BoundingBox boundingBox)
+        {
+            _zBounds.x = boundingBox.GetMinValues().z;
+            _zBounds.y = boundingBox.GetMaxValues().z;
+        }
         private int _pointCounter = 0;
 
         #endregion
