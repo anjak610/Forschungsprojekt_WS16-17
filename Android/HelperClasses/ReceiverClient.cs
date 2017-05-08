@@ -15,9 +15,8 @@ namespace Fusee.Tutorial.Android.HelperClasses
         private Socket acceptor;
         public Boolean receiving;
         private Boolean connected;
-        public Boolean completed;
         private byte[] data;
-     
+        public string serveraddress;
 
         public ReceiverClient()
         {
@@ -25,7 +24,7 @@ namespace Fusee.Tutorial.Android.HelperClasses
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             receiving = false;
             connected = false;
-            completed = false;
+      
         }
 
         public void ConnecttoServer(string serveraddress, string localip)
@@ -40,16 +39,16 @@ namespace Fusee.Tutorial.Android.HelperClasses
 
         }
 
-        public void SetupReceiving()
+        public void SetupReceiving()//Receive on port 50123
         {
             try
             {
-                receiver.Bind(new IPEndPoint(0, 1994));
+                receiver.Bind(new IPEndPoint(0, 50123));
                 receiver.Listen(0);
                 acceptor = receiver.Accept();
                 System.Diagnostics.Debug.WriteLine("Socket accepting");
                 receiving = true;
-                completed = false;
+
             }
             catch
             {
@@ -71,18 +70,7 @@ namespace Fusee.Tutorial.Android.HelperClasses
 
                     while (size > 0)
                     {
-                        System.Diagnostics.Debug.WriteLine("Buffersize > 0");
-                        System.Diagnostics.Debug.WriteLine("Receiving...");
-
-                        byte[] buffer;
-                        if (size < acceptor.ReceiveBufferSize)
-                        {
-                            buffer = new byte[size];
-                        }
-                        else
-                        {
-                            buffer = new byte[acceptor.ReceiveBufferSize];
-                        }
+                        var buffer = size < acceptor.ReceiveBufferSize ? new byte[size] : new byte[acceptor.ReceiveBufferSize];
 
                         int receive = acceptor.Receive(buffer, 0, buffer.Length, 0);
                         //subtract the size of the received data from the size
@@ -94,15 +82,13 @@ namespace Fusee.Tutorial.Android.HelperClasses
 
                     if (size == 0)
                     {
-                        receiving = false;
                         ms.Close();
                         data = ms.ToArray();
-                        //TODO change handling of data at receiver
-                       // Core.PointCloudReader.receivedData = Encoding.UTF8.GetString(data);
-                       // Core.PointCloudReader.DisplayReceived();
+                        //TODO convert to float not to string
+                        string datastring = Encoding.UTF8.GetString(data);
+                        Core.PointClouds.PointCloudReader.ReadFromString(datastring);
                         ms.Dispose();
-                        System.Diagnostics.Debug.WriteLine("Everything received");
-                        completed = true;
+
                     }
                 }
             }
@@ -115,6 +101,7 @@ namespace Fusee.Tutorial.Android.HelperClasses
             public void Disconect()
             {
             connected = false;
+            receiving = false;
             receiver.Close();
             acceptor.Close();
             socket.Close();

@@ -90,7 +90,8 @@ namespace Fusee.Tutorial.Core.PointClouds
                 }
                 catch (Exception e)
                 {
-                    System.Diagnostics.Debug.WriteLine(e);                    
+                    //System.Diagnostics.Debug.WriteLine(e);
+                    System.Diagnostics.Debug.WriteLine("Line skipped: Error converting string to float");
                 }            
             }
                 OnAssetLoadedCallbacks?.Invoke();

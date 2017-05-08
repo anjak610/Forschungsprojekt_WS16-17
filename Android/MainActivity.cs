@@ -38,7 +38,7 @@ namespace Fusee.Tutorial.Android
 		{
 
 			base.OnCreate (savedInstanceState);
-            RequestWindowFeature(WindowFeatures.NoTitle);
+            RequestWindowFeature(WindowFeatures.ActionBar);
 
             SetContentView(Resource.Layout.main_activity_layout);
             canvas_view = FindViewById<RelativeLayout>(Tutorial.Android.Resource.Id.canvas_container);
@@ -49,7 +49,7 @@ namespace Fusee.Tutorial.Android
             this.ActionBar.SetTitle(Resource.String.actionbar_title);
             this.ActionBar.Show();
 
-            FrameRateLogger frl = new FrameRateLogger();
+            //FrameRateLogger frl = new FrameRateLogger();
 
             if (SupportedOpenGLVersion() >= 3)
 		    {
@@ -132,16 +132,8 @@ namespace Fusee.Tutorial.Android
 		       // SetContentView(rci.View);
                 canvas_view.AddView(rci.View);
 
-                app._pointCloud.SetParticleSize(0.05f);
-                //show display dimensions for testing
-                IWindowManager wm = ApplicationContext.GetSystemService(WindowService).JavaCast<IWindowManager>() ;
-                //Display display = wm.DefaultDisplay;
-                //app._screenSize = new float2(display.Width, display.Height);
-                // float pixel_height = display.Height;
-                //float pixel_width = display.Width;
-                // string output = "Width: " + pixel_height + " Height:" + pixel_width;
-                //Show roasted bread
-                //  Toast.MakeText(ApplicationContext, output, ToastLength.Short).Show();
+                //app._pointCloud.SetParticleSize(0.05f);
+             
 
                 Engine.Core.Input.AddDriverImp(
 		            new Fusee.Engine.Imp.Graphics.Android.RenderCanvasInputDriverImp(app.CanvasImplementor));
@@ -155,6 +147,33 @@ namespace Fusee.Tutorial.Android
             }
         }
 
+        /// <summary>
+        /// Inflates Menu Layout
+        /// </summary>
+
+        public override bool OnCreateOptionsMenu(IMenu menu)
+        {
+            var inflater = MenuInflater;
+            inflater.Inflate(Resource.Menu.menu_main, menu);
+            return true;
+        }
+
+        /// <summary>
+        /// Sets up the actions that happen when menu buttons are clicked
+        /// </summary>
+        public override bool OnOptionsItemSelected(IMenuItem item)
+        {
+            var id = item.ItemId;
+            //If someone clicks on the Add Service button
+            if (id == Resource.Id.action_open_conn_dialog)
+            {
+                //Create a new dialog and all show on
+                //That dialog
+                var dialog = ConnectionDialog.NewInstance();
+                dialog.Show(FragmentManager, "dialog");
+            }
+            return base.OnOptionsItemSelected(item);
+        }
 
         /// <summary>
         /// Gets the supported OpenGL ES version of device.

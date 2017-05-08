@@ -103,6 +103,7 @@ namespace Fusee.Tutorial.Core
             // read shaders from files
 
             _pointCloud = new PointCloud();
+            _pointCloud.SetParticleSize(0.05f);
             _voxelSpace = new VoxelSpace(_boundingBox);
 
             //Zoom Value
@@ -182,7 +183,7 @@ namespace Fusee.Tutorial.Core
            // }
            //
            // // Zoom & Roll
-           // if (Input.Touch.TwoPoint)
+            //if (Input.Touch.TwoPoint)
            // {
            //     if (!_twoTouchRepeated)
            //     {

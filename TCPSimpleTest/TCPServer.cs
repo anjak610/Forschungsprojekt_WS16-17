@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.IO;
 using System.Collections;
 using System.Collections.Specialized;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Server
@@ -175,30 +176,42 @@ namespace Server
                     int packagesize = 5000;
                     int linelimit = packagesize;
                     string packagedata = "";
+                    
                     while (((line = s.ReadLine()) != null) && (count <= linelimit)) // read per line
                     {
-                        packagedata += line + "\n";//adds new line character after each point
-                       
-                        if (count == 0)
+                        if (!(Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.Spacebar))
                         {
-                            Console.WriteLine("Preparing packages...");
+                            packagedata += line + "\n"; //adds new line character after each point
+
+                            if (count == 0)
+                            {
+                                Console.WriteLine("Preparing packages...");                               
+                            }
+                            count++;
+
+                            if (count == linelimit)
+                            {
+                                linelimit = count + packagesize; //iterate through the next package
+
+                                byte[] b = Encoding.UTF8.GetBytes(packagedata);
+                                packages.Add(b);
+                                Console.WriteLine("Package created. Linecount: " + count);
+                                SendPackage(b);
+
+                                packagedata = "";
+                            }
+
                         }
-                        count++;
-
-                        if (count == linelimit)
+                        else
                         {
-                            linelimit = count + packagesize; //iterate through the next package
-
-                            byte[] b = Encoding.UTF8.GetBytes(packagedata);
-                            packages.Add(b);
-                            Console.WriteLine("Package created. Linecount: " + count);
-                            SendPackage(b);
-                                               
-                            packagedata = "";                                                     
-                        }                      
-
-                    }
-                    System.Diagnostics.Debug.WriteLine("Server: End of file ");
+                            System.Diagnostics.Debug.WriteLine("Sending stopped ");
+                            Console.WriteLine("Sending stopped");
+                            Console.WriteLine("Press any key to exit");                        
+                            Console.Read();
+                            break;                           
+                        }
+                    }                   
+                    
                 }
                 
             }).Start();

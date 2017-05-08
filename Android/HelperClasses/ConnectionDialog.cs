@@ -17,7 +17,7 @@ using Fusee.Tutorial.Android;
 using Fusee.Tutorial.Android.HelperClasses;
 
 
-namespace Fusee.Tutorial.Android
+namespace Fusee.Tutorial.Android.HelperClasses
 {
     class ConnectionDialog : DialogFragment
     {
@@ -90,21 +90,7 @@ namespace Fusee.Tutorial.Android
                                 StatusText.Text += ("\nConnected. Receiving data...");
                             });
 
-                            client.Receive();
-
-                            if (client.completed) {
-                                System.Diagnostics.Debug.WriteLine("Data transfer complete");
-                                Activity.RunOnUiThread(() => {
-                                       StatusText.Text += "\nData transfer complete!";                                  
-                                });
-                            }
-                            else
-                            {
-                                System.Diagnostics.Debug.WriteLine("Data transfer not completed");
-                                Activity.RunOnUiThread(() => {
-                                    StatusText.Text += "\nData transfer not completed!";
-                                });
-                            }
+                            client.Receive();                        
                             
                         }
                         catch (Exception exp) //catch socket exceptions
