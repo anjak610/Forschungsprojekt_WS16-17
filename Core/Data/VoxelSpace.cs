@@ -18,7 +18,6 @@ namespace Fusee.Tutorial.Core.Data
         private const float VOXEL_SIZE = 1;
         private const int COMPUTE_EVERY = 1; // take only every xth point into account in order to speed up calculation
         
-        private IShaderParam _yBoundsParam;
         private float2 _yBounds;
 
         // TO-DO: set shader param for voxelsize?
@@ -116,8 +115,8 @@ namespace Fusee.Tutorial.Core.Data
         /// </summary>
         public override void SetShaderParams()
         {
-            _yBoundsParam = _rc.GetShaderParam(_shader, "yBounds");
-            _rc.SetShaderParam(_yBoundsParam, _yBounds);
+            var yBoundsParam = _rc.GetShaderParam(_shader, "yBounds");
+            _rc.SetShaderParam(yBoundsParam, _yBounds);
         }
 
         /// <summary>

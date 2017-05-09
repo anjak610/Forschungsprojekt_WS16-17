@@ -15,7 +15,7 @@ namespace Fusee.Tutorial.Core.Data
         #region Fields
         
         private const float LineWidth = 4; // pixel
-                
+
         // This is the object where new vertices are stored. Also look at the description of the class(es) for more information.
         private AttributesList _positions = new AttributesList(65000);
         
@@ -62,12 +62,13 @@ namespace Fusee.Tutorial.Core.Data
         public override void Render()
         {
             base.Render();
-
+            /*
             List<DynamicAttributes> buffers = _positions.GetAttributesList();
             for(var i=0; i<buffers.Count; i++)
             {
                 _rc.RenderAsLines(buffers[i], LineWidth);
             }
+            */
         }
 
         /// <summary>

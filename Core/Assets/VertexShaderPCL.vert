@@ -16,12 +16,13 @@ varying float zoom;
 void main()
 {
 	vec3 modelpos = fuVertex;
-
+	
 	near = zBounds.x;
 	far = zBounds.y;	
 	zoom = zZoom;
-	newVertex = FUSEE_MVP * vec4(modelpos, 1.0);	
+		
+	vec4 newVertex = FUSEE_MVP * vec4(modelpos, 1.0);	
 	vec4 result = newVertex + vec4(fuNormal.xy * particleSize, 0, 0);
-
+	
 	gl_Position = result;
 }

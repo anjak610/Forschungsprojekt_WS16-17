@@ -23,12 +23,9 @@ namespace Fusee.Tutorial.Core.Data
         
         private int _pointCounter = 0;
 
-        private IShaderParam _particleSizeParam;
+        private float _aspectRatio = 1; // needed for particle size to be square, aspect ratio of viewport => see OnWindowResize
 
-        private IShaderParam _zBoundsParam;
         private float2 _zBounds = float2.Zero;
-
-        private IShaderParam _zZoomParam;
         private float _zoom = 60f;
 
         // This is the object where new vertices are stored. Also look at the description of the class(es) for more information.
@@ -65,16 +62,16 @@ namespace Fusee.Tutorial.Core.Data
         /// </summary>
         public override void SetShaderParams()
         {
-            _particleSizeParam = _rc.GetShaderParam(_shader, "particleSize");
-            _rc.SetShaderParam(_particleSizeParam, _particleSize);
-
+            var particleSizeParam = _rc.GetShaderParam(_shader, "particleSize");
+            _rc.SetShaderParam(particleSizeParam, new float2(_particleSize, _particleSize * _aspectRatio));
+            
             // SetZNearFarPlane
-            _zBoundsParam = _rc.GetShaderParam(_shader, "zBounds");
-            _rc.SetShaderParam(_zBoundsParam, _zBounds);
+            var zBoundsParam = _rc.GetShaderParam(_shader, "zBounds");
+            _rc.SetShaderParam(zBoundsParam, _zBounds);
 
             // SetZoomValue
-            _zZoomParam = _rc.GetShaderParam(_shader, "zZoom");
-            _rc.SetShaderParam(_zZoomParam, _zoom);
+            var zZoomParam = _rc.GetShaderParam(_shader, "zZoom");
+            _rc.SetShaderParam(zZoomParam, _zoom);
         }
 
         #endregion
@@ -117,17 +114,35 @@ namespace Fusee.Tutorial.Core.Data
         }
 
         /// <summary>
+        /// Gets called when viewport changes. Sets the aspect ratio
+        /// </summary>
+        /// <param name="aspectRatio">width / height</param>
+        public void SetAspectRatio(float aspectRatio)
+        {
+            _aspectRatio = aspectRatio;
+        }
+
+        /// <summary>
         /// Adds another point to this point cloud.
         /// </summary>
         /// <param name="point">The point to add.</param>
         public void AddPoint(Common.Point point)
+        {
+            AddPoint(point.Position);
+        }
+
+        /// <summary>
+        /// Adds another point to this point cloud.
+        /// </summary>
+        /// <param name="position">The position to add.</param>
+        public void AddPoint(float3 position)
         {
             _pointCounter++;
 
             if (_pointCounter % COMPUTE_EVERY != 0 && COMPUTE_EVERY != 1)
                 return;
 
-            _meshList.AddMesh(new PointMesh(point.Position));
+            _meshList.AddMesh(new PointMesh(position));
 
             //*
             if (_pointCounter % UPDATE_EVERY == 0)
@@ -164,7 +179,10 @@ namespace Fusee.Tutorial.Core.Data
         #endregion
 
         #region Event Handler
-
+        
+        /// <summary>
+        /// Gets called when bounding box updates.
+        /// </summary>
         private void OnBoundingBoxUpdate(BoundingBox boundingBox)
         {
             _zBounds.x = boundingBox.GetMinValues().z;

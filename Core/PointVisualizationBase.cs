@@ -62,8 +62,6 @@ namespace Fusee.Tutorial.Core
         private float _minAngleX = (float) -System.Math.PI / 4;
         private float _maxAngleX = (float) System.Math.PI / 4;
 
-        private float4x4 _projection;
-
         #endregion
 
         #region Begin Camera Values
@@ -93,7 +91,6 @@ namespace Fusee.Tutorial.Core
         public override void Init()
         {
             // bounding box
-
             _boundingBox = new BoundingBox();
             _boundingBox.UpdateCallbacks += OnBoundingBoxUpdate;
 
@@ -105,7 +102,7 @@ namespace Fusee.Tutorial.Core
 
             //Zoom Value
             _zoom = 60;
-            
+
             // stream point cloud from text file
 
             //*
@@ -132,6 +129,9 @@ namespace Fusee.Tutorial.Core
         /// </summary>
         public override void RenderAFrame()
         {
+            // Clear the backbuffer
+            RC.Clear(ClearFlags.Color | ClearFlags.Depth);
+            
             // check on key down
 
             if(Keyboard.IsKeyDown(KeyCodes.T))
@@ -140,47 +140,31 @@ namespace Fusee.Tutorial.Core
             }
 
             // check on particle size change
-
-            if(CurrentViewMode == ViewMode.PointCloud)
+            
+            if (CurrentViewMode == ViewMode.PointCloud && (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0) )
             {
-                if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0)
-                {
-                    _scaleKey = true;
-                }
-                else
-                {
-                    _scaleKey = false;
-                }
-
-                if (_scaleKey)
-                {
-                    PointCloud.IncreaseParticleSize(Keyboard.ADAxis * PointCloud.ParticleSizeInterval / 20);
-                }
+                PointCloud.IncreaseParticleSize(Keyboard.ADAxis * PointCloud.ParticleSizeInterval / 20);
             }
-
-            // Clear the backbuffer
-            RC.Clear(ClearFlags.Color | ClearFlags.Depth);
             
             // Render
 
             RC.ModelView = MoveInScene();
-            RC.Projection = _projection; // perhaps this must be assigned before Render() ?
-
+            
             _signalEvent.WaitOne(); // stop other thread from adding points until these points have been written to the gpu memory
             
             if (CurrentViewMode == ViewMode.PointCloud)
             {
-                //_pointCloud.Render();
+                _pointCloud.Render();
             }
             else
             {
-                //_voxelSpace.Render();
+                _voxelSpace.Render();
             }
             
-            //_dronePath.Render();
+            _dronePath.Render();
 
             _signalEvent.Set(); // allow other thread again to add points
-			
+            
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
         }
@@ -298,7 +282,10 @@ namespace Fusee.Tutorial.Core
             // Front clipping happens at 1 (Objects nearer than 1 world unit get clipped)
             // Back clipping happens at 2000 (Anything further away from the camera than 2000 world units gets clipped, polygons will be cut)
 
-            _projection = float4x4.CreatePerspectiveFieldOfView(3.141592f * 0.25f, aspectRatio, 1, 20000);
+            RC.Projection = float4x4.CreatePerspectiveFieldOfView(3.141592f * 0.25f, aspectRatio, 1, 20000);
+
+            // particle size set to be square
+            _pointCloud.SetAspectRatio(aspectRatio);
         }
 
         #endregion
@@ -314,14 +301,16 @@ namespace Fusee.Tutorial.Core
             _signalEvent.WaitOne();
 
             _pointCloud.AddPoint(point);
-            //_voxelSpace.AddPoint(point);
+            _voxelSpace.AddPoint(point);
 
             _signalEvent.Set();
 
-            //_boundingBox.Update(point.Position);
+            _boundingBox.Update(point.Position);
         }
-        
-        // update cameraPivot, whenever bounding box of point cloud gets updated
+
+        /// <summary>
+        /// Update cameraPivot, whenever bounding box of point cloud gets updated:
+        /// </summary>
         private void OnBoundingBoxUpdate(BoundingBox boundingBox)
         {
             _cameraPivot = boundingBox.GetCenterPoint();

@@ -19,7 +19,6 @@ void main()
 
 	float zlength = distance(pointFar,pointNear) + (zoom+(zoom/2.0));
 
-
 	float depth = dot(u_abcd.xyz, newVertex.xyz)+ u_abcd.w;	
 	vec3 color = vec3(1.0-depth/zlength);
 	gl_FragColor = vec4(color, 1.0); 
