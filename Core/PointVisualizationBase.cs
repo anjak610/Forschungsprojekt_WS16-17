@@ -1,53 +1,50 @@
-﻿using Fusee.Base.Core;
-using Fusee.Engine.Common;
-using Fusee.Engine.Core;
+﻿using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using static Fusee.Engine.Core.Input;
 using static Fusee.Engine.Core.Time;
-using Fusee.Tutorial.Core.Octree;
 using System.Threading;
+using Fusee.Tutorial.Core.Data_Transmission;
+using Fusee.Base.Common;
+using Fusee.Tutorial.Core.Data;
+using Fusee.Engine.Common;
 
 namespace Fusee.Tutorial.Core
 {
     [FuseeApplication(Name = "Forschungsprojekt", Description = "HFU Wintersemester 16-17")]
     public class PointVisualizationBase : RenderCanvas
     {
+        #region Enums
+
         public enum ViewMode
         {
             PointCloud, VoxelSpace
         }
 
+        #endregion
+
         #region Fields
+
+        #region UDP Connection
+
+        private const int UDP_PORT = 8001;
+
+        [InjectMe]
+        public IUDPReceiver UDPReceiver;
+
+        #endregion
 
         #region Helper
 
-        // connection with quadrocopter
-        private const int UDP_PORT = 8001;
-
         // current view mode: either pointcloud or voxelspace
-        private ViewMode _viewMode = ViewMode.PointCloud;
-
-        public ViewMode _ViewMode    // the Name property
-        {
-            get
-            {
-                return _viewMode;
-            }
-            set
-            {
-                _viewMode = value;
-            }
-        }
+        public ViewMode CurrentViewMode { get; set; } = ViewMode.PointCloud;
 
         // data
-        public PointCloud _pointCloud;
-        public VoxelSpace _voxelSpace;
+        private PointCloud _pointCloud; // particle size gets changed via static methods
+        private VoxelSpace _voxelSpace;
+        private DronePath _dronePath;
 
         private BoundingBox _boundingBox;
-        
-        // shader related
-        private ShaderProgram _shader;
-        
+                
         // due to multithreading
         private AutoResetEvent _signalEvent = new AutoResetEvent(true);
 
@@ -102,25 +99,27 @@ namespace Fusee.Tutorial.Core
 
             // read shaders from files
 
-            _pointCloud = new PointCloud();
-            _voxelSpace = new VoxelSpace(_boundingBox);
+            _pointCloud = new PointCloud(RC, _boundingBox);
+            _voxelSpace = new VoxelSpace(RC, _boundingBox);
+            _dronePath = new DronePath(RC);
 
             //Zoom Value
             _zoom = 60;
+            
+            // stream point cloud from text file
 
-            _pointCloud.GetZoomValue(RC, _shader, _zoom);
+            //*
+            AssetReader.OnNewPointCallbacks += OnNewPointAdded;
+            AssetReader.ReadFromAsset("PointCloud_IPM.txt");
+            //*/
 
-            // callbacks for various readings and stuff
+            // stream point cloud via udp
 
-            PointCloudReader.OnNewPointCallbacks += OnNewPointAdded;
-
-            // start loading points
-                        
-            PointCloudReader.ReadFromAsset("PointCloud_IPM.txt");
-            //PointCloudReader.ReceiveFromUDP(UDP_PORT); // for unity game or other
-
-            // Set RC/GL related variables
-            SetViewMode(_viewMode);
+            /*
+            UDPReceiver.OnNewPointCallbacks += OnNewPointAdded;
+            UDPReceiver.OnDronePositionCallbacks += OnDronePositionAdded;
+            UDPReceiver.StreamFrom(UDP_PORT);
+            //*/
 
             // Set the clear color for the backbuffer
             RC.ClearColor = new float4(0.95f, 0.95f, 0.95f, 1);
@@ -137,12 +136,26 @@ namespace Fusee.Tutorial.Core
 
             if(Keyboard.IsKeyDown(KeyCodes.T))
             {
-                ViewMode nextViewMode = _viewMode == ViewMode.PointCloud ? ViewMode.VoxelSpace : ViewMode.PointCloud;
-                SetViewMode(nextViewMode);
+                SwitchViewMode();
             }
-            else
+
+            // check on particle size change
+
+            if(CurrentViewMode == ViewMode.PointCloud)
             {
-                SetShaderParams();
+                if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0)
+                {
+                    _scaleKey = true;
+                }
+                else
+                {
+                    _scaleKey = false;
+                }
+
+                if (_scaleKey)
+                {
+                    PointCloud.IncreaseParticleSize(Keyboard.ADAxis * PointCloud.ParticleSizeInterval / 20);
+                }
             }
 
             // Clear the backbuffer
@@ -151,21 +164,22 @@ namespace Fusee.Tutorial.Core
             // Render
 
             RC.ModelView = MoveInScene();
+            RC.Projection = _projection; // perhaps this must be assigned before Render() ?
 
             _signalEvent.WaitOne(); // stop other thread from adding points until these points have been written to the gpu memory
             
-            if (_viewMode == ViewMode.PointCloud)
+            if (CurrentViewMode == ViewMode.PointCloud)
             {
-                _pointCloud.Render(RC);
+                //_pointCloud.Render();
             }
             else
             {
-                _voxelSpace.Render(RC);
+                //_voxelSpace.Render();
             }
+            
+            //_dronePath.Render();
 
             _signalEvent.Set(); // allow other thread again to add points
-
-            RC.Projection = _projection;
 			
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
@@ -243,9 +257,8 @@ namespace Fusee.Tutorial.Core
                 MoveY += speed.y * -0.0005f;
             }
 
-            _pointCloud.GetZoomValue(RC,_shader , _zoom);
-
-
+            _pointCloud.SetZoomValue(_zoom);
+            
             _angleHorz += _angleVelHorz;
             // Wrap-around to keep _angleHorz between -PI and + PI
             _angleHorz = M.MinAngle(_angleHorz);
@@ -268,12 +281,8 @@ namespace Fusee.Tutorial.Core
             float4x4 ModelView = MtxCam * MtxRot * view;
 
             return ModelView;
-
         }
-
-       
-
-
+        
         /// <summary>
         /// Is called when the window was resized.
         /// </summary>
@@ -300,16 +309,16 @@ namespace Fusee.Tutorial.Core
         /// Whenever a new point gets loaded, this is what happens with him.
         /// </summary>
         /// <param name="point">Point data structure containing position and stuff.</param>
-        private void OnNewPointAdded(Point point)
+        private void OnNewPointAdded(Common.Point point)
         {   
             _signalEvent.WaitOne();
 
             _pointCloud.AddPoint(point);
-            _voxelSpace.AddPoint(point);
+            //_voxelSpace.AddPoint(point);
 
             _signalEvent.Set();
 
-            _boundingBox.Update(point.Position);
+            //_boundingBox.Update(point.Position);
         }
         
         // update cameraPivot, whenever bounding box of point cloud gets updated
@@ -318,67 +327,26 @@ namespace Fusee.Tutorial.Core
             _cameraPivot = boundingBox.GetCenterPoint();
         }
 
-        #endregion
-
-        #region Public Members
-
         /// <summary>
-        /// Changes the current view to either pointcloud or voxelspace.
+        /// Gets called when a new position for the drone is transmitted.
         /// </summary>
-        public void SetViewMode(ViewMode viewMode)
+        /// <param name="position"></param>
+        private void OnDronePositionAdded(float3 position)
         {
-            _viewMode = viewMode;
-
-            // Initialize the shader(s)
-
-            // read shaders from files
-
-            if (_viewMode == ViewMode.PointCloud)
-            {
-                _shader = RC.CreateShader(_pointCloud.VertexShader, _pointCloud.PixelShader);
-            }
-            else
-            {
-                _shader = RC.CreateShader(_voxelSpace.VertexShader, _voxelSpace.PixelShader);
-            }
-            
-            RC.SetShader(_shader);
-
-            SetShaderParams();
+            _dronePath.AddPosition(position);
         }
 
         #endregion
 
-        #region Private Members
-
+        #region Public Members
+        
         /// <summary>
-        /// Sets the shader params. Gets Called either every frame or from SetViewMode() (via Android button).
+        /// Switches the view mode from point cloud to voxelspace and vice versa.
         /// </summary>
-        private void SetShaderParams()
+        public void SwitchViewMode()
         {
-            if (_viewMode == ViewMode.PointCloud)
-            {
-                if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0)
-                {
-                    _scaleKey = true;
-                }
-                else
-                {
-                    _scaleKey = false;
-                }
-
-                if (_scaleKey)
-                {
-                    _pointCloud.IncreaseParticleSize(Keyboard.ADAxis * PointCloud.ParticleSizeInterval / 20);
-                }
-
-                _pointCloud.SetShaderParams(RC, _shader);
-            }
-            else
-            {
-                _voxelSpace.SetShaderParams(RC, _shader);
-            }
-            
+            ViewMode nextViewMode = CurrentViewMode == ViewMode.PointCloud ? ViewMode.VoxelSpace : ViewMode.PointCloud;
+            CurrentViewMode = nextViewMode;
         }
 
         #endregion
