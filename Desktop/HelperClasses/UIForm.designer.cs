@@ -29,11 +29,11 @@
         private void InitializeComponent()
         {
             this.canvaspanel = new System.Windows.Forms.Panel();
+            this.chg_view_btn = new System.Windows.Forms.Button();
             this.setup_btn = new System.Windows.Forms.Button();
             this.label_particle_size = new System.Windows.Forms.Label();
             this.plus_button = new System.Windows.Forms.Button();
             this.minus_button = new System.Windows.Forms.Button();
-            this.chg_view_btn = new System.Windows.Forms.Button();
             this.canvaspanel.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -50,6 +50,19 @@
             this.canvaspanel.Size = new System.Drawing.Size(1182, 953);
             this.canvaspanel.TabIndex = 0;
             this.canvaspanel.Paint += new System.Windows.Forms.PaintEventHandler(this.canvaspanel_Paint);
+            // 
+            // chg_view_btn
+            // 
+            this.chg_view_btn.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.chg_view_btn.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.chg_view_btn.Location = new System.Drawing.Point(426, 6);
+            this.chg_view_btn.MinimumSize = new System.Drawing.Size(180, 40);
+            this.chg_view_btn.Name = "chg_view_btn";
+            this.chg_view_btn.Size = new System.Drawing.Size(181, 40);
+            this.chg_view_btn.TabIndex = 1;
+            this.chg_view_btn.Text = "Change View";
+            this.chg_view_btn.UseVisualStyleBackColor = false;
+            this.chg_view_btn.Click += new System.EventHandler(this.chg_view_btn_Click);
             // 
             // setup_btn
             // 
@@ -95,18 +108,6 @@
             this.minus_button.Text = "-";
             this.minus_button.UseVisualStyleBackColor = true;
             this.minus_button.Click += new System.EventHandler(this.minus_button_Click);
-            // 
-            // chg_view_btn
-            // 
-            this.chg_view_btn.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.chg_view_btn.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.chg_view_btn.Location = new System.Drawing.Point(426, 6);
-            this.chg_view_btn.MinimumSize = new System.Drawing.Size(180, 40);
-            this.chg_view_btn.Name = "chg_view_btn";
-            this.chg_view_btn.Size = new System.Drawing.Size(181, 40);
-            this.chg_view_btn.TabIndex = 1;
-            this.chg_view_btn.Text = "Change View";
-            this.chg_view_btn.UseVisualStyleBackColor = false;
             // 
             // UIForm
             // 

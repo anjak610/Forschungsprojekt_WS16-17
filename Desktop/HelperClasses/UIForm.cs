@@ -10,6 +10,7 @@ using Fusee.Base.Core;
 using Fusee.Base.Imp.Desktop;
 using Fusee.Math.Core;
 using Fusee.Serialization;
+using Fusee.Tutorial.Core;
 using Path = Fusee.Base.Common.Path;
 using Fusee.Tutorial.Core.PointClouds;
 using Font = Fusee.Base.Core.Font;
@@ -140,12 +141,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
             currentApp.CanvasImplementor = currentHost;
             currentApp.ContextImplementor = new Fusee.Engine.Imp.Graphics.Desktop.RenderContextImp(currentApp.CanvasImplementor);
             Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Desktop.RenderCanvasInputDriverImp(currentHost.canvas));
-
-            //app.InputImplementor = new Fusee.Engine.Imp.Graphics.Desktop.InputImp(app.CanvasImplementor);
-            //app.AudioImplementor = new Fusee.Engine.Imp.Sound.Desktop.AudioImp();
-            //app.NetworkImplementor = new Fusee.Engine.Imp.Network.Desktop.NetworkImp();
-            //app.InputDriverImplementor = new Fusee.Engine.Imp.Input.Desktop.InputDriverImp();
-            //app.VideoManagerImplementor = ImpFactory.CreateIVideoManagerImp();
+            Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Desktop.WindowsTouchInputDriverImp(currentHost.canvas));
 
             //// If not already done, show the window.
             currentControl.Show();
@@ -216,6 +212,12 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
 
             ConnectionDialog SetupForm = new ConnectionDialog();
             SetupForm.Show();
+        }
+
+        private void chg_view_btn_Click(object sender, EventArgs e)
+        {
+            //var nextView = currentApp.ViewMode == PointVisualizationBase.ViewMode.PointCloud ? PointVisualizationBase.ViewMode.VoxelSpace : PointVisualizationBase.ViewMode.PointCloud;
+            //currentApp.SetViewMode(nextView);
         }
     }
 }

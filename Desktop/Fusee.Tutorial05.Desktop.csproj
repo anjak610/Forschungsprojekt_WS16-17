@@ -62,6 +62,7 @@
     <Compile Include="HelperClasses\ConnectionDialog.designer.cs">
       <DependentUpon>ConnectionDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="HelperClasses\Keymapper.cs" />
     <Compile Include="HelperClasses\ReceiverClient.cs" />
     <Compile Include="HelperClasses\RenderControl.cs">
       <SubType>UserControl</SubType>
