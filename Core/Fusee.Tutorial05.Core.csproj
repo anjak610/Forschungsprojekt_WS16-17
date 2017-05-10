@@ -69,6 +69,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
     <Compile Include="Data\VoxelSpace.cs" />
+    <Compile Include="Octree\OctreeNodeVSP.cs" />
+    <Compile Include="Octree\OctreeVSP.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PointVisualizationBase.cs" />
   </ItemGroup>

@@ -30,7 +30,7 @@ namespace Fusee.Tutorial.Core.Data
 
         // This is the object where new vertices are stored. Also look at the description of the class(es) for more information.
         private StaticMeshList _meshList = new StaticMeshList();
-
+        
         #endregion
         
         #region Methods

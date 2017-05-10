@@ -1,5 +1,4 @@
 ﻿using Fusee.Base.Core;
-using Fusee.Engine.Common;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using Fusee.Tutorial.Core.Common;
@@ -29,7 +28,7 @@ namespace Fusee.Tutorial.Core.Data
         private Cube _cube = new Cube();
 
         // An octree for better searchability, of when to add a new voxel.
-        private Octree<OctreeNodeStates> _octree;
+        private OctreeVSP<OctreeNodeStates> _octree;
         
         private int _pointCounter = 0;
         
@@ -46,8 +45,8 @@ namespace Fusee.Tutorial.Core.Data
         {
             boundingBox.UpdateCallbacks += OnBoundingBoxUpdate;
             
-            _octree = new Octree<OctreeNodeStates>(float3.Zero, VOXEL_SIZE);
-            _octree.OnNodeAddedCallback += OnNewNodeAdded;
+            OctreeVSP<OctreeNodeStates>.OnNodeAddedCallback += OnNewNodeAdded;
+            _octree = new OctreeVSP<OctreeNodeStates>(float3.Zero, VOXEL_SIZE);
         }
 
         /// <summary>
@@ -65,7 +64,7 @@ namespace Fusee.Tutorial.Core.Data
         /// Event handler for when a new node gets added to the octree.
         /// </summary>
         /// <param name="node">The node that was added.</param>
-        private void OnNewNodeAdded(OctreeNode<OctreeNodeStates> node)
+        private void OnNewNodeAdded(OctreeNodeVSP<OctreeNodeStates> node)
         {
             if (node.Data == OctreeNodeStates.Occupied && node.SideLength == VOXEL_SIZE)
             {
@@ -79,12 +78,7 @@ namespace Fusee.Tutorial.Core.Data
         /// <param name="point">The point to add.</param>
         public void AddPoint(Common.Point point)
         {
-            _pointCounter++;
-
-            if (_pointCounter % COMPUTE_EVERY != 0 && COMPUTE_EVERY != 1)
-                return;
-            
-            _octree.Add(point.Position, OctreeNodeStates.Occupied);
+            AddPoint(point.Position);
         }
 
         /// <summary>
