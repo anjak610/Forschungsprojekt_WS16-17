@@ -21,7 +21,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
     {
         public Panel renderPanel;
         public IntPtr panelHandle;
-        private RenderCanvas currentApp;
+        private PointVisualizationBase currentApp;
         private RenderControl currentControl;
         private WinformsHost currentHost;
 
@@ -216,8 +216,9 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
 
         private void chg_view_btn_Click(object sender, EventArgs e)
         {
-            //var nextView = currentApp.ViewMode == PointVisualizationBase.ViewMode.PointCloud ? PointVisualizationBase.ViewMode.VoxelSpace : PointVisualizationBase.ViewMode.PointCloud;
-            //currentApp.SetViewMode(nextView);
+            var nextView = currentApp._ViewMode == PointVisualizationBase.ViewMode.PointCloud ? PointVisualizationBase.ViewMode.VoxelSpace : PointVisualizationBase.ViewMode.PointCloud;
+            currentApp.SetViewMode(nextView);
+            System.Diagnostics.Debug.WriteLine(nextView);
         }
     }
 }
