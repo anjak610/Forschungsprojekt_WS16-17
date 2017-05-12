@@ -16,7 +16,10 @@ namespace Fusee.Tutorial.Core.Octree
         public float SideLength;
         public readonly float Spacing;
         public readonly List<float3> Bucket; // where data/points gets stored
+        public OctreeNodeStates RenderFlag = OctreeNodeStates.NonVisible; // flag whether to load/render this node
+        public char[] Path;
 
+        public OctreeNode Parent;
         public OctreeNode[] Children;
         
         /// <summary>
@@ -29,7 +32,7 @@ namespace Fusee.Tutorial.Core.Octree
             CenterPosition = centerPos;
             SideLength = sideLength;
 
-            Spacing = sideLength / 128; // see Schuetz (2016), 3.3
+            Spacing = sideLength / 8; // see Schuetz (2016), 3.3
             Bucket = new List<float3>();
         }
 
@@ -154,6 +157,7 @@ namespace Fusee.Tutorial.Core.Octree
         {
             OctreeNode childNode = Octree.CreateNodeWithSideLength(position, SideLength / 2);
             childNode.Add(ref position, out addedNodes);
+            
             AddChild(childNode);
 
             if(addedNodes == null)
@@ -166,21 +170,65 @@ namespace Fusee.Tutorial.Core.Octree
         /// Adds an octree node as a child to this node. Called by Octree.Grow() for example.
         /// </summary>
         /// <param name="child">The octree node to add as a child.</param>
-        public void AddChild(OctreeNode childNode)
+        /// <param name="recomputePath">wether to recompute the path for all children underneath.</param>
+        public void AddChild(OctreeNode childNode, bool recomputePath = false)
         {
             if (Children == null)
                 Children = new OctreeNode[0];
 
-            List<OctreeNode> childList = new List<OctreeNode>();
-
-            for(var i=0; i<Children.Length; i++)
-            {
-                childList.Add(Children[i]);
-            }
-
+            List<OctreeNode> childList = Children.ToList();
             childList.Add(childNode);
 
             Children = childList.ToArray();
+
+            childNode.SetParent(this);
+
+            if (recomputePath && Children != null && Children.Length > 0)
+            {
+                foreach(OctreeNode child in Children)
+                {
+                    Octree.Traverse(child, (OctreeNode node) =>
+                    {
+                        node.SetParent(node.Parent); // causes the node to recompute its path
+                    });
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets the given node as its parent and computes the path.
+        /// Be careful, because it does not recompute the paths of children.
+        /// </summary>
+        public void SetParent(OctreeNode parentNode)
+        {
+            Parent = parentNode;
+            SetPath();
+        }
+
+        /// <summary>
+        /// Sets the path for this node according to its parent node.
+        /// BUT: not for all children underneath.
+        /// </summary>
+        private void SetPath()
+        {
+            int index = -1;
+            for(var i=0; i<Parent.Children.Length; i++)
+            {
+                OctreeNode childNode = Parent.Children[i];
+
+                if (childNode.IsEqual(this))
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            if(index != -1)
+            {
+                List<char> charArray = Parent.Path.ToList();
+                charArray.Add((char) index); 
+                Path = charArray.ToArray();
+            }
         }
 
         /// <summary>
@@ -190,6 +238,14 @@ namespace Fusee.Tutorial.Core.Octree
         public bool hasChildren()
         {
             return Children != null && Children.Length > 0;
+        }
+
+        /// <summary>
+        /// Returns at which level this node resides in. 0 for root, 1 for his children and so on.
+        /// </summary>
+        public int GetLevel()
+        {
+            return Path.Length - 1;
         }
 
         /// <summary>

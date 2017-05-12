@@ -106,6 +106,10 @@ namespace Fusee.Tutorial.Core
             // stream point cloud from text file
 
             //*
+            AssetReader.OnAssetLoadedCallbacks += () =>
+            {
+                //_pointCloud.HasAssetLoaded = true;
+            };
             AssetReader.OnNewPointCallbacks += OnNewPointAdded;
             AssetReader.ReadFromAsset("PointCloud_IPM.txt");
             //*/
@@ -139,19 +143,51 @@ namespace Fusee.Tutorial.Core
                 SwitchViewMode();
             }
 
+            if (Keyboard.IsKeyDown(KeyCodes.K))
+            {
+                _pointCloud.SwitchWireframe();
+            }
+
+            // Just for debugging purposes
+
+            if(Keyboard.IsKeyDown(KeyCodes.Up))
+            {
+                _pointCloud.LevelUp();
+            }
+
+            if (Keyboard.IsKeyDown(KeyCodes.Down))
+            {
+                _pointCloud.LevelDown();
+            }
+
+            if (Keyboard.IsKeyDown(KeyCodes.Left))
+            {
+                _pointCloud.DebugPreviousSibling();
+            }
+
+            if (Keyboard.IsKeyDown(KeyCodes.Right))
+            {
+                _pointCloud.DebugNextSibling();
+            }
+
+            if (Keyboard.IsKeyDown(KeyCodes.L))
+            {
+                _pointCloud.SwitchViewMode();
+            }
+
             // check on particle size change
-            
+
             if (CurrentViewMode == ViewMode.PointCloud && (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0) )
             {
                 PointCloud.IncreaseParticleSize(Keyboard.ADAxis * PointCloud.ParticleSizeInterval / 20);
             }
             
             // Render
-
-            RC.ModelView = MoveInScene();
             
             _signalEvent.WaitOne(); // stop other thread from adding points until these points have been written to the gpu memory
-            
+
+            RC.ModelView = MoveInScene();
+
             if (CurrentViewMode == ViewMode.PointCloud)
             {
                 _pointCloud.Render();
@@ -264,6 +300,8 @@ namespace Fusee.Tutorial.Core
             var MtxRot = float4x4.CreateRotationZ(_angleRoll) * float4x4.CreateRotationX(_angleVert) * float4x4.CreateRotationY(_angleHorz);
             float4x4 ModelView = MtxCam * MtxRot * view;
 
+            _pointCloud.SetCameraPosition(ModelView * float3.Zero);
+
             return ModelView;
         }
         
@@ -286,6 +324,7 @@ namespace Fusee.Tutorial.Core
 
             // particle size set to be square
             _pointCloud.SetAspectRatio(aspectRatio);
+            _pointCloud.SetScreenHeight(Height);
         }
 
         #endregion

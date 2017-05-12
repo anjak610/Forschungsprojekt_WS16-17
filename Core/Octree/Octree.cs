@@ -1,6 +1,7 @@
-﻿ using Fusee.Math.Core;
+﻿using Fusee.Math.Core;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 /// Represents an octree where a point cloud is stored.
@@ -16,10 +17,17 @@ using System.Collections.Generic;
 
 namespace Fusee.Tutorial.Core.Octree
 {
+    public enum OctreeNodeStates
+    {
+        Visible, VisibleButUnloaded, NonVisible
+    }
+
     public class Octree
     {
         public delegate void OnNewNodeAdded(OctreeNode node);
+
         public static OnNewNodeAdded OnNodeAddedCallback;
+        public static Action OnOctreeNodeLevelsChangedCallback; // callback for when one or several nodes change their levels. See Wireframe
         
         public static int BucketThreshold; // The maximum number of items one node can hold
         public static float3 CenterPosition;
@@ -30,13 +38,19 @@ namespace Fusee.Tutorial.Core.Octree
         /// Initializes the octree with given center point and minimum side length.
         /// </summary>
         /// <param name="position">The ultimate center point.</param>
-        /// <param name="initialSideLength">The side length of the root node. May be changed because of growing of the tree.</param>
         /// <param name="bucketThreshold">The maximum number of items one node can hold</param>
-        public Octree(float3 position, float initialSideLength = 2, int bucketThreshold = 8) {
+        public Octree(float3 position, int bucketThreshold = 8) {
             
             BucketThreshold = bucketThreshold;
             CenterPosition = position;
+        }
 
+        /// <summary>
+        /// Starts creating the octree. Couldn't do it in the constructor, otherwise some classes would miss the callbacks.
+        /// </summary>
+        /// <param name="initialSideLength">The side length of the root node. May be changed because of growing of the tree.</param>
+        public void Init(float initialSideLength = 2)
+        {
             CreateRootNode(initialSideLength);
         }
 
@@ -54,6 +68,7 @@ namespace Fusee.Tutorial.Core.Octree
             // => NO, then let octree grow, and check again
 
             bool found = false;
+            bool hasGrown = false;
 
             while(!found)
             {
@@ -76,10 +91,16 @@ namespace Fusee.Tutorial.Core.Octree
                     {
                         OctreeNode childNode = _root.Children[i];
                         OctreeNode parentNode = Grow(childNode);
-                        _root.Children[i] = parentNode;
 
-                        OnNodeAddedCallback?.Invoke(childNode);
+                        _root.Children[i] = parentNode; // replace childNode
+
+                        parentNode.SetParent(_root);
+                        parentNode.AddChild(childNode, true);
+
+                        OnNodeAddedCallback?.Invoke(parentNode);
                     }
+
+                    hasGrown = true;
 
                     if (++count > 20)
                     {
@@ -87,6 +108,11 @@ namespace Fusee.Tutorial.Core.Octree
                         return;
                     }
                 }
+            }
+
+            if(hasGrown)
+            {
+                OnOctreeNodeLevelsChangedCallback?.Invoke();
             }
         }
 
@@ -98,6 +124,8 @@ namespace Fusee.Tutorial.Core.Octree
         private void CreateRootNode(float sideLength)
         {
             _root = new OctreeNode(CenterPosition, sideLength);
+            _root.Path = new char[] { (char)0 };
+
             OnNodeAddedCallback?.Invoke(_root);
 
             for (var i=0; i<8; i++)
@@ -143,15 +171,14 @@ namespace Fusee.Tutorial.Core.Octree
         
         /// <summary>
         /// Takes an octree node and creates its parent by letting it grow around the center point.
+        /// BUT: Parent and Paths and children have not been set yet.
         /// </summary>
         /// <param name="node">The octree node for which to create the parent</param>
         /// <returns>Returns the parent octree node.</returns>
         public OctreeNode Grow(OctreeNode node)
         {
-            OctreeNode parentNode = CreateNodeWithSideLength(node.CenterPosition, node.SideLength * 2);
-            parentNode.AddChild(node);
-
-            return parentNode;
+            OctreeNode newNode = CreateNodeWithSideLength(node.CenterPosition, node.SideLength * 2);
+            return newNode;
         }
 
         /// <summary>
@@ -182,6 +209,69 @@ namespace Fusee.Tutorial.Core.Octree
             OctreeNode node = new OctreeNode(newPos, sideLength);
 
             return node;
+        }
+
+        /// <summary>
+        /// Returns the root node.
+        /// </summary>
+        public OctreeNode GetRootNode()
+        {
+            return _root;
+        }
+
+        /// <summary>
+        /// Traverses the octree, visits each node and calls the callback.
+        /// </summary>
+        /// <param name="callback">The function to call for each node.</param>
+        public void Traverse(Action<OctreeNode> callback)
+        {
+            RecTraverse(_root, callback);
+        }
+
+        /// <summary>
+        /// Traverses the octree, visits each node and calls the callback.
+        /// </summary>
+        /// <param name="startNode">The node to start from.</param>
+        /// <param name="callback">The function to call for each node.</param>
+        public static void Traverse(OctreeNode startNode, Action<OctreeNode> callback)
+        {
+            RecTraverse(startNode, callback);
+        }
+
+        /// <summary>
+        /// Traverse function, where a custom traverse functionality can be defined (without callback).
+        /// </summary>
+        /// <param name="traverseFn">A function, which takes as input a node, and then decides which child nodes to traverse further.</param>
+        public void TraverseWithoutCallback(Action<OctreeNode> traverseFn)
+        {
+            traverseFn(_root);
+        }
+
+        /// <summary>
+        /// Traverse function, where a custom traverse functionality can be defined.
+        /// </summary>
+        /// <param name="traverseFn">A function, which takes as input a node, and then decides which child nodes to traverse further.</param>
+        /// <param name="callback">Simple callback, which gets called for each visited node by traverseFn.</param>
+        public void Traverse(Action<OctreeNode, Action<OctreeNode>> traverseFn, Action<OctreeNode> callback)
+        {
+            traverseFn(_root, callback);
+        }
+
+        /// <summary>
+        /// Recursive function, which takes one node, and visits all children and so on.
+        /// For each node, a callback gets called.
+        /// </summary>
+        private static void RecTraverse(OctreeNode node, Action<OctreeNode> callback)
+        {
+            callback(node);
+
+            if(node.hasChildren())
+            {
+                foreach(OctreeNode child in node.Children)
+                {
+                    RecTraverse(child, callback);
+                }
+            }
         }
     }
 }

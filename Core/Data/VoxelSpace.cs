@@ -28,7 +28,7 @@ namespace Fusee.Tutorial.Core.Data
         private Cube _cube = new Cube();
 
         // An octree for better searchability, of when to add a new voxel.
-        private OctreeVSP<OctreeNodeStates> _octree;
+        private OctreeVSP<OctreeNodeStatesVSP> _octree;
         
         private int _pointCounter = 0;
         
@@ -45,8 +45,8 @@ namespace Fusee.Tutorial.Core.Data
         {
             boundingBox.UpdateCallbacks += OnBoundingBoxUpdate;
             
-            OctreeVSP<OctreeNodeStates>.OnNodeAddedCallback += OnNewNodeAdded;
-            _octree = new OctreeVSP<OctreeNodeStates>(float3.Zero, VOXEL_SIZE);
+            OctreeVSP<OctreeNodeStatesVSP>.OnNodeAddedCallback += OnNewNodeAdded;
+            _octree = new OctreeVSP<OctreeNodeStatesVSP>(float3.Zero, VOXEL_SIZE);
         }
 
         /// <summary>
@@ -64,9 +64,9 @@ namespace Fusee.Tutorial.Core.Data
         /// Event handler for when a new node gets added to the octree.
         /// </summary>
         /// <param name="node">The node that was added.</param>
-        private void OnNewNodeAdded(OctreeNodeVSP<OctreeNodeStates> node)
+        private void OnNewNodeAdded(OctreeNodeVSP<OctreeNodeStatesVSP> node)
         {
-            if (node.Data == OctreeNodeStates.Occupied && node.SideLength == VOXEL_SIZE)
+            if (node.Data == OctreeNodeStatesVSP.Occupied && node.SideLength == VOXEL_SIZE)
             {
                 _positions.AddAttribute(node.Position);
             }
@@ -92,7 +92,7 @@ namespace Fusee.Tutorial.Core.Data
             if (_pointCounter % COMPUTE_EVERY != 0 && COMPUTE_EVERY != 1)
                 return;
 
-            _octree.Add(position, OctreeNodeStates.Occupied);
+            _octree.Add(position, OctreeNodeStatesVSP.Occupied);
         }
 
         /// <summary>

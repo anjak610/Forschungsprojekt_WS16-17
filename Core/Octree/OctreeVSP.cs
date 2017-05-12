@@ -15,7 +15,7 @@ using System.Collections.Generic;
 
 namespace Fusee.Tutorial.Core.Octree
 {
-    public enum OctreeNodeStates
+    public enum OctreeNodeStatesVSP
     {
         Unknown, Occupied, Free
     }

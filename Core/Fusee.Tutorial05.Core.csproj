@@ -52,6 +52,7 @@
     <Compile Include="Data Transmission\AssetReader.cs" />
     <Compile Include="Data Transmission\IUDPReceiver.cs" />
     <Compile Include="Data\DronePath.cs" />
+    <Compile Include="Data\Wireframe.cs" />
     <Compile Include="Octree\Octree.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
@@ -144,6 +145,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\VertexShaderDP.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\VertexShaderWF.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\PixelShaderWF.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
