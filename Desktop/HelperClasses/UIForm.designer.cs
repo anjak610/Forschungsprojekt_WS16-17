@@ -48,7 +48,6 @@
             this.canvaspanel.Name = "canvaspanel";
             this.canvaspanel.Size = new System.Drawing.Size(1182, 893);
             this.canvaspanel.TabIndex = 0;
-            this.canvaspanel.Paint += new System.Windows.Forms.PaintEventHandler(this.canvaspanel_Paint);
             // 
             // chg_view_btn
             // 

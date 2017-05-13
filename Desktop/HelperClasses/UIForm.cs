@@ -37,6 +37,8 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
 
             SetSize(width, height);
             StartPosition = FormStartPosition.CenterScreen;
+            plus_button.Click += plus_button_Click;
+            minus_button.Click += minus_button_Click;
 
         }
 
@@ -78,7 +80,6 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
 
         private void renderControl_HandleCreated(object sender, EventArgs e)
         {
-            //
             //  STEP TWO - Now the underlying Windows Window was created - we can hook OpenGL on it.
             //
 
@@ -89,9 +90,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
             // Then instantiate your app (could be as well _currentApp = new MyOwnRenderCanvasDerivedClass(); )
 
 
-            // Now use the host as the canvas AND the input implementation of your App
-            //currentApp.CanvasImplementor = currentHost;
-            //currentApp.ContextImplementor= currentHost;
+           
 
 
             // Inject Fusee.Engine.Base InjectMe dependencies
@@ -133,10 +132,11 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
           
 
             // First create a WinformsHost around the control
-            currentHost = new WinformsHost(currentControl, this);
+            currentHost = new WinformsHost(currentControl, canvaspanel);
 
             currentApp = new Core.PointVisualizationBase();
 
+            // Now use the host as the canvas AND the input implementation of your App
             // Inject Fusee.Engine InjectMe dependencies (hard coded)
             currentApp.CanvasImplementor = currentHost;
             currentApp.ContextImplementor = new Fusee.Engine.Imp.Graphics.Desktop.RenderContextImp(currentApp.CanvasImplementor);
@@ -154,12 +154,12 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
 
         private void plus_button_Click(object sender, EventArgs e)
         {
-
+            currentApp._pointCloud.IncreaseParticleSize(0.02f);
         }
 
         private void minus_button_Click(object sender, EventArgs e)
         {
-
+            currentApp._pointCloud.DecreaseParticleSize(0.02f);
         }
 
         private void CloseCurrentApp()
@@ -200,11 +200,6 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
         private void UIForm_Load(object sender, EventArgs e)
         {
             StartCurrentApp();
-        }
-
-        private void canvaspanel_Paint(object sender, PaintEventArgs e)
-        {
-
         }
 
         private void setup_btn_Click(object sender, EventArgs e)

@@ -15,16 +15,16 @@ using System.Linq;
 namespace Fusee.Tutorial.Desktop.HelperClasses
 {
     /// <summary>
-    ///     Instances of this class act as the glue between a Windows Forms form and FUSEE when FUSEE is intended to display
+    ///     Instances of this class act as the glue between a Windows Forms renderControl and FUSEE when FUSEE is intended to display
     ///     its contents
-    ///     on the Windows form and to wire interactions to user input performed on the Windows form.
+    ///     on the Windows renderControl and to wire interactions to user input performed on the Windows renderControl.
     /// </summary>
     internal class WinformsHost : RenderCanvasWindowImp, IInputDriverImp
     {
         private bool _disposed;
         
-        private Control _form;
-        private readonly UIForm _parent;
+        private Control _renderControl;
+        private readonly Panel _parent;
 
         private int _mouseWheelPos;
         private bool _initialized;
@@ -34,21 +34,21 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
         private WinFormsMouseDeviceImp _mouse;
 
 
-        public WinformsHost(Control form, UIForm parent)
-            : base(form.Handle, form.Width, form.Height)
+        public WinformsHost(Control renderControl, Panel parent)
+            : base(renderControl.Handle, renderControl.Width, renderControl.Height)
         {
-            if (form == null) throw new ArgumentNullException("form");
+            if (renderControl == null) throw new ArgumentNullException("renderControl");
 
-            _form = form;
+            _renderControl = renderControl;
             _parent = parent;
-            //canvas = new RenderCanvasImp();
+
 
             _mouseWheelPos = 0;
 
-            form.MouseDown += delegate(object sender, System.Windows.Forms.MouseEventArgs args)
+            renderControl.MouseDown += delegate(object sender, System.Windows.Forms.MouseEventArgs args)
             {
                 if (MouseButtonDown != null)
-                    MouseButtonDown(this,
+                    MouseButtonDown(this, //TODO something is not going in here
                         new MouseEventArgs
                         {
                             Button = XLateButtons(args.Button),
@@ -58,7 +58,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
 
         
 
-            form.MouseUp += delegate(object sender, System.Windows.Forms.MouseEventArgs args)
+            renderControl.MouseUp += delegate(object sender, System.Windows.Forms.MouseEventArgs args)
             {
                 if (MouseButtonUp != null)
                     MouseButtonUp(this,
@@ -69,7 +69,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
                         });
             };
 
-            form.MouseMove += delegate(object sender, System.Windows.Forms.MouseEventArgs args)
+            renderControl.MouseMove += delegate(object sender, System.Windows.Forms.MouseEventArgs args)
             {
                 if (MouseMove != null)
                     MouseMove(this,
@@ -80,7 +80,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
                         });
             };
 
-            form.KeyDown += delegate(object sender, System.Windows.Forms.KeyEventArgs args)
+            renderControl.KeyDown += delegate(object sender, System.Windows.Forms.KeyEventArgs args)
             {
                 if (KeyDown != null)
                     KeyDown(this,
@@ -92,7 +92,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
                         });
             };
 
-            form.KeyUp += delegate(object sender, System.Windows.Forms.KeyEventArgs args)
+            renderControl.KeyUp += delegate(object sender, System.Windows.Forms.KeyEventArgs args)
             {
                 if (KeyDown != null)
                     KeyUp(this,
@@ -104,22 +104,22 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
                         });
             };
 
-            form.MouseWheel +=
+            renderControl.MouseWheel +=
                 delegate(object sender, System.Windows.Forms.MouseEventArgs args) { _mouseWheelPos += args.Delta; };
 
-            form.SizeChanged += delegate
+            renderControl.SizeChanged += delegate
             {
-                _form.Invalidate();
+                _renderControl.Invalidate();
 
-                base.Width = _form.Width;
-                base.Height = _form.Height;
+                base.Width = _renderControl.Width;
+                base.Height = _renderControl.Height;
 
                 DoResize();
                 DoRender();
             };
 
-            _keyboard = new WinFormsKeyboardDeviceImp(form);
-            _mouse = new WinFormsMouseDeviceImp(form);
+            _keyboard = new WinFormsKeyboardDeviceImp(renderControl);
+            _mouse = new WinFormsMouseDeviceImp(renderControl);
 
             Application.Idle += OnIdle;         
 
@@ -146,7 +146,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
                     // Free other state (managed objects).
                 }
                 Application.Idle -= OnIdle;
-                _form = null;
+                _renderControl = null;
                 _disposed = true;
             }
             base.Dispose(disposing);
@@ -157,10 +157,10 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
             switch (cursorType)
             {
                 case CursorType.Standard:
-                    _form.Cursor = Cursors.Default;
+                    _renderControl.Cursor = Cursors.Default;
                     break;
                 case CursorType.Hand:
-                    _form.Cursor = Cursors.WaitCursor;
+                    _renderControl.Cursor = Cursors.WaitCursor;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("cursorType");
@@ -180,8 +180,8 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
             {
                 DoInit();
 
-                base.Width = _form.Width;
-                base.Height = _form.Height;
+                base.Width = _renderControl.Width;
+                base.Height = _renderControl.Height;
 
                 DoResize();
 
@@ -195,7 +195,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
             set
             {
                 BaseWidth = value;
-                _parent.SetSize(BaseWidth, BaseHeight);
+                //_parent.SetSize(BaseWidth, BaseHeight);
             }
         }
 
@@ -205,7 +205,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
             set
             {
                 BaseHeight = value;
-                _parent.SetSize(BaseWidth, BaseHeight);
+                //_parent.SetSize(BaseWidth, BaseHeight);
             }
         }
 
@@ -215,7 +215,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
             set
             {
                 BaseTop = value;
-                _parent.SetDesktopLocation(BaseLeft, BaseTop);
+                //_parent.SetDesktopLocation(BaseLeft, BaseTop);
             }
         }
 
@@ -225,7 +225,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
             set
             {
                 BaseLeft = value;
-                _parent.SetDesktopLocation(BaseLeft, BaseTop);
+               // _parent.SetDesktopLocation(BaseLeft, BaseTop);
             }
         }
 
@@ -363,19 +363,19 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
     /// </summary>
     public class WinFormsKeyboardDeviceImp : IInputDeviceImp
     {
-        private Control _form;
+        private Control _control;
         private Keymapper _keymapper;
 
         /// <summary>
         /// Should be called by the driver only.
         /// </summary>
-        /// <param name="form"></param>
-        internal WinFormsKeyboardDeviceImp(Control form)
+        /// <param name="control"></param>
+        internal WinFormsKeyboardDeviceImp(Control control)
         {
-            _form = form;
+            _control = control;
             _keymapper = new Keymapper();
-            _form.KeyDown += OnGameWinKeyDown;
-            _form.KeyUp += OnGameWinKeyUp;
+            _control.KeyDown += OnGameWinKeyDown;
+            _control.KeyUp += OnGameWinKeyUp;
 
         }
 

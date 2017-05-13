@@ -22,6 +22,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
             InitializeComponent();
 
             ResizeRedraw = true;
+
         }
 
         // Hard stuff to get access to keyboard events. Winforms seems quite over-engineered, found no other way.
@@ -34,6 +35,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
                 case WM_KEYDOWN:
                     // case WM_SYSKEYDOWN:
                     OnKeyDown(new KeyEventArgs((Keys) m.WParam));
+                  
                     break;
                 case WM_KEYUP:
                     // case WM_SYSKEYUP:
@@ -59,5 +61,16 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
         {
             // not implemented
         }
+
+        protected override void OnClick(EventArgs e)
+        {
+            //MessageBox.Show("Clicked render control");
+        }
+
+        private void panel_KeyDown(object sender, KeyEventArgs e)
+        {
+            this.OnKeyDown(e);
+        }
+
     }
 }

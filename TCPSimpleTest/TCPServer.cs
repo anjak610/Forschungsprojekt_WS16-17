@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.IO;
 using System.Collections;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -173,7 +174,7 @@ namespace Server
                     string line; //each line represents one point
 
                     int count = 0;
-                    int packagesize = 5000;
+                    int packagesize = 500;
                     int linelimit = packagesize;
                     string packagedata = "";
                     
@@ -219,7 +220,107 @@ namespace Server
         }
 
         //TODO: Package creation according to description in pdf protocol documentation
+        /// <summary>
+        /// Reads a text file and prepares string packages with length of 500 lines(500 points)
+        /// </summary>
+        /// <param name="filepath">absolute location of file</param>
+        /// <returns></returns>
 
+        public List<byte[]> CreateProtocolPackages(string filepath)
+        {
+            List<byte[]> packages = new List<byte[]>();
+            new Thread(() => //thread for receiving data
+            {
+                using (StreamReader s = new StreamReader(filepath))
+                {
+                    string line; //each line represents one point
+
+                    int count = 0;
+                    int maxpoints = 500;
+                    int linelimit = maxpoints;
+                    Random rnd = new Random();
+
+
+
+                    var mstream = new MemoryStream();
+                    var writer = new BinaryWriter(mstream);
+
+                    UInt32 packetBeginMarker = 0xFEEDBEEF;
+                    UInt16 typeID = 0x1010;
+                    UInt16 version = 0x001;
+                    UInt32 packetSize = 2048;                 
+                    DateTime utctime = DateTime.UtcNow;
+                    double time = utctime.ToOADate(); //dont know if this is the right calculation!?
+
+
+                    while (((line = s.ReadLine()) != null) && (count <= linelimit)) // read per line
+                    {
+                        if (!(Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.Spacebar))
+                        {
+                            //create EchoId
+                            int EchoId = rnd.Next(0, 3);
+
+                            float[] pointArray = new float[3];
+
+                            string separator = "\t";
+
+                            byte[] pointBytes = new byte[12];// 3*4 bytes 
+
+                            string[] coordinates = line.Split(separator.ToCharArray()); //adds new line character after each point
+                          
+                            pointArray[0] = float.Parse(coordinates[0], CultureInfo.InvariantCulture.NumberFormat);
+                            pointArray[1] = float.Parse(coordinates[1], CultureInfo.InvariantCulture.NumberFormat);
+                            pointArray[2] = float.Parse(coordinates[1], CultureInfo.InvariantCulture.NumberFormat);
+
+                            int dst = rnd.Next(10, 150);
+                            
+                            //write point data to memory stream                            
+                             writer.Write(EchoId);
+                             writer.Write(pointArray[0]);
+                             writer.Write(pointArray[1]);
+                             writer.Write(pointArray[2]);
+                             writer.Write(dst);
+
+
+                            if (count == 0 || (count % 500 == 0))
+                            {
+                                Console.WriteLine("Preparing next package...");
+                                writer.Write(BitConverter.GetBytes(packetBeginMarker));
+                                writer.Write(BitConverter.GetBytes(typeID));
+                                writer.Write(BitConverter.GetBytes(version));
+                                writer.Write(BitConverter.GetBytes(packetSize));
+                                writer.Write(BitConverter.GetBytes(time));
+
+                            }
+                            count++;
+
+                            if (count == linelimit)
+                            {
+                               
+                                linelimit = count + maxpoints; //iterate through the next package
+                                writer.Write(BitConverter.GetBytes(packetBeginMarker));
+                                Console.WriteLine("UDP Package created.");
+                                byte[] b = mstream.ToArray();
+                                SendPackage(b);
+                                mstream.SetLength(0);//is this the proper way to empty it?
+                            }
+
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine("Sending stopped ");
+                            Console.WriteLine("Sending stopped");
+                            Console.WriteLine("Press any key to exit");
+                            Console.Read();
+                            break;
+                        }
+                    }
+
+                }
+
+            }).Start();
+            return packages;
+        }
 
         /// <SUMMARY>
         /// Tells you the IP Address of the remote host that you are sending files to.

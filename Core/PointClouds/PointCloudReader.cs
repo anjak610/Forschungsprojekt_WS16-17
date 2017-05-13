@@ -122,7 +122,7 @@ namespace Fusee.Tutorial.Core.PointClouds
             float[] floatArr = new float[array.Length / 4];
             for (int i = 0; i < floatArr.Length; i++)
             {
-                if (BitConverter.IsLittleEndian)
+                if (BitConverter.IsLittleEndian)// if little endian format then reverse bit order
                 {
                     Array.Reverse(array, i * 4, 4);
                 }
