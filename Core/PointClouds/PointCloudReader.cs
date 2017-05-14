@@ -6,6 +6,8 @@ using Fusee.Base.Core;
 using Fusee.Math.Core;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Android.Provider;
 
 namespace Fusee.Tutorial.Core.PointClouds
 {
@@ -168,6 +170,41 @@ namespace Fusee.Tutorial.Core.PointClouds
             }
 
             return point;
+        }
+
+        public static void ReadFromBinary(byte[] file)
+        {
+            Stream stream = new MemoryStream();
+            BinaryReader reader = new BinaryReader(stream);
+
+            if (BitConverter.IsLittleEndian)// if little endian format then reverse bit order
+            {
+                Array.Reverse(file);
+            }
+
+            UInt32 packetBeginMarker = (uint)reader.Read(file, 0, 4);
+            UInt16 typeID = (ushort) reader.Read(file, 4, 2);
+            UInt16 version = (ushort)reader.Read(file, 6, 2); ;
+            UInt32 packetSize = (uint)reader.Read(file, 8, 4); ;
+            double time = reader.Read(file, 12, 8);
+            
+            //Position of Scanner
+            float drone_posX = reader.Read(file, 20, 4);
+            float drone_posY = reader.Read(file, 24, 4);
+            float drone_posZ = reader.Read(file, 28, 4);
+           
+            //Orientation
+            float quaternionW = reader.Read(file, 32, 4);
+            float quaternionX = reader.Read(file, 36, 4);
+            float quaternionY = reader.Read(file, 40, 4);
+            float quaternionZ = reader.Read(file, 44, 4);
+            //number of points
+            UInt32 numberOfPoints = (uint) reader.Read(file, 48, 4);
+
+            //byte[] pointsChunk = (byte[]) file.Skip(51);
+
+            UInt32 values = BitConverter.ToUInt32(file, 52);
+            Diagnostics.Log("Pointvalues: " + values);
         }
     }
 }

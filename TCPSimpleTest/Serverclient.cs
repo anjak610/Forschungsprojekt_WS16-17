@@ -18,12 +18,16 @@ namespace Server
     public class Serverclient //for sending data
     {
 
-        //  private static byte[] file;
-        //  private static string feedback;
+        
+
         private static List<byte[]> packages = new List<byte[]>();
 
         private static string path =
             @"C:/Users/Tanja Langer/Documents/Studium/Forschungsprojekt/Forschungsprojekt_WS16-17/TCPSimpleTest/PointCloud_IPM.txt";
+
+
+        private static string binarydatapath =
+           @"C:\Users\Tanja Langer\Documents\Studium\Forschungsprojekt\Forschungsprojekt_WS16-17\TCPSimpleTest\TestPacket.uav_live_stream";
 
         //  //private static string path = @"L:/Programme/Gitkraken/Forschungsprojekt_WS16-17/TCPSimpleTest/TestPoints.txt";
         //
@@ -54,13 +58,16 @@ namespace Server
             }
 
             Console.WriteLine("Press <enter> to send data");
-            Console.WriteLine("Press <space> to abort sending");
             pressed = Console.ReadKey();
+
             if (pressed.Key == ConsoleKey.Enter)
             {
                 try
                 {
-                    packages = server.SplitandSendPackages(path); //split and send packages, store them  
+                     byte[] binaryfile = server.ReadBinaryFile(binarydatapath);
+                     server.SendData(binaryfile); 
+
+                     //packages = server.SplitandSendPackages(path); //split and send packages, store them  
 
                 }
                 catch (Exception exception)
@@ -69,7 +76,25 @@ namespace Server
                 }
 
             }
-           
+            Console.Read();
+
+            //Console.WriteLine("Press <enter> to send data");
+            //Console.WriteLine("Press <space> to abort sending");
+            //pressed = Console.ReadKey();
+            //if (pressed.Key == ConsoleKey.Enter)
+            //{
+            //    try
+            //    {
+            //        packages = server.SplitandSendPackages(path); //split and send packages, store them  
+
+            //    }
+            //    catch (Exception exception)
+            //    {
+            //        Console.WriteLine("Error: " + exception);
+            //    }
+
+            //}
+
 
 
         }

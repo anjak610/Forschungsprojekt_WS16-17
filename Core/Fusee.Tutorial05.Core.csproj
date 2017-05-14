@@ -134,6 +134,7 @@
     <Content Include="Assets\VertexShaderPCL.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Assets\TestPacket.uav_live_stream" />
   </ItemGroup>
   <!-- ItemGroup>
     <Reference Include="Fusee.SerializationSerializer">

@@ -43,8 +43,7 @@ namespace Server
         {                   
                         
           SendData(package);
-          Console.Write("Sending package");                 
-                      
+
             if (package.Length == 0)//handle last package
             {
                 float endMessage = 0xFEEDBEEF;
@@ -53,10 +52,15 @@ namespace Server
                 System.Diagnostics.Debug.WriteLine("Sent END OF FILE Message");
                 Console.WriteLine("All packages submitted");
             }
-         
-                                         
+
+
         }
-           
+
+        public byte[] ReadBinaryFile(string filepath)
+        {
+            byte[] fileData = File.ReadAllBytes(filepath);
+            return fileData;
+        }
                 
 
         public void SendData(byte[] file)
@@ -64,7 +68,9 @@ namespace Server
             Console.Write("Sending... ");
             try
             {
-                sender.Send(BitConverter.GetBytes(file.Length), 0, 4, 0);
+                byte[] buffer = BitConverter.GetBytes(file.Length);
+                sender.Send(buffer, 0, buffer.Length , 0);//send length of data first              
+                Console.WriteLine("Filesize sent: "+ file.Length);
                 sender.Send(file);
                 Console.WriteLine("File sent successfully!");
             }
@@ -219,9 +225,8 @@ namespace Server
             return packages;
         }
 
-        //TODO: Package creation according to description in pdf protocol documentation
         /// <summary>
-        /// Reads a text file and prepares string packages with length of 500 lines(500 points)
+        /// Reads a text file and prepares dummy packages with length of 500 lines(500 points) for testing
         /// </summary>
         /// <param name="filepath">absolute location of file</param>
         /// <returns></returns>
@@ -240,31 +245,57 @@ namespace Server
                     int linelimit = maxpoints;
                     Random rnd = new Random();
 
-
-
                     var mstream = new MemoryStream();
                     var writer = new BinaryWriter(mstream);
 
                     UInt32 packetBeginMarker = 0xFEEDBEEF;
                     UInt16 typeID = 0x1010;
                     UInt16 version = 0x001;
-                    UInt32 packetSize = 2048;                 
+                    UInt32 packetSize = 2040;                 
                     DateTime utctime = DateTime.UtcNow;
                     double time = utctime.ToOADate(); //dont know if this is the right calculation!?
-
+                    //using dummy values! 
+                    //position of scanner for this packet
+                    float drone_posX = 120; 
+                    float drone_posY = 140;
+                    float drone_posZ = 200;
+                   //Orientation
+                    float quaternionW = 1.0f;
+                    float quaternionX = 1.5f;
+                    float quaternionY = 2.5f;
+                    float quaternionZ = 2.0f;
+                    //number of points
+                    UInt32 numberOfPoints = 500;
 
                     while (((line = s.ReadLine()) != null) && (count <= linelimit)) // read per line
                     {
                         if (!(Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.Spacebar))
                         {
+                            //add information at the beginning of each packet
+                            if (count == 0 || (count % 500 == 0))
+                            {
+                                Console.WriteLine("Preparing next package...");
+                                writer.Write(BitConverter.GetBytes(packetBeginMarker));
+                                writer.Write(BitConverter.GetBytes(typeID));
+                                writer.Write(BitConverter.GetBytes(version));
+                                writer.Write(BitConverter.GetBytes(packetSize));
+                                writer.Write(BitConverter.GetBytes(time));
+                                writer.Write(BitConverter.GetBytes(drone_posX));
+                                writer.Write(BitConverter.GetBytes(drone_posY));
+                                writer.Write(BitConverter.GetBytes(drone_posZ));
+                                writer.Write(BitConverter.GetBytes(quaternionW));
+                                writer.Write(BitConverter.GetBytes(quaternionX));
+                                writer.Write(BitConverter.GetBytes(quaternionY));
+                                writer.Write(BitConverter.GetBytes(quaternionZ));
+                                writer.Write(BitConverter.GetBytes(numberOfPoints));
+                            }
+
                             //create EchoId
                             int EchoId = rnd.Next(0, 3);
 
                             float[] pointArray = new float[3];
 
                             string separator = "\t";
-
-                            byte[] pointBytes = new byte[12];// 3*4 bytes 
 
                             string[] coordinates = line.Split(separator.ToCharArray()); //adds new line character after each point
                           
@@ -281,28 +312,18 @@ namespace Server
                              writer.Write(pointArray[2]);
                              writer.Write(dst);
 
-
-                            if (count == 0 || (count % 500 == 0))
-                            {
-                                Console.WriteLine("Preparing next package...");
-                                writer.Write(BitConverter.GetBytes(packetBeginMarker));
-                                writer.Write(BitConverter.GetBytes(typeID));
-                                writer.Write(BitConverter.GetBytes(version));
-                                writer.Write(BitConverter.GetBytes(packetSize));
-                                writer.Write(BitConverter.GetBytes(time));
-
-                            }
+                            //count up to limit
                             count++;
 
+                            //add information at the end of every packet
                             if (count == linelimit)
-                            {
-                               
+                            {                              
                                 linelimit = count + maxpoints; //iterate through the next package
                                 writer.Write(BitConverter.GetBytes(packetBeginMarker));
-                                Console.WriteLine("UDP Package created.");
+                                Console.WriteLine("UAV Package created.");
                                 byte[] b = mstream.ToArray();
                                 SendPackage(b);
-                                mstream.SetLength(0);//is this the proper way to empty it?
+                                mstream.SetLength(0);//empty memory stream
                             }
 
                         }
