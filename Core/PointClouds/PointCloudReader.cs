@@ -174,37 +174,55 @@ namespace Fusee.Tutorial.Core.PointClouds
 
         public static void ReadFromBinary(byte[] file)
         {
-            Stream stream = new MemoryStream();
-            BinaryReader reader = new BinaryReader(stream);
-
-            if (BitConverter.IsLittleEndian)// if little endian format then reverse bit order
-            {
-                Array.Reverse(file);
-            }
-
-            UInt32 packetBeginMarker = (uint)reader.Read(file, 0, 4);
-            UInt16 typeID = (ushort) reader.Read(file, 4, 2);
-            UInt16 version = (ushort)reader.Read(file, 6, 2); ;
-            UInt32 packetSize = (uint)reader.Read(file, 8, 4); ;
-            double time = reader.Read(file, 12, 8);
+           
+            UInt32 packetBeginMarker = BitConverter.ToUInt32((SubArray(file, 0, 4)),0);
+            UInt16 typeID = BitConverter.ToUInt16((SubArray(file, 4, 2)), 0);
+            UInt16 version = BitConverter.ToUInt16((SubArray(file, 6, 2)), 0);
+            UInt32 packetSize = BitConverter.ToUInt32((SubArray(file, 8, 4)), 0);
+            double time = BitConverter.ToDouble((SubArray(file, 12, 8)), 0);
+                    
             
             //Position of Scanner
-            float drone_posX = reader.Read(file, 20, 4);
-            float drone_posY = reader.Read(file, 24, 4);
-            float drone_posZ = reader.Read(file, 28, 4);
-           
+            float drone_posX = BitConverter.ToSingle((SubArray(file, 20, 4)), 0);
+            float drone_posY = BitConverter.ToSingle((SubArray(file, 24, 4)), 0);
+            float drone_posZ = BitConverter.ToSingle((SubArray(file, 28, 4)), 0);
+
             //Orientation
-            float quaternionW = reader.Read(file, 32, 4);
-            float quaternionX = reader.Read(file, 36, 4);
-            float quaternionY = reader.Read(file, 40, 4);
-            float quaternionZ = reader.Read(file, 44, 4);
+            float quaternionW = BitConverter.ToSingle((SubArray(file, 32, 4)), 0);
+            float quaternionX = BitConverter.ToSingle((SubArray(file, 36, 4)), 0);
+            float quaternionY = BitConverter.ToSingle((SubArray(file, 40, 4)), 0);
+            float quaternionZ = BitConverter.ToSingle((SubArray(file, 44, 4)), 0);
             //number of points
-            UInt32 numberOfPoints = (uint) reader.Read(file, 48, 4);
+            UInt32 numberOfPoints = BitConverter.ToUInt32((SubArray(file, 48, 4)), 0);
 
-            //byte[] pointsChunk = (byte[]) file.Skip(51);
+            
+           //Print out on console for testing
+            Diagnostics.Log("Packet Begin Marker: " + packetBeginMarker.ToString("X"));
+            Diagnostics.Log("TypeID: " + typeID.ToString("X"));
+            Diagnostics.Log("Version: " + version.ToString("X"));
+            Diagnostics.Log("Packet Size: " + packetSize);
+            Diagnostics.Log("Time milliseconds: " + time);
+            Diagnostics.Log("Pos X: " + drone_posX);
+            Diagnostics.Log("Pos Y: " + drone_posY);
+            Diagnostics.Log("Pos Z: " + drone_posZ);
+            Diagnostics.Log("Quaternion W: " + quaternionW);
+            Diagnostics.Log("Quaternion X: " + quaternionX);
+            Diagnostics.Log("Quaternion Y: " + quaternionY);
+            Diagnostics.Log("Quaternion Z: " + quaternionZ);
+            Diagnostics.Log("Number of points: " + numberOfPoints);
 
-            UInt32 values = BitConverter.ToUInt32(file, 52);
-            Diagnostics.Log("Pointvalues: " + values);
+
+            //TODO extract point values
+            //UInt32 values = BitConverter.ToUInt32(pointsChunk, 0);
+            //Diagnostics.Log("Pointvalues: " + values.ToString("X"));
         }
+
+        public static  T[] SubArray<T>( T[] data, int index, int length)
+        {
+            T[] result = new T[length];
+            Array.Copy(data, index, result, 0, length);
+            return result;
+        }
+
     }
 }
