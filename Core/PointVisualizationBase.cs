@@ -7,6 +7,8 @@ using Fusee.Tutorial.Core.Data_Transmission;
 using Fusee.Base.Common;
 using Fusee.Tutorial.Core.Data;
 using Fusee.Engine.Common;
+using Fusee.Tutorial.Core.Octree;
+using System.Linq;
 
 namespace Fusee.Tutorial.Core
 {
@@ -19,34 +21,64 @@ namespace Fusee.Tutorial.Core
         {
             PointCloud, VoxelSpace
         }
+        
+        public enum ViewModeDebugging // works only with pointcloud or wireframe
+        {
+            All,        // Standard behaviour, see all bounding boxes and points together
+            PerLevel,   // watch points / nodes per level in octree
+            PerNode,    // watch single nodes (points/boundingboxes highlighted in orange) together with nodes on the same level
+            Snapshot    // Hit S in order to take a snapshot while viewing ViewModeDebugging.All
+        }
 
         #endregion
 
         #region Fields
 
-        #region UDP Connection
+        #region Constants / Settings
 
         private const int UDP_PORT = 8001;
+
+        private const int MAX_LEVEL_DEBUG = 8; // how deep in the octree can we debug?
+        
+        #endregion
+
+        #region UDP Connection
 
         [InjectMe]
         public IUDPReceiver UDPReceiver;
 
         #endregion
 
-        #region Helper
+        #region Rendering
 
         // current view mode: either pointcloud or voxelspace
         public ViewMode CurrentViewMode { get; set; } = ViewMode.PointCloud;
 
-        // data
-        private PointCloud _pointCloud; // particle size gets changed via static methods
+        // render entities
+        private PointCloud _pointCloud;     // particle size gets changed via static methods
         private VoxelSpace _voxelSpace;
         private DronePath _dronePath;
+        private Wireframe _wireFrame;       // Renders the bounding boxes for each node
 
+        // data structures
         private BoundingBox _boundingBox;
-                
+        private Octree.Octree _octree;
+
         // due to multithreading
         private AutoResetEvent _signalEvent = new AutoResetEvent(true);
+
+        #endregion
+
+        #region Debugging
+
+        public ViewModeDebugging CurrentViewModeDebugging { get; set; } = ViewModeDebugging.All;
+        private bool _wireFrameVisible = true;
+
+        private OctreeNode _debuggingNode;
+
+        // 0 => root node, 1 => second largest node, etc.
+        private int _level = 0;
+        private bool _showAllLevels = true;
 
         #endregion
 
@@ -61,10 +93,8 @@ namespace Fusee.Tutorial.Core
 
         private float _minAngleX = (float) -System.Math.PI / 4;
         private float _maxAngleX = (float) System.Math.PI / 4;
-
-        #endregion
-
-        #region Begin Camera Values
+        
+        // Begin Camera Values
         
         private static float _zoom, _zoomVel, _angleHorz = M.PiOver6 * 2.0f, _angleVert = -M.PiOver6 * 0.5f, _angleVelHorz, _angleVelVert, _angleRoll, _angleRollInit;
         private bool _twoTouchRepeated;
@@ -90,26 +120,46 @@ namespace Fusee.Tutorial.Core
         /// </summary>
         public override void Init()
         {
-            // bounding box
+            // data structures
+
             _boundingBox = new BoundingBox();
             _boundingBox.UpdateCallbacks += OnBoundingBoxUpdate;
 
-            // read shaders from files
+            _octree = new Octree.Octree(float3.Zero, 16);
 
-            _pointCloud = new PointCloud(RC, _boundingBox);
+            // initialize render entities
+
+            _pointCloud = new PointCloud(RC, _octree, _boundingBox);
             _voxelSpace = new VoxelSpace(RC, _boundingBox);
             _dronePath = new DronePath(RC);
+            _wireFrame = new Wireframe(RC, _octree);
+
+            _octree.Init(256); // 256 => initialSideLength; after render entities have been initialized due to callbacks
 
             //Zoom Value
             _zoom = 60;
 
             // stream point cloud from text file
 
-            //*
+            /*
             AssetReader.OnAssetLoadedCallbacks += () =>
             {
                 //_pointCloud.HasAssetLoaded = true;
+                Task task = new Task(() => 
+                {
+                    _octree.Traverse((OctreeNode node) => 
+                    {
+                        _signalEvent.WaitOne();
+                        _pointCloud.OnNewOctreeNodeAdded(node);
+                        _signalEvent.Set();
+                    });
+                });
+
+                task.Start();
             };
+            //*/
+
+            //*
             AssetReader.OnNewPointCallbacks += OnNewPointAdded;
             AssetReader.ReadFromAsset("PointCloud_IPM.txt");
             //*/
@@ -135,7 +185,9 @@ namespace Fusee.Tutorial.Core
         {
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
-            
+
+            #region Keyboard Events
+
             // check on key down
 
             if(Keyboard.IsKeyDown(KeyCodes.T))
@@ -145,52 +197,59 @@ namespace Fusee.Tutorial.Core
 
             if (Keyboard.IsKeyDown(KeyCodes.K))
             {
-                _pointCloud.SwitchWireframe();
+                SwitchWireframe();
+            }
+
+            if (Keyboard.IsKeyDown(KeyCodes.L))
+            {
+                SwitchViewModeDebugging();
             }
 
             // Just for debugging purposes
 
             if(Keyboard.IsKeyDown(KeyCodes.Up))
             {
-                _pointCloud.LevelUp();
+                LevelUp();
             }
 
             if (Keyboard.IsKeyDown(KeyCodes.Down))
             {
-                _pointCloud.LevelDown();
+                LevelDown();
             }
 
             if (Keyboard.IsKeyDown(KeyCodes.Left))
             {
-                _pointCloud.DebugPreviousSibling();
+                DebugPreviousSibling();
             }
 
             if (Keyboard.IsKeyDown(KeyCodes.Right))
             {
-                _pointCloud.DebugNextSibling();
+                DebugNextSibling();
             }
-
-            if (Keyboard.IsKeyDown(KeyCodes.L))
-            {
-                _pointCloud.SwitchViewMode();
-            }
-
+            
             // check on particle size change
 
             if (CurrentViewMode == ViewMode.PointCloud && (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0) )
             {
                 PointCloud.IncreaseParticleSize(Keyboard.ADAxis * PointCloud.ParticleSizeInterval / 20);
             }
-            
+
+            #endregion
+
             // Render
-            
+
             _signalEvent.WaitOne(); // stop other thread from adding points until these points have been written to the gpu memory
 
             RC.ModelView = MoveInScene();
 
             if (CurrentViewMode == ViewMode.PointCloud)
             {
-                _pointCloud.Render();
+                int level = _showAllLevels ? -1 : _level;
+
+                _pointCloud.Render(CurrentViewModeDebugging, level, _debuggingNode);
+
+                if(_wireFrameVisible)
+                    _wireFrame.Render(CurrentViewModeDebugging, level, _debuggingNode);
             }
             else
             {
@@ -322,9 +381,8 @@ namespace Fusee.Tutorial.Core
 
             RC.Projection = float4x4.CreatePerspectiveFieldOfView(3.141592f * 0.25f, aspectRatio, 1, 20000);
 
-            // particle size set to be square
-            _pointCloud.SetAspectRatio(aspectRatio);
-            _pointCloud.SetScreenHeight(Height);
+            // inform point cloud about resizing
+            _pointCloud.OnResize(this);
         }
 
         #endregion
@@ -333,6 +391,7 @@ namespace Fusee.Tutorial.Core
         
         /// <summary>
         /// Whenever a new point gets loaded, this is what happens with him.
+        /// Not to mixed up with the OnNodeAdded callback.
         /// </summary>
         /// <param name="point">Point data structure containing position and stuff.</param>
         private void OnNewPointAdded(Common.Point point)
@@ -375,6 +434,163 @@ namespace Fusee.Tutorial.Core
         {
             ViewMode nextViewMode = CurrentViewMode == ViewMode.PointCloud ? ViewMode.VoxelSpace : ViewMode.PointCloud;
             CurrentViewMode = nextViewMode;
+        }
+
+        #endregion
+
+        #region Debugging
+
+        /// <summary>
+        /// Switches the view mode for debugging wireframe and point cloud.
+        /// </summary>
+        private void SwitchViewModeDebugging()
+        {
+            ViewModeDebugging nextViewMode;
+
+            switch (CurrentViewModeDebugging)
+            {
+                case ViewModeDebugging.All:
+                    nextViewMode = ViewModeDebugging.PerLevel;
+                    _showAllLevels = false;
+                    _pointCloud.StartNewTraversingForVisibleNodes = true;
+                    break;
+                case ViewModeDebugging.PerLevel:
+                    nextViewMode = ViewModeDebugging.PerNode;
+
+                    // start debugging via traversing octree
+                    _debuggingNode = _octree.GetRootNode();
+
+                    _wireFrame.OnNewDebuggingNode(_debuggingNode);
+                    _pointCloud.OnNewDebuggingNode(_debuggingNode);
+
+                    _level = 0;
+                    _showAllLevels = false;
+                    break;
+                case ViewModeDebugging.PerNode:
+                    nextViewMode = ViewModeDebugging.Snapshot;
+                    _showAllLevels = true;
+                    break;
+                case ViewModeDebugging.Snapshot:
+                default:
+                    nextViewMode = ViewModeDebugging.All;
+                    _showAllLevels = true;
+                    break;
+            }
+
+            CurrentViewModeDebugging = nextViewMode;
+        }
+
+        /// <summary>
+        /// Switches whether the wire frame is visible or not.
+        /// </summary>
+        private void SwitchWireframe()
+        {
+            _wireFrameVisible = !_wireFrameVisible;
+        }
+
+        /// <summary>
+        /// Demands the wireframe and the point cloud only to render a specific level.
+        /// Level up means bigger nodes.
+        /// </summary>
+        public void LevelUp()
+        {
+            if (_level == 0)
+                return;
+
+            bool hasLevelChanged = false;
+
+            if (CurrentViewModeDebugging == ViewModeDebugging.PerNode)
+            {
+                if (_debuggingNode.Parent != null)
+                {
+                    _debuggingNode = _debuggingNode.Parent;
+
+                    _wireFrame.OnNewDebuggingNode(_debuggingNode);
+                    _pointCloud.OnNewDebuggingNode(_debuggingNode);
+
+                    _level--;
+                    hasLevelChanged = true;
+                }
+            }
+            else if(CurrentViewModeDebugging == ViewModeDebugging.PerLevel)
+            {
+                _level--;
+                hasLevelChanged = true;
+            }
+
+            if (hasLevelChanged)
+                _pointCloud.StartNewTraversingForVisibleNodes = true;
+        }
+
+        /// <summary>
+        /// Demands the wireframe and the point cloud only to render a specific level.
+        /// </summary>
+        public void LevelDown()
+        {
+            if (_level >= MAX_LEVEL_DEBUG)
+                return;
+
+            bool hasLevelChanged = false;
+                
+            if (CurrentViewModeDebugging == ViewModeDebugging.PerNode)
+            {
+                if (_debuggingNode.hasChildren())
+                {
+                    _debuggingNode = _debuggingNode.Children[0];
+
+                    _wireFrame.OnNewDebuggingNode(_debuggingNode);
+                    _pointCloud.OnNewDebuggingNode(_debuggingNode);
+
+                    _level++;
+                    hasLevelChanged = true;
+                } 
+            }
+            else if (CurrentViewModeDebugging == ViewModeDebugging.PerLevel)
+            {
+                _level++;
+                hasLevelChanged = true;
+            }
+
+            if (hasLevelChanged)
+                _pointCloud.StartNewTraversingForVisibleNodes = true;
+        }
+
+        /// <summary>
+        /// Sets the debugging node to its previous sibling if existent.
+        /// </summary>
+        public void DebugPreviousSibling()
+        {
+            if (CurrentViewModeDebugging != ViewModeDebugging.PerNode)
+                return;
+
+            byte index = _debuggingNode.Path.Last();
+
+            if (index > 0)
+            {
+                _debuggingNode = _debuggingNode.Parent.Children[index - 1];
+
+                _wireFrame.OnNewDebuggingNode(_debuggingNode);
+                _pointCloud.OnNewDebuggingNode(_debuggingNode);
+            }
+        }
+
+        /// <summary>
+        /// Sets the debugging node to its previous sibling if existent.
+        /// </summary>
+        public void DebugNextSibling()
+        {
+            if (CurrentViewModeDebugging != ViewModeDebugging.PerNode)
+                return;
+
+            byte index = _debuggingNode.Path.Last();
+
+            if (index < _debuggingNode.Parent.Children.Length - 1)
+            {
+                _debuggingNode = _debuggingNode.Parent.Children[index + 1];
+
+                _wireFrame.OnNewDebuggingNode(_debuggingNode);
+                _pointCloud.OnNewDebuggingNode(_debuggingNode);
+            }
         }
 
         #endregion

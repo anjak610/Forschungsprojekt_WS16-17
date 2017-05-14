@@ -1,13 +1,10 @@
 ﻿using Fusee.Base.Core;
-using Fusee.Engine.Common;
 using Fusee.Engine.Core;
 using Fusee.Tutorial.Core.Common;
 using System.Collections.Generic;
 using Fusee.Math.Core;
 using Fusee.Tutorial.Core.Octree;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
+using static Fusee.Tutorial.Core.PointVisualizationBase;
 
 namespace Fusee.Tutorial.Core.Data
 {
@@ -18,25 +15,21 @@ namespace Fusee.Tutorial.Core.Data
     public class Wireframe : RenderEntitiy
     {
         #region Fields
+        
+        // constants / settings
 
-        private const float LineWidth = 1;
-        private const float LineWidthEmphasized = 4;
+        private const float LINE_WIDTH = 1;
+        private const float LINE_WIDTH_EMPHASIZED = 4;
 
-        private const int MinSize = 8; // the minimum side length of a bounding box to render
-
-        // 0 => smallest bounding box, 1 => second smallest size, e.g. 8 => biggest size etc.
-        private int _level = -1; 
-        private int _maxLevel = 8;
-
-        private bool _showAllLevels = true;
-
-        private OctreeNode _lastDebuggingNode;
+        private const int MAX_NODE_LEVEL = 8; // the maximum level of a node for a bounding box to render
+        
+        // debugging
+        
         private DynamicAttributes _debuggingBoundingBox;
 
-        // wireframe to render
-        private Dictionary<int, List<DynamicAttributes>> _wireFramePerLevel = new Dictionary<int, List<DynamicAttributes>>();
+        // data structure
 
-        // nodes: position and sidelength, per level
+        private Dictionary<int, List<DynamicAttributes>> _wireFramePerLevel = new Dictionary<int, List<DynamicAttributes>>();
         private Octree.Octree _octree;
 
         #endregion
@@ -54,34 +47,6 @@ namespace Fusee.Tutorial.Core.Data
             Octree.Octree.OnOctreeNodeLevelsChangedCallback += OnOctreeNodeLevelsChanged;
 
             _octree = octree;
-        }
-
-        /// <summary>
-        /// Show only the bounding boxes of a certain level. Step up this level, means larger nodes.
-        /// </summary>
-        public void LevelUp()
-        {
-            if(_level >= 0)
-            {
-                _level--;
-                _showAllLevels = false;
-            }
-            else
-            {
-                _showAllLevels = true;
-            }
-        }
-
-        /// <summary>
-        /// Show only the bounding boxes of a certain level. Step down this level, means smaller nodes.
-        /// </summary>
-        public void LevelDown()
-        {
-            if (_level < _maxLevel && _level < _wireFramePerLevel.Count - 1)
-            {
-                _level++;
-                _showAllLevels = false;
-            }
         }
 
         #region Shader related methods
@@ -124,23 +89,19 @@ namespace Fusee.Tutorial.Core.Data
         /// <summary>
         /// Gets called every frame. Takes care of rendering the point cloud.
         /// </summary>
-        public override void Render()
+        /// <param name="viewMode">The view mode currently set.</param>
+        /// <param name="level">The level to render. -1 for all levels together.</param>
+        /// <param name="debuggingNode">The node to debug for.</param>
+        public void Render(ViewModeDebugging viewMode, int level, OctreeNode debuggingNode)
         {
             base.Render();
             
-            foreach(KeyValuePair<int, List<DynamicAttributes>> kvp in _wireFramePerLevel) // for each level
+            foreach (KeyValuePair<int, List<DynamicAttributes>> kvp in _wireFramePerLevel) // for each level
             {
-                float lineWidth = LineWidth;
+                float lineWidth = LINE_WIDTH;
 
-                if (PointCloud.GetCurrentViewMode() == PointCloud.ViewMode.PerLevel && !_showAllLevels && _level == kvp.Key)
-                {
-                    lineWidth = LineWidthEmphasized;
-                    SetLineColor(true);
-                }        
-                else
-                {
-                    SetLineColor(false);
-                }            
+                if ((viewMode == ViewModeDebugging.PerLevel || viewMode == ViewModeDebugging.PerNode) && level != kvp.Key)
+                    continue;
 
                 foreach (DynamicAttributes wireframe in kvp.Value) // for each bounding box
                 {
@@ -149,30 +110,37 @@ namespace Fusee.Tutorial.Core.Data
             }
 
             // debugging node octree
-            if(PointCloud.GetCurrentViewMode() == PointCloud.ViewMode.PerNode)
+
+            if(viewMode == ViewModeDebugging.PerNode)
             {
                 SetLineColor(true);
-
-                if(_lastDebuggingNode == null || !_lastDebuggingNode.IsEqual(PointCloud.GetCurrentDebuggingNode()))
-                {
-                    _lastDebuggingNode = PointCloud.GetCurrentDebuggingNode();
-                    _debuggingBoundingBox = CreateBoundingBox(_lastDebuggingNode.SideLength, _lastDebuggingNode.CenterPosition);
-                }
-
-                _rc.RenderAsLines(_debuggingBoundingBox, LineWidthEmphasized);
+                _rc.RenderAsLines(_debuggingBoundingBox, LINE_WIDTH_EMPHASIZED);
             }
         }
 
         #endregion
 
         /// <summary>
+        /// When a new debugging node is set, this function is called.
+        /// </summary>
+        /// <param name="node">The node that is currently debugged.</param>
+        public void OnNewDebuggingNode(OctreeNode node)
+        {
+            if (_debuggingBoundingBox != null)
+                _rc.Remove(_debuggingBoundingBox);
+            
+            _debuggingBoundingBox = CreateBoundingBox(node.SideLength, node.CenterPosition);
+        }
+
+        /// <summary>
         /// Gets called when bounding box updates. Creates a new bounding box for this node.
         /// </summary>
         private void OnNewOctreeNodeAdded(OctreeNode node)
         {
-            if(node.SideLength >= MinSize)
+            int level = node.GetLevel();
+
+            if (level <= MAX_NODE_LEVEL)
             {
-                int level = node.GetLevel();
                 DynamicAttributes boundingBox = CreateBoundingBox(node.SideLength, node.CenterPosition);
 
                 if (_wireFramePerLevel.ContainsKey(level))

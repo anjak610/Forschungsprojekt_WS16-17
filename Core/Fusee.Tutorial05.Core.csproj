@@ -53,6 +53,7 @@
     <Compile Include="Data Transmission\IUDPReceiver.cs" />
     <Compile Include="Data\DronePath.cs" />
     <Compile Include="Data\Wireframe.cs" />
+    <Compile Include="Octree\ByteArrayComparer.cs" />
     <Compile Include="Octree\Octree.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>

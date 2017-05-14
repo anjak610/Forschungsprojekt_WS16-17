@@ -1,4 +1,5 @@
-﻿using Fusee.Math.Core;
+﻿using Fusee.Base.Core;
+using Fusee.Math.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,10 +25,15 @@ namespace Fusee.Tutorial.Core.Octree
 
     public class Octree
     {
+        // number of points that must have been added until to search for nodes of which bucket have been changed
+        private const int PASSED_POINTS_UNTIL_SEARCH_FOR_BUCKET_CHANGE = 1000;
+        private long _pointCounter = 0;
+
         public delegate void OnNewNodeAdded(OctreeNode node);
 
         public static OnNewNodeAdded OnNodeAddedCallback;
         public static Action OnOctreeNodeLevelsChangedCallback; // callback for when one or several nodes change their levels. See Wireframe
+        public static Action<OctreeNode> OnNodeBucketChangedCallback;
         
         public static int BucketThreshold; // The maximum number of items one node can hold
         public static float3 CenterPosition;
@@ -72,17 +78,8 @@ namespace Fusee.Tutorial.Core.Octree
 
             while(!found)
             {
-                List<OctreeNode> nodesAdded = new List<OctreeNode>();
-                found = _root.Add(ref position, out nodesAdded);
-
-                if (nodesAdded != null)
-                {
-                    foreach (OctreeNode nodeAdded in nodesAdded)
-                    {
-                        OnNodeAddedCallback?.Invoke(nodeAdded);
-                    }
-                }
-
+                found = _root.Add(ref position);
+                
                 if(!found)
                 {
                     _root.SideLength = _root.SideLength * 2;
@@ -114,6 +111,13 @@ namespace Fusee.Tutorial.Core.Octree
             {
                 OnOctreeNodeLevelsChangedCallback?.Invoke();
             }
+
+            _pointCounter++;
+
+            if(_pointCounter % PASSED_POINTS_UNTIL_SEARCH_FOR_BUCKET_CHANGE == 0)
+            {
+                SearchForNodesWithChangedBuckets();
+            }
         }
 
         /// <summary>
@@ -124,7 +128,7 @@ namespace Fusee.Tutorial.Core.Octree
         private void CreateRootNode(float sideLength)
         {
             _root = new OctreeNode(CenterPosition, sideLength);
-            _root.Path = new char[] { (char)0 };
+            _root.Path = new byte[] { 0 };
 
             OnNodeAddedCallback?.Invoke(_root);
 
@@ -208,6 +212,11 @@ namespace Fusee.Tutorial.Core.Octree
 
             OctreeNode node = new OctreeNode(newPos, sideLength);
 
+            if(sideLength == 64)
+            {
+                Diagnostics.Log("yuchey!");
+            }
+
             return node;
         }
 
@@ -217,6 +226,21 @@ namespace Fusee.Tutorial.Core.Octree
         public OctreeNode GetRootNode()
         {
             return _root;
+        }
+
+        /// <summary>
+        /// Searches for nodes of which buckets have been changed since the last time this function was called.
+        /// </summary>
+        private void SearchForNodesWithChangedBuckets()
+        {
+            Traverse((OctreeNode node) =>
+            {
+                if (node.HasBucketChanged)
+                {
+                    node.HasBucketChanged = false;
+                    OnNodeBucketChangedCallback?.Invoke(node);
+                }   
+            });
         }
 
         /// <summary>

@@ -4,8 +4,20 @@ using Fusee.Tutorial.Core.Common;
 using System.Collections.Generic;
 using Fusee.Math.Core;
 using Fusee.Tutorial.Core.Octree;
-using System.Linq;
+using static Fusee.Tutorial.Core.PointVisualizationBase;
 using System.Threading.Tasks;
+using System.Threading;
+
+/**
+ * Three different threads or tasks are involved:
+ * 1. The render thread, which accesses the _pointsPerNode, in which the points are stored which should be rendered.
+ * 2. The reading thread, which either downloads points via UDP or reads them from a file and builds up the octree.
+ * 3. The preparing thread, which - whenever the camera view changes - collects up the nodes from the octree that are visible and thus should be rendered.
+ *      It then stores the corresponding nodes in a list, which are then scheduled to be loaded into the GPU memory by the render thread.
+ *      
+ * Improvements that might speed up:
+ * - Instead of _pointsPerNode.ContainsKey() we could just set a render flag for each node
+ */
 
 namespace Fusee.Tutorial.Core.Data
 {
@@ -15,66 +27,78 @@ namespace Fusee.Tutorial.Core.Data
     /// </summary>
     public class PointCloud : RenderEntitiy
     {
-        // choose traversing between levels or single nodes
-        public enum ViewMode
-        {
-            PerLevel, PerNode
-        }
-
         #region Fields
 
-        private const int UPDATE_EVERY = 100; // every xth point the point cloud should update its meshes
-        private const int COMPUTE_EVERY = 10; // take only every xth point into account in order to speed up calculation
+        // constants / settings
 
-        private static float _particleSize = 0.05f; // maybe gets changed from platform specific classes
-        public const float ParticleSizeInterval = 0.025f;
+        private const int UPDATE_EVERY = 65000; // every xth point the point cloud should update its meshes
+        private const int COMPUTE_EVERY = 1; // take only every xth point into account in order to speed up calculation
 
-        public static ViewMode _viewMode = ViewMode.PerLevel;
-        private static OctreeNode _debuggingNode;
+        // conditions of when to stop the traversal
 
-        private int _pointCounter = 0;
+        private const int POINT_BUDGET = 10000; // number of points that are visible at one frame, tradeoff between performance and quality
+        private const float MIN_SCREEN_PROJECTED_SIZE = 1; // minimum screen size of the node
+        private int NODES_TO_BE_LOADED_PER_SCHEDULE = 1000; // X = 5, see Schuetz (2016)
 
-        private float _aspectRatio = 1; // needed for particle size to be square, aspect ratio of viewport => see OnWindowResize
-        private float _screenHeight = 1; // needs to be set for calculating screen-projected-size for each octree node
+        private const int MAX_NODE_LEVEL = 8; // the maximum level of a node for the points in it to be loaded
+
+        // shader params
+
+        private static float _particleSize = 1f; // maybe gets changed from platform specific classes
+        public const float ParticleSizeInterval = 0.25f;
 
         private float2 _zBounds = float2.Zero;
         private float _zoom = 60f;
 
+        private float _aspectRatio = 1; // needed for particle size to be square, aspect ratio of viewport => see OnWindowResize
+
+        // helper
+
+        private int _pointCounter = 0;
+        private int _visitPointCounter; // counts the points that have been scheduled to be loaded while traversing the octree
+
+        // data structure
+
         // This is the object where new vertices are stored. Also look at the description of the class(es) for more information.
-        private StaticMeshList _meshList = new StaticMeshList();
+        private Dictionary<byte[], DynamicAttributes> _pointsPerNode = new Dictionary<byte[], DynamicAttributes>();
 
-        private bool _wireframeVisible = true;
+        // octree
 
-        #region Octree
-
-        // Renders the bounding boxes for each node
-        private Wireframe _wireFrame;
-
-        // See Schuetz (2016): Potree 3.4 Octree Traversal and Visible Node Determination
         private Octree.Octree _octree;
-
-        // conditions of when to stop the traversal
-        private const int POINT_BUDGET = 10000; // number of points that are visible at one frame, tradeoff between performance and quality
-        private const float MINSCREENSIZE = 5; // minimum screen size of the node
-        private int NODESTOBELOADEDPERSCHEDULE = 65000; // X = 5, see Schuetz (2016)
-
-        private int _visitPointCounter; // counts the points that have been visited
-
+        
         private List<OctreeNode> _unloadedVisibleNodes;
-        private bool _traversingFinished = true;
-
         private SortedDictionary<double, OctreeNode> _nodesOrdered = new SortedDictionary<double, OctreeNode>(); // nodes ordered by screen-projected-size
 
+        // conditions on when to start a new traversing in screen-projected-size order
+        private bool _traversingFinished = true; // determines whether the octree traversal has been already finished
+        private int _levelToLoad = -1;
+
         public bool HasAssetLoaded = false;
+
+        public bool StartNewTraversingForVisibleNodes = false; // decides, whether a new search for visible nodes should be started
+        private bool _scheduleLoading = false;
+
+        private Dictionary<byte[], DynamicAttributes> _nodesToBeLoaded = new Dictionary<byte[], DynamicAttributes>();
+        private List<byte[]> _nodesToBeRemoved = new List<byte[]>();
+
+        // octree traversing
+
+        private float _screenHeight = 1; // needs to be set for calculating screen-projected-size for each octree node
 
         private double _fov = 3.141592f * 0.25f; // needs to be the same as in PointVisualizationBase.cs
         private double _slope;
         private float3 _cameraPosition;
 
-        #endregion
+        // debugging
+        
+        private DynamicAttributes _debuggingPoints;
 
-        #endregion
+        // multithreading
 
+        private AutoResetEvent _signalEvent = new AutoResetEvent(true);
+        
+        #endregion
+        
         #region Methods
 
         /// <summary>
@@ -82,16 +106,14 @@ namespace Fusee.Tutorial.Core.Data
         /// </summary>
         /// <param name="rc">The render context.</param>
         /// <param name="boundingBox">Reference to the bounding box which is used throughout the program.</param>
-        public PointCloud(RenderContext rc, BoundingBox boundingBox) : base(rc)
-        {
+        public PointCloud(RenderContext rc, Octree.Octree octree, BoundingBox boundingBox) : base(rc)
+        { 
             boundingBox.UpdateCallbacks += OnBoundingBoxUpdate;
-
-            _octree = new Octree.Octree(float3.Zero);
-            _wireFrame = new Wireframe(rc, _octree);
-
-            _octree.Init(256);
-            
             _slope = System.Math.Tan(_fov / 2);
+            
+            Octree.Octree.OnNodeBucketChangedCallback += OnNodeBucketChanged;
+
+            _octree = octree;
         }
 
         #region Shader related methods
@@ -114,6 +136,9 @@ namespace Fusee.Tutorial.Core.Data
         {
             var particleSizeParam = _rc.GetShaderParam(_shader, "particleSize");
             _rc.SetShaderParam(particleSizeParam, new float2(_particleSize, _particleSize * _aspectRatio));
+
+            var colorParam = _rc.GetShaderParam(_shader, "color");
+            _rc.SetShaderParam(colorParam, new float3(0, 0, 0.5f));
             /*
             // SetZNearFarPlane
             var zBoundsParam = _rc.GetShaderParam(_shader, "zBounds");
@@ -124,41 +149,25 @@ namespace Fusee.Tutorial.Core.Data
             _rc.SetShaderParam(zZoomParam, _zoom);*/
         }
 
+        /// <summary>
+        /// Highlights the points to be rendered next by setting a different color and point size.
+        /// </summary>
+        /// <param name="active"></param>
+        public void SetPointsActive(bool active)
+        {
+            float3 color = active ? new float3(1, 0, 0) : new float3(0, 0, 0.5f);
+
+            var colorParam = _rc.GetShaderParam(_shader, "color");
+            _rc.SetShaderParam(colorParam, color);
+
+            var particleSizeParam = _rc.GetShaderParam(_shader, "particleSize");
+            _rc.SetShaderParam(particleSizeParam, new float2(_particleSize + ParticleSizeInterval, (_particleSize + ParticleSizeInterval) * _aspectRatio));
+        }
+
         #endregion
 
         #region Setter and Getter of Fields
-
-        /// <summary>
-        /// Switches between the different view modes.
-        /// </summary>
-        public void SwitchViewMode()
-        {
-            ViewMode nextViewMode = _viewMode == ViewMode.PerLevel ? ViewMode.PerNode : ViewMode.PerLevel;
-            _viewMode = nextViewMode;
-
-            if(_viewMode == ViewMode.PerNode)
-            {
-                // start debugging via traversing octree
-                _debuggingNode = _octree.GetRootNode();
-            }
-        }
-
-        /// <summary>
-        /// Whether mode either traversing per level or per single node is active.
-        /// </summary>
-        public static ViewMode GetCurrentViewMode()
-        {
-            return _viewMode;
-        }
-
-        /// <summary>
-        /// Returns the current debugging node.
-        /// </summary>
-        public static OctreeNode GetCurrentDebuggingNode()
-        {
-            return _debuggingNode;
-        }
-
+        
         /// <summary>
         /// Increases the particle size.
         /// </summary>
@@ -193,24 +202,7 @@ namespace Fusee.Tutorial.Core.Data
         {
             _zoom = zoom;
         }
-
-        /// <summary>
-        /// Sets the current screen height.
-        /// </summary>
-        public void SetScreenHeight(float screenHeight)
-        {
-            _screenHeight = screenHeight;
-        }
-
-        /// <summary>
-        /// Gets called when viewport changes. Sets the aspect ratio
-        /// </summary>
-        /// <param name="aspectRatio">width / height</param>
-        public void SetAspectRatio(float aspectRatio)
-        {
-            _aspectRatio = aspectRatio;
-        }
-
+        
         /// <summary>
         /// Sets the position of the camera.
         /// </summary>
@@ -220,61 +212,32 @@ namespace Fusee.Tutorial.Core.Data
         }
 
         /// <summary>
-        /// Demands the wireframe and the point cloud only to render a specific level.
+        /// When a new debugging node is set, this function is called.
         /// </summary>
-        public void LevelUp()
+        /// <param name="node">The node that is currently debugged.</param>
+        public void OnNewDebuggingNode(OctreeNode node)
         {
-            if(_viewMode == ViewMode.PerLevel)
+            // remove old mesh
+
+            if(_debuggingPoints != null)
             {
-                _wireFrame.LevelUp();
+                _rc.Remove(_debuggingPoints);
             }
-            else
-            {
-                if (_debuggingNode.Parent != null)
-                    _debuggingNode = _debuggingNode.Parent;
-            }
+
+            _debuggingPoints = new DynamicAttributes(Octree.Octree.BucketThreshold);
+
+            // create new mesh
+            _debuggingPoints.AddAttributes(node.Bucket);
         }
 
         /// <summary>
-        /// Demands the wireframe and the point cloud only to render a specific level.
+        /// Gets called when Resize() on the render canvas gets called.
         /// </summary>
-        public void LevelDown()
+        /// <param name="renderCanvas">A reference to the render canvas.</param>
+        public void OnResize(RenderCanvas renderCanvas)
         {
-            if (_viewMode == ViewMode.PerLevel)
-            {
-                _wireFrame.LevelDown();
-            }
-            else
-            {
-                if (_debuggingNode.hasChildren())
-                    _debuggingNode = _debuggingNode.Children[0];
-            }
-        }
-
-        /// <summary>
-        /// Sets the debugging node to its previous sibling if existent.
-        /// </summary>
-        public void DebugPreviousSibling()
-        {
-            byte index = (byte)_debuggingNode.Path.Last();
-
-            if (index > 0)
-            {
-                _debuggingNode = _debuggingNode.Parent.Children[index - 1];
-            }
-        }
-
-        /// <summary>
-        /// Sets the debugging node to its previous sibling if existent.
-        /// </summary>
-        public void DebugNextSibling()
-        {
-            byte index = (byte) _debuggingNode.Path.Last();
-
-            if (index < _debuggingNode.Parent.Children.Length - 1)
-            {
-                _debuggingNode = _debuggingNode.Parent.Children[index + 1];
-            }
+            _aspectRatio = renderCanvas.Width / (float) renderCanvas.Height;
+            _screenHeight = renderCanvas.Height;
         }
 
         /// <summary>
@@ -284,11 +247,6 @@ namespace Fusee.Tutorial.Core.Data
         public void AddPoint(Common.Point point)
         {
             AddPoint(point.Position);
-        }
-
-        public void SwitchWireframe()
-        {
-            _wireframeVisible = !_wireframeVisible;
         }
 
         /// <summary>
@@ -323,60 +281,74 @@ namespace Fusee.Tutorial.Core.Data
         /// <summary>
         /// Gets called every frame. Takes care of rendering the point cloud.
         /// </summary>
-        public override void Render()
+        /// <param name="viewMode">The view mode currently set.</param>
+        /// <param name="level">The level to render. -1 for all levels together.</param>
+        /// <param name="debuggingNode">The node to debug for.</param>
+        public void Render(ViewModeDebugging viewMode, int level, OctreeNode debuggingNode)
         {
             base.Render();
-
-            // handle octree 
-
-            if (_traversingFinished && HasAssetLoaded)
+            
+            if(_scheduleLoading) // if traversing the octree for new nodes to be loaded has finished
             {
-                if (_unloadedVisibleNodes != null && _unloadedVisibleNodes.Count > 0)
+                // remove nodes
+                foreach (byte[] nodePath in _nodesToBeRemoved)
                 {
-                    for (var i = 0; i < NODESTOBELOADEDPERSCHEDULE; i++)
+                    DynamicAttributes da = _pointsPerNode[nodePath];
+                    _rc.Remove(da);
+
+                    _pointsPerNode.Remove(nodePath);
+                }
+
+                // add nodes
+                foreach(KeyValuePair<byte[], DynamicAttributes> kvp in _nodesToBeLoaded)
+                {
+                    if(_pointsPerNode.ContainsKey(kvp.Key))
                     {
-                        if (i > _unloadedVisibleNodes.Count - 1)
-                            break;
-
-                        OctreeNode node = _unloadedVisibleNodes[i];
-
-                        foreach (float3 point in node.Bucket)
-                        {
-                            PointMesh pointMesh = new PointMesh(point);
-                            _meshList.AddMesh(pointMesh);
-
-                            _pointCounter++;
-                            if (_pointCounter % UPDATE_EVERY == 0)
-                            {
-                                _meshList.Apply();
-                            }
-                        }
-
-                        node.RenderFlag = OctreeNodeStates.Visible;
+                        _pointsPerNode[kvp.Key] = kvp.Value;
+                    }
+                    else
+                    {
+                        _pointsPerNode.Add(kvp.Key, kvp.Value);
                     }
                 }
 
-                RenderOctree();
+                _nodesToBeLoaded = new Dictionary<byte[], DynamicAttributes>();
+                _nodesToBeRemoved = new List<byte[]>();
+
+                _scheduleLoading = false; // loading finished
             }
 
-            // render points
-
-            List<Mesh> meshesToRemove = _meshList.GetMeshesToRemove();
-            for (var i = 0; i < meshesToRemove.Count; i++)
+            if(StartNewTraversingForVisibleNodes && _traversingFinished && !_scheduleLoading && level != -1)
             {
-                _rc.Remove(meshesToRemove[i]);
+                CollectNodes(level);
             }
 
-            List<Mesh> meshes = _meshList.GetMeshes();
-            for (var i = 0; i < meshes.Count; i++)
+            // Render Point Cloud
+
+            if(viewMode == ViewModeDebugging.PerLevel || viewMode == ViewModeDebugging.All)
             {
-                _rc.Render(meshes[i]);
+                _signalEvent.WaitOne();
+
+                foreach (KeyValuePair<byte[], DynamicAttributes> kvp in _pointsPerNode) // for each node
+                {
+                    if ((viewMode == ViewModeDebugging.PerLevel || viewMode == ViewModeDebugging.PerNode) && level != kvp.Key.Length - 1)
+                        continue;
+
+                    _rc.RenderAsPoints(kvp.Value);
+                }
+
+                _signalEvent.Set();
+            }
+            
+            // debugging octree node
+
+            if (viewMode == ViewModeDebugging.PerNode)
+            {
+                SetPointsActive(true);
+                _rc.RenderAsPoints(_debuggingPoints);
             }
 
-            // render wireframe
-
-            if(_wireframeVisible)
-                _wireFrame.Render();
+            #endregion
         }
 
         #endregion
@@ -395,49 +367,81 @@ namespace Fusee.Tutorial.Core.Data
         #endregion
 
         #region Octree Methods
-
+       
         /// <summary>
-        /// Traverses the octree and prints for each node some debug line.
+        /// Starts traversing the octree and collecting for nodes which should be visible next.
         /// </summary>
-        public void RenderOctree()
+        /// <param name="level">For debugging purpose, just take the nodes of a given level as visible nodes.</param>
+        private void CollectNodes(int level)
         {
+            if (!_traversingFinished)
+                return;
+
+            StartNewTraversingForVisibleNodes = false;
             _traversingFinished = false;
+            _levelToLoad = level;
 
             Task task = new Task(() =>
             {
-
-                _nodesOrdered = new SortedDictionary<double, OctreeNode>();
                 _visitPointCounter = 0;
 
-                _unloadedVisibleNodes = new List<OctreeNode>();
+                _nodesToBeLoaded = new Dictionary<byte[], DynamicAttributes>();
+                _nodesToBeRemoved = new List<byte[]>();
 
-                _octree.TraverseWithoutCallback(TraverseByProjectionSizeOrder);
+                _octree.Traverse(OnNodeVisited);
 
                 // schedule loading for visible but onloaded nodes => in Render()
                 _traversingFinished = true;
+                _scheduleLoading = true;
             });
 
             task.Start();
         }
-
+        
         /// <summary>
-        /// Gets called when traversing in screen-projected-size order is running.
+        /// Gets called when traversing the octree.
         /// </summary>
         /// <param name="node">The node currently visited.</param>
         private void OnNodeVisited(OctreeNode node)
         {
-            // This is the function where the nodes are visited in screen-projected-size order
-            //Diagnostics.Log(node.SideLength);
-
-            if (node.RenderFlag != OctreeNodeStates.Visible && node.SideLength > 15)
+            if(node.GetLevel() == _levelToLoad)
             {
-                _visitPointCounter += node.Bucket.Count;
-                node.RenderFlag = OctreeNodeStates.VisibleButUnloaded;
+                // if not already rendered, add this node to the nodes-to-be-rendered-list
+                if(!_pointsPerNode.ContainsKey(node.Path))
+                {
+                    _visitPointCounter += node.Bucket.Count;
 
-                _unloadedVisibleNodes.Add(node);
+                    DynamicAttributes points = new DynamicAttributes(Octree.Octree.BucketThreshold);
+                    points.AddAttributes(node.Bucket);
+                    
+                    _nodesToBeLoaded.Add(node.Path, points);
+                }
+                else if(node.HasBucketChanged)
+                {
+                    DynamicAttributes points = _pointsPerNode[node.Path];
+                    points.Reset();
+                    
+                    _visitPointCounter += node.Bucket.Count - points.GetCount();
+
+                    _nodesToBeLoaded.Add(node.Path, points);
+                }
+            }
+            else 
+            {
+                // if already rendered, but shouldn't be, add this node to the nodes-to-be-removed-list
+
+                if (_pointsPerNode.ContainsKey(node.Path))
+                {
+                    _nodesToBeRemoved.Add(node.Path);
+                }
             }
         }
 
+        /*
+        /// <summary>
+        /// Traverses the octree and searches for
+        /// </summary>
+        /// <param name="rootNode"></param>
         private void TraverseByProjectionSizeOrder(OctreeNode rootNode)
         {
             ProcessNode(rootNode);
@@ -492,8 +496,21 @@ namespace Fusee.Tutorial.Core.Data
                 }
             }
         }
+        */
+        
+        /// <summary>
+        /// Gets called when the bucket of a node has changed. (Means more points have been added or removed from this node.)
+        /// </summary>
+        /// <param name="node">The node which bucket has changed.</param>
+        private void OnNodeBucketChanged(OctreeNode node)
+        {
+            int level = node.GetLevel();
 
-        #endregion
+            if (level > MAX_NODE_LEVEL || level != _levelToLoad)
+                return;
+
+            StartNewTraversingForVisibleNodes = true;
+        }
 
         #endregion
     }

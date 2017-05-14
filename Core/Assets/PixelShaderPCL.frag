@@ -7,6 +7,8 @@ varying float far;
 varying vec4 newVertex;
 varying float zoom;
 */
+uniform vec3 color;
+
 void main()
 {/*
 	vec3 pointFar = vec3(0.0,0.0,far);
@@ -22,5 +24,6 @@ void main()
 	float depth = dot(u_abcd.xyz, newVertex.xyz)+ u_abcd.w;	
 	vec3 color = vec3(1.0-depth/zlength);
 	gl_FragColor = vec4(color, 1.0); */
-	gl_FragColor = vec4(0, 0, 0.5, 1.0);
+
+	gl_FragColor = vec4(color, 1.0);
 }

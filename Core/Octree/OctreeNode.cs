@@ -16,8 +16,10 @@ namespace Fusee.Tutorial.Core.Octree
         public float SideLength;
         public readonly float Spacing;
         public readonly List<float3> Bucket; // where data/points gets stored
+        public byte[] Path;
+
         public OctreeNodeStates RenderFlag = OctreeNodeStates.NonVisible; // flag whether to load/render this node
-        public char[] Path;
+        public bool HasBucketChanged = false; // some kind of flag whether points have been added to or removed from this node
 
         public OctreeNode Parent;
         public OctreeNode[] Children;
@@ -40,20 +42,17 @@ namespace Fusee.Tutorial.Core.Octree
         /// Adds another point to this node.
         /// </summary>
         /// <param name="position">Position of the point to add.</param>
-        /// <param name="addedNodes">if nodes had to be added, they will be stored in here.</param>
         /// <returns>Returns false, when target position does not lie inside this voxel.</returns>
-        public bool Add(ref float3 position, out List<OctreeNode> addedNodes)
+        public bool Add(ref float3 position)
         {
             // node contains position?
             // => YES, add point to this node
             // => NO, then return false
 
-            addedNodes = null;
-
             if (!Contains(position))
                 return false;
 
-            SubAdd(ref position, out addedNodes);
+            SubAdd(ref position);
             return true;
         }
 
@@ -61,11 +60,8 @@ namespace Fusee.Tutorial.Core.Octree
         /// Private counterpart to Add(). Does recursive calculation.
         /// </summary>
         /// <param name="position">Position of the point to add.</param>
-        /// <param name="addedNodes">if nodes had to be added, they will be stored in here.</param>
-        private void SubAdd(ref float3 position, out List<OctreeNode> addedNodes)
+        private void SubAdd(ref float3 position)
         {
-            addedNodes = null;
-
             if(hasChildren()) // inner node
             {
                 // check whether requested position is above minimum distance with other points
@@ -90,7 +86,7 @@ namespace Fusee.Tutorial.Core.Octree
 
                         foreach (OctreeNode child in Children)
                         {
-                            found = child.Add(ref position, out addedNodes);
+                            found = child.Add(ref position);
 
                             if (found)
                                 break;
@@ -98,12 +94,13 @@ namespace Fusee.Tutorial.Core.Octree
 
                         if(!found) // create new child node
                         {
-                            CreateChildNode(ref position, out addedNodes);
+                            CreateChildNode(ref position);
                         }
                     }
                     else // threshold not reached => add point to this node
                     {
                         Bucket.Add(position);
+                        HasBucketChanged = true;
                     }
                 }
                 else // pass point to child node(s)
@@ -114,7 +111,7 @@ namespace Fusee.Tutorial.Core.Octree
 
                     foreach (OctreeNode child in Children)
                     {
-                        found = child.Add(ref position, out addedNodes);
+                        found = child.Add(ref position);
 
                         if (found)
                             break;
@@ -122,7 +119,7 @@ namespace Fusee.Tutorial.Core.Octree
 
                     if (!found) // create new child node
                     {
-                        CreateChildNode(ref position, out addedNodes);
+                        CreateChildNode(ref position);
                     }
                 }
             } 
@@ -131,19 +128,22 @@ namespace Fusee.Tutorial.Core.Octree
                 if(Bucket.Count + 1 > Octree.BucketThreshold) // threshold reached
                 {
                     // become inner node by creating a child node for position
-                    CreateChildNode(ref position, out addedNodes);
-
+                    CreateChildNode(ref position);
+                    
                     for (var i=0; i<Bucket.Count; i++)
                     {
                         float3 point = Bucket[i];
                         Bucket.RemoveAt(i);
-
-                        SubAdd(ref point, out addedNodes);
+                        
+                        SubAdd(ref point);
                     }
+
+                    HasBucketChanged = true;
                 }
                 else // threshold not reached => keep point
                 {
                     Bucket.Add(position);
+                    HasBucketChanged = true;
                 }
             }
         }
@@ -152,18 +152,14 @@ namespace Fusee.Tutorial.Core.Octree
         /// Creates a new child node containing specified position.
         /// </summary>
         /// <param name="position">The position the child node should contain.</param>
-        /// <param name="addedNodes">if nodes had to be added (e.g. the child node), they will be stored in here.</param>
-        private void CreateChildNode(ref float3 position, out List<OctreeNode> addedNodes)
+        private void CreateChildNode(ref float3 position)
         {
             OctreeNode childNode = Octree.CreateNodeWithSideLength(position, SideLength / 2);
-            childNode.Add(ref position, out addedNodes);
+            childNode.Add(ref position);
             
             AddChild(childNode);
-
-            if(addedNodes == null)
-                addedNodes = new List<OctreeNode>();
-
-            addedNodes.Add(childNode);
+            
+            Octree.OnNodeAddedCallback?.Invoke(childNode);
         }
 
         /// <summary>
@@ -225,9 +221,9 @@ namespace Fusee.Tutorial.Core.Octree
 
             if(index != -1)
             {
-                List<char> charArray = Parent.Path.ToList();
-                charArray.Add((char) index); 
-                Path = charArray.ToArray();
+                List<byte> byteArray = Parent.Path.ToList();
+                byteArray.Add((byte) index); 
+                Path = byteArray.ToArray();
             }
         }
 

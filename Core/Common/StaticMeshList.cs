@@ -166,10 +166,13 @@ namespace Fusee.Tutorial.Core.Common
         /// </summary>
         public void Reset()
         {
-            ResetLists();
-
             _meshesToRemove.Add(_temporaryMesh);
             _meshesToRemove.AddRange(_meshes);
+
+            _meshes = new List<Mesh>();
+            _temporaryMesh = new Mesh();
+
+            ResetLists();
         }
 
         /// <summary>
