@@ -111,8 +111,8 @@ namespace Fusee.Tutorial.Android
                 //Change Shader dependent on ViewMode
                 viewMode.Click += (sender, e) =>
                 {
-                    app.SwitchViewMode();
-                    System.Diagnostics.Debug.WriteLine(app.CurrentViewMode);
+                    app.ViewCtrl.SwitchViewMode();
+                    System.Diagnostics.Debug.WriteLine(app.ViewCtrl.GetCurrentViewMode());
                 };
 
                 // connect UDPReceiver

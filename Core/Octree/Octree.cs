@@ -27,6 +27,7 @@ namespace Fusee.Tutorial.Core.Octree
     {
         // number of points that must have been added until to search for nodes of which bucket have been changed
         private const int PASSED_POINTS_UNTIL_SEARCH_FOR_BUCKET_CHANGE = 1000;
+
         private long _pointCounter = 0;
 
         public delegate void OnNewNodeAdded(OctreeNode node);
@@ -76,7 +77,7 @@ namespace Fusee.Tutorial.Core.Octree
             bool found = false;
             bool hasGrown = false;
 
-            while(!found)
+            while (!found)
             {
                 found = _root.Add(ref position);
                 
@@ -116,7 +117,7 @@ namespace Fusee.Tutorial.Core.Octree
 
             if(_pointCounter % PASSED_POINTS_UNTIL_SEARCH_FOR_BUCKET_CHANGE == 0)
             {
-                SearchForNodesWithChangedBuckets();
+                //SearchForNodesWithChangedBuckets();
             }
         }
 

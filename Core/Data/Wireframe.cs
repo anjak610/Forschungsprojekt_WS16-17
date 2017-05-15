@@ -4,7 +4,6 @@ using Fusee.Tutorial.Core.Common;
 using System.Collections.Generic;
 using Fusee.Math.Core;
 using Fusee.Tutorial.Core.Octree;
-using static Fusee.Tutorial.Core.PointVisualizationBase;
 
 namespace Fusee.Tutorial.Core.Data
 {
@@ -25,13 +24,13 @@ namespace Fusee.Tutorial.Core.Data
         
         // debugging
         
-        private DynamicAttributes _debuggingBoundingBox;
+        private DynamicAttributes _debugWireframe;
+        private List<DynamicAttributes> _snapshotWireframes;
 
         // data structure
 
-        private Dictionary<int, List<DynamicAttributes>> _wireFramePerLevel = new Dictionary<int, List<DynamicAttributes>>();
-        private Octree.Octree _octree;
-
+        private Dictionary<byte[], DynamicAttributes> _wireframePerNode = new Dictionary<byte[], DynamicAttributes>();
+        
         #endregion
 
         #region Methods
@@ -40,13 +39,8 @@ namespace Fusee.Tutorial.Core.Data
         /// Constructor, which loads the shader programs and sets some references.
         /// </summary>
         /// <param name="rc">The render context.</param>
-        /// <param name="renderCanvas">Render canvas, PointVisualizationBase</param>
-        public Wireframe(RenderContext rc, Octree.Octree octree) : base(rc)
+        public Wireframe(RenderContext rc) : base(rc)
         {
-            Octree.Octree.OnNodeAddedCallback += OnNewOctreeNodeAdded;
-            Octree.Octree.OnOctreeNodeLevelsChangedCallback += OnOctreeNodeLevelsChanged;
-
-            _octree = octree;
         }
 
         #region Shader related methods
@@ -87,88 +81,142 @@ namespace Fusee.Tutorial.Core.Data
         #region Render
 
         /// <summary>
-        /// Gets called every frame. Takes care of rendering the point cloud.
+        /// Gets called every frame. Takes care of rendering the wireframe of all octree nodes.
         /// </summary>
-        /// <param name="viewMode">The view mode currently set.</param>
-        /// <param name="level">The level to render. -1 for all levels together.</param>
-        /// <param name="debuggingNode">The node to debug for.</param>
-        public void Render(ViewModeDebugging viewMode, int level, OctreeNode debuggingNode)
+        public override void Render()
         {
             base.Render();
-            
-            foreach (KeyValuePair<int, List<DynamicAttributes>> kvp in _wireFramePerLevel) // for each level
-            {
-                float lineWidth = LINE_WIDTH;
 
-                if ((viewMode == ViewModeDebugging.PerLevel || viewMode == ViewModeDebugging.PerNode) && level != kvp.Key)
+            foreach (KeyValuePair<byte[], DynamicAttributes> kvp in _wireframePerNode) // for each level
+            {
+                _rc.RenderAsLines(kvp.Value, LINE_WIDTH);
+            }
+        }
+        
+        /// <summary>
+        /// Renders the wireframes of the nodes of a specified level.
+        /// </summary>
+        /// <param name="level">The octree level to render nodes from.</param>
+        public void Render(int level)
+        {
+            base.Render();
+
+            foreach (KeyValuePair<byte[], DynamicAttributes> kvp in _wireframePerNode) // for each level
+            {
+                if (level != kvp.Key.Length - 1)
                     continue;
 
-                foreach (DynamicAttributes wireframe in kvp.Value) // for each bounding box
-                {
-                    _rc.RenderAsLines(wireframe, lineWidth);
-                }
+                _rc.RenderAsLines(kvp.Value, LINE_WIDTH);
             }
+        }
 
-            // debugging node octree
+        /// <summary>
+        /// Render method that gets called when only a specific node is desired along with a specified octree level.
+        /// </summary>
+        /// <param name="level">The level of which other nodes should be rendered too.</param>
+        /// <param name="debugNode">The node which should be highlighted.</param>
+        public void Render(int level, OctreeNode debugNode)
+        {
+            base.Render();
 
-            if(viewMode == ViewModeDebugging.PerNode)
+            Render(level);
+
+            SetLineColor(true);
+            _rc.RenderAsLines(_debugWireframe, LINE_WIDTH_EMPHASIZED);
+        }
+
+        /// <summary>
+        /// Takes the current snapshot and renders it.
+        /// </summary>
+        public void RenderSnapshot()
+        {
+            base.Render();
+
+            if (_snapshotWireframes != null)
             {
-                SetLineColor(true);
-                _rc.RenderAsLines(_debuggingBoundingBox, LINE_WIDTH_EMPHASIZED);
+                foreach (DynamicAttributes da in _snapshotWireframes)
+                    _rc.RenderAsLines(da, LINE_WIDTH);
             }
         }
 
         #endregion
 
+        #region Data Model
+        
         /// <summary>
-        /// When a new debugging node is set, this function is called.
+        /// Adds a new node to render. If already existent, it gets changed.
         /// </summary>
-        /// <param name="node">The node that is currently debugged.</param>
-        public void OnNewDebuggingNode(OctreeNode node)
+        public void AddNode(OctreeNode node)
         {
-            if (_debuggingBoundingBox != null)
-                _rc.Remove(_debuggingBoundingBox);
-            
-            _debuggingBoundingBox = CreateBoundingBox(node.SideLength, node.CenterPosition);
-        }
+            if (node.GetLevel() > MAX_NODE_LEVEL)
+                return;
 
-        /// <summary>
-        /// Gets called when bounding box updates. Creates a new bounding box for this node.
-        /// </summary>
-        private void OnNewOctreeNodeAdded(OctreeNode node)
-        {
-            int level = node.GetLevel();
-
-            if (level <= MAX_NODE_LEVEL)
+            if (!_wireframePerNode.ContainsKey(node.Path))
             {
                 DynamicAttributes boundingBox = CreateBoundingBox(node.SideLength, node.CenterPosition);
-
-                if (_wireFramePerLevel.ContainsKey(level))
-                {
-                    List<DynamicAttributes> boundingBoxes = _wireFramePerLevel[level];
-                    boundingBoxes.Add(boundingBox);
-
-                    _wireFramePerLevel[level] = boundingBoxes;
-                }
-                else
-                {
-                    List<DynamicAttributes> boundingBoxes = new List<DynamicAttributes>();
-                    boundingBoxes.Add(boundingBox);
-
-                    _wireFramePerLevel.Add(level, boundingBoxes);
-                }
+                _wireframePerNode.Add(node.Path, boundingBox);
             }
         }
 
         /// <summary>
-        /// Recalculate the whole wireframe.
+        /// Removes the specified node from the list of rendered nodes.
         /// </summary>
-        private void OnOctreeNodeLevelsChanged()
+        public void RemoveNode(OctreeNode node)
         {
-            _wireFramePerLevel = new Dictionary<int, List<DynamicAttributes>>();
-            _octree.Traverse(OnNewOctreeNodeAdded);
+            if (_wireframePerNode.ContainsKey(node.Path))
+            {
+                DynamicAttributes da = _wireframePerNode[node.Path];
+                _rc.Remove(da);
+
+                _wireframePerNode.Remove(node.Path);
+            }
         }
 
+        /// <summary>
+        /// Takes the current state and keeps it until its released.
+        /// </summary>
+        public void TakeSnapshot()
+        {
+            _snapshotWireframes = new List<DynamicAttributes>();
+
+            foreach (KeyValuePair<byte[], DynamicAttributes> kvp in _wireframePerNode)
+            {
+                // must have different buffer object id when removing
+                DynamicAttributes da = new DynamicAttributes(16);
+                da.AddAttributes(kvp.Value.GetOffsets());
+
+                _snapshotWireframes.Add(da);
+            }
+        }
+        
+        /// <summary>
+        /// Removes the old snapshot.
+        /// </summary>
+        public void ReleaseSnapshot()
+        {
+            if (_snapshotWireframes == null)
+                return;
+
+            foreach (DynamicAttributes da in _snapshotWireframes)
+            {
+                _rc.Remove(da);
+            }
+
+            _snapshotWireframes = null;
+        }
+
+        /// <summary>
+        /// When a new debugging node is set, this function is called.
+        /// </summary>
+        /// <param name="node">The node that is currently debugged.</param>
+        public void SetNewDebuggingNode(OctreeNode node)
+        {
+            if (_debugWireframe != null)
+                _rc.Remove(_debugWireframe);
+
+            _debugWireframe = CreateBoundingBox(node.SideLength, node.CenterPosition);
+        }
+        
         /// <summary>
         /// Creates a wireframe for a bounding box, from which all the nodes with the specified size are rendered.
         /// </summary>
@@ -236,7 +284,9 @@ namespace Fusee.Tutorial.Core.Data
 
             return boundingBox;
         }
-        
+
+        #endregion
+
         #endregion
     }
 }

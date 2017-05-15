@@ -51,7 +51,7 @@ namespace Fusee.Tutorial.Core.Octree
 
             if (!Contains(position))
                 return false;
-
+            
             SubAdd(ref position);
             return true;
         }
@@ -62,7 +62,7 @@ namespace Fusee.Tutorial.Core.Octree
         /// <param name="position">Position of the point to add.</param>
         private void SubAdd(ref float3 position)
         {
-            if(hasChildren()) // inner node
+            if (hasChildren()) // inner node
             {
                 // check whether requested position is above minimum distance with other points
                 bool keepsMinDistance = true;
@@ -155,10 +155,10 @@ namespace Fusee.Tutorial.Core.Octree
         private void CreateChildNode(ref float3 position)
         {
             OctreeNode childNode = Octree.CreateNodeWithSideLength(position, SideLength / 2);
-            childNode.Add(ref position);
-            
             AddChild(childNode);
             
+            childNode.Add(ref position);
+
             Octree.OnNodeAddedCallback?.Invoke(childNode);
         }
 

@@ -17,6 +17,7 @@ using System.Threading;
  *      
  * Improvements that might speed up:
  * - Instead of _pointsPerNode.ContainsKey() we could just set a render flag for each node
+ * - In the render cycle all the data is created. One could might do this while octree traversal.
  */
 
 namespace Fusee.Tutorial.Core.Data
@@ -33,13 +34,7 @@ namespace Fusee.Tutorial.Core.Data
 
         private const int UPDATE_EVERY = 65000; // every xth point the point cloud should update its meshes
         private const int COMPUTE_EVERY = 1; // take only every xth point into account in order to speed up calculation
-
-        // conditions of when to stop the traversal
-
-        private const int POINT_BUDGET = 10000; // number of points that are visible at one frame, tradeoff between performance and quality
-        private const float MIN_SCREEN_PROJECTED_SIZE = 1; // minimum screen size of the node
-        private int NODES_TO_BE_LOADED_PER_SCHEDULE = 1000; // X = 5, see Schuetz (2016)
-
+        
         private const int MAX_NODE_LEVEL = 8; // the maximum level of a node for the points in it to be loaded
 
         // shader params
@@ -51,51 +46,16 @@ namespace Fusee.Tutorial.Core.Data
         private float _zoom = 60f;
 
         private float _aspectRatio = 1; // needed for particle size to be square, aspect ratio of viewport => see OnWindowResize
-
-        // helper
-
-        private int _pointCounter = 0;
-        private int _visitPointCounter; // counts the points that have been scheduled to be loaded while traversing the octree
-
+                
         // data structure
 
         // This is the object where new vertices are stored. Also look at the description of the class(es) for more information.
         private Dictionary<byte[], DynamicAttributes> _pointsPerNode = new Dictionary<byte[], DynamicAttributes>();
-
-        // octree
-
-        private Octree.Octree _octree;
         
-        private List<OctreeNode> _unloadedVisibleNodes;
-        private SortedDictionary<double, OctreeNode> _nodesOrdered = new SortedDictionary<double, OctreeNode>(); // nodes ordered by screen-projected-size
-
-        // conditions on when to start a new traversing in screen-projected-size order
-        private bool _traversingFinished = true; // determines whether the octree traversal has been already finished
-        private int _levelToLoad = -1;
-
-        public bool HasAssetLoaded = false;
-
-        public bool StartNewTraversingForVisibleNodes = false; // decides, whether a new search for visible nodes should be started
-        private bool _scheduleLoading = false;
-
-        private Dictionary<byte[], DynamicAttributes> _nodesToBeLoaded = new Dictionary<byte[], DynamicAttributes>();
-        private List<byte[]> _nodesToBeRemoved = new List<byte[]>();
-
-        // octree traversing
-
-        private float _screenHeight = 1; // needs to be set for calculating screen-projected-size for each octree node
-
-        private double _fov = 3.141592f * 0.25f; // needs to be the same as in PointVisualizationBase.cs
-        private double _slope;
-        private float3 _cameraPosition;
-
         // debugging
         
-        private DynamicAttributes _debuggingPoints;
-
-        // multithreading
-
-        private AutoResetEvent _signalEvent = new AutoResetEvent(true);
+        private DynamicAttributes _debugPoints;
+        private List<DynamicAttributes> _snapshotPoints;
         
         #endregion
         
@@ -106,14 +66,9 @@ namespace Fusee.Tutorial.Core.Data
         /// </summary>
         /// <param name="rc">The render context.</param>
         /// <param name="boundingBox">Reference to the bounding box which is used throughout the program.</param>
-        public PointCloud(RenderContext rc, Octree.Octree octree, BoundingBox boundingBox) : base(rc)
+        public PointCloud(RenderContext rc, BoundingBox boundingBox) : base(rc)
         { 
             boundingBox.UpdateCallbacks += OnBoundingBoxUpdate;
-            _slope = System.Math.Tan(_fov / 2);
-            
-            Octree.Octree.OnNodeBucketChangedCallback += OnNodeBucketChanged;
-
-            _octree = octree;
         }
 
         #region Shader related methods
@@ -161,7 +116,7 @@ namespace Fusee.Tutorial.Core.Data
             _rc.SetShaderParam(colorParam, color);
 
             var particleSizeParam = _rc.GetShaderParam(_shader, "particleSize");
-            _rc.SetShaderParam(particleSizeParam, new float2(_particleSize + ParticleSizeInterval, (_particleSize + ParticleSizeInterval) * _aspectRatio));
+            _rc.SetShaderParam(particleSizeParam, new float2(_particleSize + 2 * ParticleSizeInterval, (_particleSize + 2 * ParticleSizeInterval) * _aspectRatio));
         }
 
         #endregion
@@ -204,74 +159,12 @@ namespace Fusee.Tutorial.Core.Data
         }
         
         /// <summary>
-        /// Sets the position of the camera.
-        /// </summary>
-        public void SetCameraPosition(float3 position)
-        {
-            _cameraPosition = position;
-        }
-
-        /// <summary>
-        /// When a new debugging node is set, this function is called.
-        /// </summary>
-        /// <param name="node">The node that is currently debugged.</param>
-        public void OnNewDebuggingNode(OctreeNode node)
-        {
-            // remove old mesh
-
-            if(_debuggingPoints != null)
-            {
-                _rc.Remove(_debuggingPoints);
-            }
-
-            _debuggingPoints = new DynamicAttributes(Octree.Octree.BucketThreshold);
-
-            // create new mesh
-            _debuggingPoints.AddAttributes(node.Bucket);
-        }
-
-        /// <summary>
         /// Gets called when Resize() on the render canvas gets called.
         /// </summary>
         /// <param name="renderCanvas">A reference to the render canvas.</param>
         public void OnResize(RenderCanvas renderCanvas)
         {
             _aspectRatio = renderCanvas.Width / (float) renderCanvas.Height;
-            _screenHeight = renderCanvas.Height;
-        }
-
-        /// <summary>
-        /// Adds another point to this point cloud.
-        /// </summary>
-        /// <param name="point">The point to add.</param>
-        public void AddPoint(Common.Point point)
-        {
-            AddPoint(point.Position);
-        }
-
-        /// <summary>
-        /// Adds another point to this point cloud.
-        /// </summary>
-        /// <param name="position">The position to add.</param>
-        public void AddPoint(float3 position)
-        {
-            /*
-            _pointCounter++;
-
-            if (_pointCounter % COMPUTE_EVERY != 0 && COMPUTE_EVERY != 1)
-                return;
-
-            /*
-            _meshList.AddMesh(new PointMesh(position));
-
-            //*
-            if (_pointCounter % UPDATE_EVERY == 0)
-            {
-                _meshList.Apply();
-            }
-            //*/
-
-            _octree.Add(position);
         }
 
         #endregion
@@ -279,76 +172,62 @@ namespace Fusee.Tutorial.Core.Data
         #region Render
 
         /// <summary>
-        /// Gets called every frame. Takes care of rendering the point cloud.
+        /// Gets called every frame. Takes care of rendering the wireframe of all octree nodes.
         /// </summary>
-        /// <param name="viewMode">The view mode currently set.</param>
-        /// <param name="level">The level to render. -1 for all levels together.</param>
-        /// <param name="debuggingNode">The node to debug for.</param>
-        public void Render(ViewModeDebugging viewMode, int level, OctreeNode debuggingNode)
+        public override void Render()
         {
             base.Render();
-            
-            if(_scheduleLoading) // if traversing the octree for new nodes to be loaded has finished
+
+            foreach (KeyValuePair<byte[], DynamicAttributes> kvp in _pointsPerNode) // for each level
             {
-                // remove nodes
-                foreach (byte[] nodePath in _nodesToBeRemoved)
-                {
-                    DynamicAttributes da = _pointsPerNode[nodePath];
-                    _rc.Remove(da);
-
-                    _pointsPerNode.Remove(nodePath);
-                }
-
-                // add nodes
-                foreach(KeyValuePair<byte[], DynamicAttributes> kvp in _nodesToBeLoaded)
-                {
-                    if(_pointsPerNode.ContainsKey(kvp.Key))
-                    {
-                        _pointsPerNode[kvp.Key] = kvp.Value;
-                    }
-                    else
-                    {
-                        _pointsPerNode.Add(kvp.Key, kvp.Value);
-                    }
-                }
-
-                _nodesToBeLoaded = new Dictionary<byte[], DynamicAttributes>();
-                _nodesToBeRemoved = new List<byte[]>();
-
-                _scheduleLoading = false; // loading finished
+                _rc.RenderAsPoints(kvp.Value);
             }
+        }
 
-            if(StartNewTraversingForVisibleNodes && _traversingFinished && !_scheduleLoading && level != -1)
+        /// <summary>
+        /// Renders the wireframes of the nodes of a specified level.
+        /// </summary>
+        /// <param name="level">The octree level to render nodes from.</param>
+        public void Render(int level)
+        {
+            base.Render();
+
+            foreach (KeyValuePair<byte[], DynamicAttributes> kvp in _pointsPerNode) // for each level
             {
-                CollectNodes(level);
+                if (level != kvp.Key.Length - 1)
+                    continue;
+
+                _rc.RenderAsPoints(kvp.Value);
             }
+        }
 
-            // Render Point Cloud
+        /// <summary>
+        /// Render method that gets called when only a specific node is desired along with a specified octree level.
+        /// </summary>
+        /// <param name="level">The level of which other nodes should be rendered too.</param>
+        /// <param name="debugNode">The node which should be highlighted.</param>
+        public void Render(int level, OctreeNode debugNode)
+        {
+            base.Render();
 
-            if(viewMode == ViewModeDebugging.PerLevel || viewMode == ViewModeDebugging.All)
+            Render(level);
+
+            SetPointsActive(true);
+            _rc.RenderAsPoints(_debugPoints);
+        }
+
+        /// <summary>
+        /// Takes the current snapshot and renders it.
+        /// </summary>
+        public void RenderSnapshot()
+        {
+            base.Render();
+
+            if (_snapshotPoints != null)
             {
-                _signalEvent.WaitOne();
-
-                foreach (KeyValuePair<byte[], DynamicAttributes> kvp in _pointsPerNode) // for each node
-                {
-                    if ((viewMode == ViewModeDebugging.PerLevel || viewMode == ViewModeDebugging.PerNode) && level != kvp.Key.Length - 1)
-                        continue;
-
-                    _rc.RenderAsPoints(kvp.Value);
-                }
-
-                _signalEvent.Set();
+                foreach (DynamicAttributes da in _snapshotPoints)
+                    _rc.RenderAsPoints(da);
             }
-            
-            // debugging octree node
-
-            if (viewMode == ViewModeDebugging.PerNode)
-            {
-                SetPointsActive(true);
-                _rc.RenderAsPoints(_debuggingPoints);
-            }
-
-            #endregion
         }
 
         #endregion
@@ -365,152 +244,104 @@ namespace Fusee.Tutorial.Core.Data
         }
 
         #endregion
+        
+        #region Data Model
 
-        #region Octree Methods
-       
         /// <summary>
-        /// Starts traversing the octree and collecting for nodes which should be visible next.
+        /// Adds a new node to render. If already existent, it gets changed.
         /// </summary>
-        /// <param name="level">For debugging purpose, just take the nodes of a given level as visible nodes.</param>
-        private void CollectNodes(int level)
+        public void AddNode(OctreeNode node)
         {
-            if (!_traversingFinished)
+            if (node.GetLevel() > MAX_NODE_LEVEL)
                 return;
 
-            StartNewTraversingForVisibleNodes = false;
-            _traversingFinished = false;
-            _levelToLoad = level;
-
-            Task task = new Task(() =>
+            if (!_pointsPerNode.ContainsKey(node.Path))
             {
-                _visitPointCounter = 0;
+                DynamicAttributes points = new DynamicAttributes(Octree.Octree.BucketThreshold);
+                points.AddAttributes(node.Bucket);
 
-                _nodesToBeLoaded = new Dictionary<byte[], DynamicAttributes>();
-                _nodesToBeRemoved = new List<byte[]>();
-
-                _octree.Traverse(OnNodeVisited);
-
-                // schedule loading for visible but onloaded nodes => in Render()
-                _traversingFinished = true;
-                _scheduleLoading = true;
-            });
-
-            task.Start();
-        }
-        
-        /// <summary>
-        /// Gets called when traversing the octree.
-        /// </summary>
-        /// <param name="node">The node currently visited.</param>
-        private void OnNodeVisited(OctreeNode node)
-        {
-            if(node.GetLevel() == _levelToLoad)
-            {
-                // if not already rendered, add this node to the nodes-to-be-rendered-list
-                if(!_pointsPerNode.ContainsKey(node.Path))
-                {
-                    _visitPointCounter += node.Bucket.Count;
-
-                    DynamicAttributes points = new DynamicAttributes(Octree.Octree.BucketThreshold);
-                    points.AddAttributes(node.Bucket);
-                    
-                    _nodesToBeLoaded.Add(node.Path, points);
-                }
-                else if(node.HasBucketChanged)
-                {
-                    DynamicAttributes points = _pointsPerNode[node.Path];
-                    points.Reset();
-                    
-                    _visitPointCounter += node.Bucket.Count - points.GetCount();
-
-                    _nodesToBeLoaded.Add(node.Path, points);
-                }
-            }
-            else 
-            {
-                // if already rendered, but shouldn't be, add this node to the nodes-to-be-removed-list
-
-                if (_pointsPerNode.ContainsKey(node.Path))
-                {
-                    _nodesToBeRemoved.Add(node.Path);
-                }
-            }
-        }
-
-        /*
-        /// <summary>
-        /// Traverses the octree and searches for
-        /// </summary>
-        /// <param name="rootNode"></param>
-        private void TraverseByProjectionSizeOrder(OctreeNode rootNode)
-        {
-            ProcessNode(rootNode);
-
-            while (!(_nodesOrdered.Count == 0 || _visitPointCounter > POINT_BUDGET || _unloadedVisibleNodes.Count > NODESTOBELOADEDPERSCHEDULE)) // abbruchbedingungen
-            {
-                // choose the nodes with the biggest screen size overall to process next
-
-                KeyValuePair<double, OctreeNode> biggestNode = _nodesOrdered.Last();
-                _nodesOrdered.Remove(biggestNode.Key);
-
-                ProcessNode(biggestNode.Value);
+                _pointsPerNode.Add(node.Path, points);
             }
         }
 
         /// <summary>
-        /// Sub function which calculates the screen-projected-size and adds it to the heap of nodesOrdered by pss.
-        /// And call its callback (OnNodeVisited);
+        /// Removes the specified node from the list of rendered nodes.
         /// </summary>
-        /// <param name="node">The node to compute the pss for.</param>
-        private void ProcessNode(OctreeNode node)
+        public void RemoveNode(OctreeNode node)
         {
-            // process the node
-            OnNodeVisited(node);
-
-            // add child nodes to the heap of ordered nodes
-
-            if (node.hasChildren())
+            if (_pointsPerNode.ContainsKey(node.Path))
             {
-                foreach (OctreeNode childNode in node.Children)
-                {
-                    // compute screen projected size
+                DynamicAttributes da = _pointsPerNode[node.Path];
+                _rc.Remove(da);
 
-                    //float3 nodePosition = _rc.ModelView * childNode.CenterPosition;
-                    //var distance = nodePosition.Length;
-                    var distance = float3.Subtract(childNode.CenterPosition, _cameraPosition).Length;
-
-                    var projectedSize = _screenHeight / 2 * childNode.SideLength / (_slope * distance);
-
-                    // is it below minimum or outside the view frustum => cancel
-
-                    if (projectedSize < MINSCREENSIZE) // || liegt nicht im view frustum
-                    {
-                        childNode.RenderFlag = OctreeNodeStates.NonVisible;
-                        continue;
-                    }
-
-                    if (!_nodesOrdered.ContainsKey(projectedSize))
-                    {
-                        _nodesOrdered.Add(projectedSize, childNode);
-                    }
-                }
+                _pointsPerNode.Remove(node.Path);
             }
         }
-        */
-        
-        /// <summary>
-        /// Gets called when the bucket of a node has changed. (Means more points have been added or removed from this node.)
-        /// </summary>
-        /// <param name="node">The node which bucket has changed.</param>
-        private void OnNodeBucketChanged(OctreeNode node)
-        {
-            int level = node.GetLevel();
 
-            if (level > MAX_NODE_LEVEL || level != _levelToLoad)
+        /// <summary>
+        /// Sets all the points stored in memory away.
+        /// </summary>
+        public void Reset()
+        {
+            foreach(KeyValuePair<byte[], DynamicAttributes> kvp in _pointsPerNode)
+            {
+                _rc.Remove(kvp.Value);
+            }
+
+            _pointsPerNode = new Dictionary<byte[], DynamicAttributes>();
+        }
+
+        /// <summary>
+        /// Takes the current state and keeps it until its released.
+        /// </summary>
+        public void TakeSnapshot()
+        {
+            _snapshotPoints = new List<DynamicAttributes>();
+
+            foreach (KeyValuePair<byte[], DynamicAttributes> kvp in _pointsPerNode)
+            {
+                // must have different buffer object id when removing
+                DynamicAttributes da = new DynamicAttributes(Octree.Octree.BucketThreshold);
+                da.AddAttributes(kvp.Value.GetOffsets());
+                
+                _snapshotPoints.Add(da);
+            }
+        }
+
+        /// <summary>
+        /// Removes the old snapshot.
+        /// </summary>
+        public void ReleaseSnapshot()
+        {
+            if (_snapshotPoints == null)
                 return;
 
-            StartNewTraversingForVisibleNodes = true;
+            foreach (DynamicAttributes da in _snapshotPoints)
+            {
+                _rc.Remove(da);
+            }
+
+            _snapshotPoints = null;
         }
+
+        /// <summary>
+        /// When a new debugging node is set, this function is called.
+        /// </summary>
+        /// <param name="node">The node that is currently debugged.</param>
+        public void SetNewDebuggingNode(OctreeNode node)
+        {
+            // remove old mesh
+
+            if (_debugPoints != null)
+                _rc.Remove(_debugPoints);
+
+            _debugPoints = new DynamicAttributes(Octree.Octree.BucketThreshold);
+
+            // create new mesh
+            _debugPoints.AddAttributes(node.Bucket);
+        }
+
+        #endregion
 
         #endregion
     }
