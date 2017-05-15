@@ -41,7 +41,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
 
             _renderControl = renderControl;
             _parent = parent;
-
+            
 
             _mouseWheelPos = 0;
 

@@ -140,7 +140,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
             // Inject Fusee.Engine InjectMe dependencies (hard coded)
             currentApp.CanvasImplementor = currentHost;
             currentApp.ContextImplementor = new Fusee.Engine.Imp.Graphics.Desktop.RenderContextImp(currentApp.CanvasImplementor);
-            Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Desktop.RenderCanvasInputDriverImp(currentHost.canvas));
+            Input.AddDriverImp(currentHost);
             Input.AddDriverImp(new Fusee.Engine.Imp.Graphics.Desktop.WindowsTouchInputDriverImp(currentHost.canvas));
 
             //// If not already done, show the window.

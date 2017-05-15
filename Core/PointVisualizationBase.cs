@@ -116,7 +116,7 @@ namespace Fusee.Tutorial.Core
 
             // start loading points
                         
-            //PointCloudReader.ReadFromAsset("PointCloud_IPM.txt");
+            PointCloudReader.ReadFromAsset("PointCloud_IPM.txt");
             //PointCloudReader.ReceiveFromUDP(UDP_PORT); // for unity game or other
 
             // Set RC/GL related variables

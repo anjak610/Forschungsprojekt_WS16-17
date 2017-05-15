@@ -180,7 +180,10 @@ namespace Fusee.Tutorial.Core.PointClouds
             UInt16 version = BitConverter.ToUInt16((SubArray(file, 6, 2)), 0);
             UInt32 packetSize = BitConverter.ToUInt32((SubArray(file, 8, 4)), 0);
             double time = BitConverter.ToDouble((SubArray(file, 12, 8)), 0);
-                                
+
+            TimeSpan timespan = TimeSpan.FromMilliseconds(time);
+
+
             //Position of Scanner
             float drone_posX = BitConverter.ToSingle((SubArray(file, 20, 4)), 0);
             float drone_posY = BitConverter.ToSingle((SubArray(file, 24, 4)), 0);
@@ -236,7 +239,13 @@ namespace Fusee.Tutorial.Core.PointClouds
             int count = 52;
             while (count < array.Length)
             {
-                pointChunks.Add(BitConverter.ToUInt32(SubArray(array, count, 4), 0));
+                UInt32 chunk = BitConverter.ToUInt32(SubArray(array, count, 4), 0);
+                if (chunk != 0xDEADBEEF)
+                {
+                    pointChunks.Add(chunk);
+                }
+                else Diagnostics.Log("End of Package");
+               
                 count = count + 4;
             }
             return pointChunks;
