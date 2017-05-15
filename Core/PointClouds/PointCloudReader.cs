@@ -7,7 +7,7 @@ using Fusee.Math.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Android.Provider;
+
 
 namespace Fusee.Tutorial.Core.PointClouds
 {
@@ -180,8 +180,7 @@ namespace Fusee.Tutorial.Core.PointClouds
             UInt16 version = BitConverter.ToUInt16((SubArray(file, 6, 2)), 0);
             UInt32 packetSize = BitConverter.ToUInt32((SubArray(file, 8, 4)), 0);
             double time = BitConverter.ToDouble((SubArray(file, 12, 8)), 0);
-                    
-            
+                                
             //Position of Scanner
             float drone_posX = BitConverter.ToSingle((SubArray(file, 20, 4)), 0);
             float drone_posY = BitConverter.ToSingle((SubArray(file, 24, 4)), 0);
@@ -197,9 +196,9 @@ namespace Fusee.Tutorial.Core.PointClouds
 
             
            //Print out on console for testing
-            Diagnostics.Log("Packet Begin Marker: " + packetBeginMarker.ToString("X"));
-            Diagnostics.Log("TypeID: " + typeID.ToString("X"));
-            Diagnostics.Log("Version: " + version.ToString("X"));
+            Diagnostics.Log("Packet Begin Marker: 0x" + packetBeginMarker.ToString("X"));
+            Diagnostics.Log("TypeID: 0x" + typeID.ToString("X"));
+            Diagnostics.Log("Version: 0x" + version.ToString("X"));
             Diagnostics.Log("Packet Size: " + packetSize);
             Diagnostics.Log("Time milliseconds: " + time);
             Diagnostics.Log("Pos X: " + drone_posX);
@@ -211,10 +210,16 @@ namespace Fusee.Tutorial.Core.PointClouds
             Diagnostics.Log("Quaternion Z: " + quaternionZ);
             Diagnostics.Log("Number of points: " + numberOfPoints);
 
+            List<UInt32> values = CreateHexList(file);
 
-            //TODO extract point values
-            //UInt32 values = BitConverter.ToUInt32(pointsChunk, 0);
-            //Diagnostics.Log("Pointvalues: " + values.ToString("X"));
+            foreach (var value in values)
+            {
+                if (value != 0)
+                {
+                    Diagnostics.Log("Pointvalue: 0x" + value.ToString("X"));
+                }
+            }
+          
         }
 
         public static  T[] SubArray<T>( T[] data, int index, int length)
@@ -223,6 +228,20 @@ namespace Fusee.Tutorial.Core.PointClouds
             Array.Copy(data, index, result, 0, length);
             return result;
         }
+
+        private static List<UInt32> CreateHexList(byte[] array)
+        {
+
+           List<UInt32> pointChunks = new List<UInt32>();
+            int count = 52;
+            while (count < array.Length)
+            {
+                pointChunks.Add(BitConverter.ToUInt32(SubArray(array, count, 4), 0));
+                count = count + 4;
+            }
+            return pointChunks;
+        }
+
 
     }
 }
