@@ -4,6 +4,7 @@ using Fusee.Engine.Core;
 using Fusee.Tutorial.Core.Common;
 using System.Collections.Generic;
 using Fusee.Math.Core;
+using System.Diagnostics;
 
 namespace Fusee.Tutorial.Core.Data
 {
@@ -30,8 +31,7 @@ namespace Fusee.Tutorial.Core.Data
 
         // This is the object where new vertices are stored. Also look at the description of the class(es) for more information.
         private StaticMeshList _meshList = new StaticMeshList();
-
-        private BoundingBox _boundingbox = new BoundingBox();
+      
 
         #endregion
         
@@ -44,6 +44,8 @@ namespace Fusee.Tutorial.Core.Data
         public PointCloud(RenderContext rc, BoundingBox boundingBox) : base(rc)
         {
             boundingBox.UpdateCallbacks += OnBoundingBoxUpdate;
+            _zBounds.x = boundingBox.GetMinValues().z;
+            _zBounds.y = boundingBox.GetMaxValues().z;
         }
 
         #region Shader related methods
@@ -68,11 +70,15 @@ namespace Fusee.Tutorial.Core.Data
             _rc.SetShaderParam(particleSizeParam, new float2(_particleSize, _particleSize * _aspectRatio));
 
             // SetZNearFarPlane
-            _zBounds.x = _boundingbox.GetMinValues().z;
-            _zBounds.y = _boundingbox.GetMaxValues().z;
             _zBounds = new float2(_zBounds.x, _zBounds.y);
+
+            Debug.WriteLine("zBounds" + _zBounds);
+
             var zBoundsParam = _rc.GetShaderParam(_shader, "zBounds");
             _rc.SetShaderParam(zBoundsParam, _zBounds);
+
+            //Debug.WriteLine("zBounds" + _zBounds);
+            //Debug.WriteLine("Max z" + _boundingBox.GetMaxValues().z);
 
             // SetZoomValue
             var zZoomParam = _rc.GetShaderParam(_shader, "zZoom");

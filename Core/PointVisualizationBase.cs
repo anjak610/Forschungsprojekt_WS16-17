@@ -247,9 +247,14 @@ namespace Fusee.Tutorial.Core
                 MoveY += speed.y * -0.0005f;
             }
 
-           // Debug.WriteLine("Min z" +_boundingBox.GetMinValues().z);
-            Debug.WriteLine("Max z" + _boundingBox.GetMaxValues().z);
-
+            // Debug.WriteLine("Min z" +_boundingBox.GetMinValues().z);
+            //Debug.WriteLine("Max z" + _boundingBox.GetMaxValues().z);
+            // SetZNearFarPlane
+          // float2 _zBounds = new float2(0,0);
+          // _zBounds.x = _boundingBox.GetMinValues().z;
+          // _zBounds.y = _boundingBox.GetMaxValues().z;
+          // _zBounds = new float2(_zBounds.x, _zBounds.y);
+          // Debug.WriteLine("zBounds" + _zBounds);
 
             _angleHorz += _angleVelHorz;
             // Wrap-around to keep _angleHorz between -PI and + PI

@@ -11,7 +11,7 @@ varying float zoom;
 void main()
 {
 	vec3 pointFar = vec3(0.0,0.0,far);
-	vec3 pointNear = vec3(0.0,0.0,1.0);
+	vec3 pointNear = vec3(0.0,0.0,near);
 		
 //if(near < 1.0)
 //{
@@ -33,17 +33,17 @@ void main()
 	float d = dot(point, normal);
 	vec4 u_abcd = vec4 (normal.x, normal.y, normal.z, d);
 	
-	//float zlength = distance(pointFar, pointNear);
-	float zlength = abs(pointNear-pointFar);
+	float zlength = distance(pointFar, pointNear)+zoom;
+	//float zlength = abs(pointNear-pointFar)+zoom;
 	
 	
 	float depth = dot(u_abcd.xyz, newVertex.xyz)+ u_abcd.w;	
-	vec3 color = vec3(1.0- depth/zlength);
+	vec3 color = vec3(1.0- (depth/zlength));
 	gl_FragColor = vec4(color, 1.0); 
 	
-	if( far > 80.0)
+	if( depth/zlength > 1.0)
 		{
-			gl_FragColor = vec4(0.0,0.0,1.0+zoom, 1.0); 
+			gl_FragColor = vec4(0.0,0.0,1.0, 1.0); 
 	
 		}
 	//float depth = LinearizeDepth(gl_FragCoord.z)/far;
