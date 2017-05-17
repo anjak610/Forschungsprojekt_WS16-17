@@ -10,6 +10,9 @@ using Fusee.Engine.Common;
 using Fusee.Tutorial.Core.Octree;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq;
+using Fusee.Base.Core;
+using System;
 
 namespace Fusee.Tutorial.Core
 {
@@ -30,7 +33,6 @@ namespace Fusee.Tutorial.Core
         #region Rendering
 
         public ViewController ViewCtrl;
-        private bool _snapshotActive = false;
 
         // render entities
         private PointCloud _pointCloud;     // particle size gets changed via static methods
@@ -47,30 +49,35 @@ namespace Fusee.Tutorial.Core
         #endregion
 
         #region Octree
-
+        
         private Octree.Octree _octree;
 
         private List<OctreeNode> _nodesToBeLoaded = new List<OctreeNode>();
         private List<OctreeNode> _nodesToBeRemoved = new List<OctreeNode>();
 
-        private bool _traversingFinished = true;
+        private bool _collectingFinished = true;
+
         private bool _scheduleLoading = false;
+        private bool _scheduleRemoving = false;
 
-        // conditions of when to stop the traversal
+        private Frustum _currentViewFrustum; // the view frustum to check nodes again
 
-        private const int POINT_BUDGET = 10000; // number of points that are visible at one frame, tradeoff between performance and quality
-        private const float MIN_SCREEN_PROJECTED_SIZE = 1; // minimum screen size of the node
-        private int NODES_TO_BE_LOADED_PER_SCHEDULE = 1000; // X = 5, see Schuetz (2016)
+        // conditions of when to start and stop the traversal
+
+        private bool _scheduleNewCollectingTraversal = true;
+
+        private const int POINT_BUDGET = 50000; // number of points that are visible at one frame, tradeoff between performance and quality
+        private const float MIN_SCREEN_PROJECTED_SIZE = 5; // minimum screen size of the node
+
+        private int NODES_TO_BE_LOADED_PER_SCHEDULE = 25; // X = 5, see Schuetz (2016)
+        private int NODES_TO_BE_REMOVED_PER_SCHEDULE = 100; // X = 5, see Schuetz (2016)
 
         private int _visitPointCounter; // counts the points that have been scheduled to be loaded while traversing the octree
 
-        private SortedDictionary<double, OctreeNode> _nodesOrdered = new SortedDictionary<double, OctreeNode>(); // nodes ordered by screen-projected-size
-
-        private float _screenHeight = 1; // needs to be set for calculating screen-projected-size for each octree node
-
-        private double _fov = 3.141592f * 0.25f; // needs to be the same as in PointVisualizationBase.cs
-        private double _slope; //_slope = System.Math.Tan(_fov / 2);
-        //private float3 _cameraPosition;
+        private SortedDictionary<double, OctreeNode> _nodesOrderedByProjectionSize = new SortedDictionary<double, OctreeNode>(); // nodes ordered by screen-projected-size
+        
+        private double _slope = System.Math.Tan( ( 3.141592f * 0.25f ) / 2); // fov / 2
+        private float3 _cameraPosition = float3.Zero;
 
         #endregion
 
@@ -79,7 +86,7 @@ namespace Fusee.Tutorial.Core
         private float _rotationY = (float) System.Math.PI;
         private float _rotationX = (float) System.Math.PI / -8;
 
-        private float3 _cameraPosition = new float3(0, 0, -5.0f);
+        //private float3 _cameraPosition = new float3(0, 0, -5.0f);
         private float3 _cameraPivot = new float3(0, 0, 0);
         private float3 _cameraPivotOffset = new float3(0, 0, 0);
 
@@ -116,6 +123,8 @@ namespace Fusee.Tutorial.Core
 
             _boundingBox = new BoundingBox();
             _boundingBox.UpdateCallbacks += OnBoundingBoxUpdate;
+
+            Octree.Octree.OnNodeBucketChangedCallback += OnNodeBucketChanged;
 
             _octree = new Octree.Octree(float3.Zero, 16);
 
@@ -164,22 +173,23 @@ namespace Fusee.Tutorial.Core
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
             
             RC.ModelView = MoveInScene();
-
+            
             ViewCtrl.CheckOnKeyboardEvents();
             
             if (ViewCtrl.GetCurrentViewMode() == ViewMode.PointCloud)
             {
-                if (Keyboard.IsKeyDown(KeyCodes.N))
+                if (Keyboard.IsKeyDown(KeyCodes.N) || _scheduleNewCollectingTraversal)
                 {
                     StartCollectingNodes();
                 }
 
                 // load octree node data when traversal has finished
                 if (_scheduleLoading)
-                {
                     LoadNodes();
-                }
 
+                if (_scheduleRemoving)
+                    RemoveNodes();
+                
                 // check on particle size change
                 if (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0)
                 {
@@ -190,22 +200,18 @@ namespace Fusee.Tutorial.Core
                 {
                     case DebugViewMode.Standard:
 
-                        if(Keyboard.IsKeyDown(KeyCodes.S) && !_snapshotActive)
+                        if(ViewCtrl.HasTakenSnapshot())
                         {
                             _pointCloud.TakeSnapshot();
                             _wireframe.TakeSnapshot();
-
-                            _snapshotActive = true;
                         } 
-                        else if(Keyboard.IsKeyDown(KeyCodes.S) && _snapshotActive)
+                        else if(ViewCtrl.HasReleasedSnapshot())
                         {
                             _pointCloud.ReleaseSnapshot();
                             _wireframe.ReleaseSnapshot();
-
-                            _snapshotActive = false;
                         }
 
-                        if(_snapshotActive)
+                        if(ViewCtrl.IsSnapshotActive())
                         {
                             _pointCloud.RenderSnapshot();
 
@@ -352,6 +358,8 @@ namespace Fusee.Tutorial.Core
             var MtxRot = float4x4.CreateRotationZ(_angleRoll) * float4x4.CreateRotationX(_angleVert) * float4x4.CreateRotationY(_angleHorz);
             float4x4 ModelView = MtxCam * MtxRot * view;
 
+            _cameraPosition = float4x4.Invert(ModelView) * float3.Zero;
+
             return ModelView;
         }
         
@@ -419,31 +427,49 @@ namespace Fusee.Tutorial.Core
         /// </summary>
         private void LoadNodes()
         {
-            // load data
-
-            foreach (OctreeNode node in _nodesToBeLoaded)
+            int i;
+            for(i = 0; i<NODES_TO_BE_LOADED_PER_SCHEDULE; i++)
             {
+                if(i > _nodesToBeLoaded.Count - 1)
+                    break;
+
+                OctreeNode node = _nodesToBeLoaded[i];
+
                 _wireframe.AddNode(node);
                 _pointCloud.AddNode(node);
 
                 node.RenderFlag = OctreeNodeStates.Visible;
             }
 
-            _nodesToBeLoaded.Clear();
+            _nodesToBeLoaded.RemoveRange(0, i);
+            
+            if(_nodesToBeLoaded.Count == 0)
+                _scheduleLoading = false;
+        }
 
-            // remove data
-
-            foreach (OctreeNode node in _nodesToBeRemoved)
+        /// <summary>
+        /// Deallocates the memory taken by the nodes in the current nodesToBeRemoved-List.
+        /// </summary>
+        private void RemoveNodes()
+        {
+            int i;
+            for (i = 0; i < NODES_TO_BE_REMOVED_PER_SCHEDULE; i++)
             {
+                if (i > _nodesToBeRemoved.Count - 1)
+                    break;
+
+                OctreeNode node = _nodesToBeRemoved[i];
+
                 _wireframe.RemoveNode(node);
                 _pointCloud.RemoveNode(node);
 
                 node.RenderFlag = OctreeNodeStates.NonVisible;
             }
 
-            _nodesToBeRemoved.Clear();
+            _nodesToBeRemoved.RemoveRange(0, i);
 
-            _scheduleLoading = false;
+            if (_nodesToBeRemoved.Count == 0)
+                _scheduleRemoving = false;
         }
 
         /// <summary>
@@ -451,17 +477,35 @@ namespace Fusee.Tutorial.Core
         /// </summary>
         private void StartCollectingNodes()
         {
-            if (!_traversingFinished)
+            if (!_collectingFinished)
                 return;
 
-            _traversingFinished = false;
-
+            if (_scheduleLoading || _scheduleRemoving)
+                return;
+            
+            _collectingFinished = false;
+            //_scheduleNewCollectingTraversal = false;
+            
             Task task = new Task(() =>
             {
-                _octree.Traverse(OnNodeVisited);
+                Diagnostics.Log("Start Collecting");
 
-                _traversingFinished = true;
+                _visitPointCounter = 0;
+
+                _nodesToBeLoaded = new List<OctreeNode>();
+                _nodesToBeRemoved = new List<OctreeNode>();
+
+                _nodesOrderedByProjectionSize = new SortedDictionary<double, OctreeNode>();
+                _currentViewFrustum = new Frustum(RC.ModelViewProjection);
+
+                TraverseByProjectionSizeOrder();
+                
                 _scheduleLoading = true;
+                _scheduleRemoving = true;
+                
+                _collectingFinished = true;
+
+                Diagnostics.Log("Collecting Finished");
             });
 
             task.Start();
@@ -473,33 +517,57 @@ namespace Fusee.Tutorial.Core
         /// <param name="node">The node currently visited.</param>
         private void OnNodeVisited(OctreeNode node)
         {
-            if(node.RenderFlag == OctreeNodeStates.NonVisible)
+            if(_visitPointCounter <= POINT_BUDGET)
             {
-                _nodesToBeLoaded.Add(node);
-                node.RenderFlag = OctreeNodeStates.VisibleButUnloaded;
-            }   
+                if (node.RenderFlag == OctreeNodeStates.Visible)
+                {
+                    _visitPointCounter += node.Bucket.Count;
+                }
+                else if (node.RenderFlag == OctreeNodeStates.NonVisible)
+                {
+                    _visitPointCounter += node.Bucket.Count;
+
+                    _nodesToBeLoaded.Add(node);
+                    node.RenderFlag = OctreeNodeStates.VisibleButUnloaded;
+                }
+            }
+            else
+            {
+                RemoveVisibleNode(node);
+            }
         }
-
-        /*
+        
         /// <summary>
-        /// Traverses the octree and searches for
+        /// Traverses the octree and searches for nodes in screen-projected-size order.
         /// </summary>
-        /// <param name="rootNode"></param>
-        private void TraverseByProjectionSizeOrder(OctreeNode rootNode)
+        private void TraverseByProjectionSizeOrder()
         {
-            ProcessNode(rootNode);
+            ProcessNode(_octree.GetRootNode());
 
-            while (!(_nodesOrdered.Count == 0 || _visitPointCounter > POINT_BUDGET || _unloadedVisibleNodes.Count > NODESTOBELOADEDPERSCHEDULE)) // abbruchbedingungen
+            while (_nodesOrderedByProjectionSize.Count > 0) // abbruchbedingungen
             {
+                if (!_scheduleLoading && _visitPointCounter > POINT_BUDGET)
+                {
+                    _scheduleLoading = true; 
+                    
+                    // once the visible nodes are known, calculating the screen-projected-size isn't necessary anymore
+                    foreach(KeyValuePair<double, OctreeNode> kvp in _nodesOrderedByProjectionSize)
+                    {
+                        Octree.Octree.Traverse(kvp.Value, RemoveVisibleNode);
+                    }
+
+                    break;
+                }
+
                 // choose the nodes with the biggest screen size overall to process next
 
-                KeyValuePair<double, OctreeNode> biggestNode = _nodesOrdered.Last();
-                _nodesOrdered.Remove(biggestNode.Key);
+                KeyValuePair<double, OctreeNode> biggestNode = _nodesOrderedByProjectionSize.Last();
+                _nodesOrderedByProjectionSize.Remove(biggestNode.Key);
 
                 ProcessNode(biggestNode.Value);
             }
         }
-
+        
         /// <summary>
         /// Sub function which calculates the screen-projected-size and adds it to the heap of nodesOrdered by pss.
         /// And call its callback (OnNodeVisited);
@@ -517,45 +585,56 @@ namespace Fusee.Tutorial.Core
                 foreach (OctreeNode childNode in node.Children)
                 {
                     // compute screen projected size
-
-                    //float3 nodePosition = _rc.ModelView * childNode.CenterPosition;
-                    //var distance = nodePosition.Length;
+                    
                     var distance = float3.Subtract(childNode.CenterPosition, _cameraPosition).Length;
-
-                    var projectedSize = _screenHeight / 2 * childNode.SideLength / (_slope * distance);
+                    var projectedSize = Height / 2 * childNode.SideLength / (_slope * distance);
 
                     // is it below minimum or outside the view frustum => cancel
 
-                    if (projectedSize < MINSCREENSIZE) // || liegt nicht im view frustum
+                    if (projectedSize < MIN_SCREEN_PROJECTED_SIZE || !_currentViewFrustum.sphereinfrustum(childNode.CenterPosition, childNode.SideLength))
                     {
-                        childNode.RenderFlag = OctreeNodeStates.NonVisible;
+                        // remove this and all the child nodes                        
+                        Octree.Octree.Traverse(childNode, RemoveVisibleNode);
                         continue;
                     }
 
-                    if (!_nodesOrdered.ContainsKey(projectedSize))
+                    if (!_nodesOrderedByProjectionSize.ContainsKey(projectedSize)) // by chance two same nodes have the same screen-projected-size; it's such a pitty we can't add it (because it's not allowed to have the same key twice)
                     {
-                        _nodesOrdered.Add(projectedSize, childNode);
+                        _nodesOrderedByProjectionSize.Add(projectedSize, childNode);
                     }
                 }
             }
         }
-        */
 
-            /*
+        /// <summary>
+        /// Checks whether a node is either visible or visible but onloaded, and 
+        /// adds it then to the list of being removed.
+        /// </summary>
+        private void RemoveVisibleNode(OctreeNode node)
+        {
+            if (node.RenderFlag == OctreeNodeStates.VisibleButUnloaded)
+            {
+                _nodesToBeLoaded.Remove(node);
+                node.RenderFlag = OctreeNodeStates.NonVisible;
+            }
+            else if (node.RenderFlag == OctreeNodeStates.Visible)
+            {
+                _nodesToBeRemoved.Add(node);
+                node.RenderFlag = OctreeNodeStates.NonVisible;
+            }
+        }
+        
         /// <summary>
         /// Gets called when the bucket of a node has changed. (Means more points have been added or removed from this node.)
         /// </summary>
         /// <param name="node">The node which bucket has changed.</param>
         private void OnNodeBucketChanged(OctreeNode node)
         {
-            int level = node.GetLevel();
-
-            if (level > MAX_NODE_LEVEL || level != _levelToLoad)
-                return;
-
-            StartNewTraversingForVisibleNodes = true;
+            if(node.RenderFlag == OctreeNodeStates.Visible)
+            {
+                _scheduleNewCollectingTraversal = true;
+            }
         }
-        */
 
         #endregion
     }

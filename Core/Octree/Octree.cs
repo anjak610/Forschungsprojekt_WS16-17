@@ -1,8 +1,5 @@
-﻿using Fusee.Base.Core;
-using Fusee.Math.Core;
+﻿using Fusee.Math.Core;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 /// <summary>
 /// Represents an octree where a point cloud is stored.
@@ -117,7 +114,7 @@ namespace Fusee.Tutorial.Core.Octree
 
             if(_pointCounter % PASSED_POINTS_UNTIL_SEARCH_FOR_BUCKET_CHANGE == 0)
             {
-                //SearchForNodesWithChangedBuckets();
+                SearchForNodesWithChangedBuckets();
             }
         }
 
@@ -213,11 +210,6 @@ namespace Fusee.Tutorial.Core.Octree
 
             OctreeNode node = new OctreeNode(newPos, sideLength);
 
-            if(sideLength == 64)
-            {
-                Diagnostics.Log("yuchey!");
-            }
-
             return node;
         }
 
@@ -261,6 +253,17 @@ namespace Fusee.Tutorial.Core.Octree
         public static void Traverse(OctreeNode startNode, Action<OctreeNode> callback)
         {
             RecTraverse(startNode, callback);
+        }
+
+        /// <summary>
+        /// Traverse function, where a custom traverse functionality can be defined.
+        /// </summary>
+        /// <param name="traverseFn">A function, which takes as input a node, and then decides which child nodes to traverse further.</param>
+        /// <param name="startNode">The node to start from.</param>
+        /// <param name="callback">Simple callback, which gets called for each visited node by traverseFn.</param>
+        public static void Traverse(Action<OctreeNode, Action<OctreeNode>> traverseFn, OctreeNode startNode, Action<OctreeNode> callback)
+        {
+            traverseFn(startNode, callback);
         }
 
         /// <summary>

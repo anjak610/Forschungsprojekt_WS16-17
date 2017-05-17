@@ -22,13 +22,15 @@ namespace Fusee.Tutorial.Core.Data
 
     public enum ViewEvent // could also be used by android
     {
+        None,
         SwitchViewMode = KeyCodes.T,
         SwitchDebugViewMode = KeyCodes.L,
         SwitchWireframe = KeyCodes.K,
         LevelUp = KeyCodes.Up,
         LevelDown = KeyCodes.Down,
         PreviousSibling = KeyCodes.Left,
-        NextSibling = KeyCodes.Right
+        NextSibling = KeyCodes.Right,
+        Snapshot = KeyCodes.S
     }
 
     #endregion
@@ -39,6 +41,9 @@ namespace Fusee.Tutorial.Core.Data
     public class ViewController
     {
         private bool _wireframeVisible = false;
+        private bool _snapshotActive = false;
+
+        private ViewEvent _currentViewEvent = ViewEvent.None;
 
         private ViewMode _currentViewMode = ViewMode.PointCloud;
         private DebugViewMode _currentDebugViewMode = DebugViewMode.Standard;
@@ -122,6 +127,9 @@ namespace Fusee.Tutorial.Core.Data
 
             foreach(ViewEvent keyboardEvent in keyboardEvents)
             {
+                if (keyboardEvent == ViewEvent.None)
+                    continue;
+
                 KeyCodes keyCode = (KeyCodes) keyboardEvent;
 
                 if(_keyboard.IsKeyDown(keyCode))
@@ -133,7 +141,10 @@ namespace Fusee.Tutorial.Core.Data
             }
 
             if (!isKeyDown)
+            {
+                _currentViewEvent = ViewEvent.None;
                 return;
+            }
             else
                 SetViewEvent(currentEvent);            
         }
@@ -165,6 +176,9 @@ namespace Fusee.Tutorial.Core.Data
                     break;
                 case ViewEvent.NextSibling:
                     DebugNextSibling();
+                    break;
+                case ViewEvent.Snapshot:
+                    OnSnapshotKeyDown();
                     break;
             }
         }
@@ -347,6 +361,38 @@ namespace Fusee.Tutorial.Core.Data
                 _debugNode = _debugNode.Parent.Children[index + 1];
                 _hasDebugNodeChanged = true;
             }
+        }
+
+        /// <summary>
+        /// Gets called when the user either takes or releases a snapshot.
+        /// </summary>
+        public void OnSnapshotKeyDown()
+        {
+            _snapshotActive = !_snapshotActive;
+        }
+
+        /// <summary>
+        /// Determines whether snapshot mode is currently active.
+        /// </summary>
+        public bool IsSnapshotActive()
+        {
+            return _snapshotActive;
+        }
+
+        /// <summary>
+        /// Determines whether the user has just taken a snapshot.
+        /// </summary>
+        public bool HasTakenSnapshot()
+        {
+            return _currentViewEvent == ViewEvent.Snapshot && _snapshotActive;
+        }
+
+        /// <summary>
+        /// Determines whether the user has just released the current snapshot.
+        /// </summary>
+        public bool HasReleasedSnapshot()
+        {
+            return _currentViewEvent == ViewEvent.Snapshot && !_snapshotActive;
         }
 
         #endregion

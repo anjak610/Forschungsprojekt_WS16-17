@@ -35,7 +35,7 @@ namespace Fusee.Tutorial.Core.Data
         private const int UPDATE_EVERY = 65000; // every xth point the point cloud should update its meshes
         private const int COMPUTE_EVERY = 1; // take only every xth point into account in order to speed up calculation
         
-        private const int MAX_NODE_LEVEL = 8; // the maximum level of a node for the points in it to be loaded
+        private const int MAX_NODE_LEVEL = -1; // the maximum level of a node for the points in it to be loaded
 
         // shader params
 
@@ -252,7 +252,7 @@ namespace Fusee.Tutorial.Core.Data
         /// </summary>
         public void AddNode(OctreeNode node)
         {
-            if (node.GetLevel() > MAX_NODE_LEVEL)
+            if (MAX_NODE_LEVEL != -1 && node.GetLevel() > MAX_NODE_LEVEL)
                 return;
 
             if (!_pointsPerNode.ContainsKey(node.Path))
