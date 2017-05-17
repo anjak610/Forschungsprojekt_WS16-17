@@ -26,10 +26,12 @@ namespace Fusee.Tutorial.Core.Data
         private float _aspectRatio = 1; // needed for particle size to be square, aspect ratio of viewport => see OnWindowResize
 
         private float2 _zBounds = float2.Zero;
-        private float _zoom = 60f;
+        private static float _zoom = 60f;
 
         // This is the object where new vertices are stored. Also look at the description of the class(es) for more information.
         private StaticMeshList _meshList = new StaticMeshList();
+
+        private BoundingBox _boundingbox = new BoundingBox();
 
         #endregion
         
@@ -64,8 +66,11 @@ namespace Fusee.Tutorial.Core.Data
         {
             var particleSizeParam = _rc.GetShaderParam(_shader, "particleSize");
             _rc.SetShaderParam(particleSizeParam, new float2(_particleSize, _particleSize * _aspectRatio));
-            
+
             // SetZNearFarPlane
+            _zBounds.x = _boundingbox.GetMinValues().z;
+            _zBounds.y = _boundingbox.GetMaxValues().z;
+            _zBounds = new float2(_zBounds.x, _zBounds.y);
             var zBoundsParam = _rc.GetShaderParam(_shader, "zBounds");
             _rc.SetShaderParam(zBoundsParam, _zBounds);
 
@@ -108,9 +113,9 @@ namespace Fusee.Tutorial.Core.Data
         /// <summary>
         /// Sets the zoom value.
         /// </summary>
-        public void SetZoomValue(float zoom)
+        public static void SetZoomValue(float zoom)
         {
-            _zoom = zoom;
+           _zoom = zoom;
         }
 
         /// <summary>
@@ -187,6 +192,7 @@ namespace Fusee.Tutorial.Core.Data
         {
             _zBounds.x = boundingBox.GetMinValues().z;
             _zBounds.y = boundingBox.GetMaxValues().z;
+            
         }
 
         #endregion

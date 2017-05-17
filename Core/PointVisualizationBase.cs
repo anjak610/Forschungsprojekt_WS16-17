@@ -3,10 +3,13 @@ using Fusee.Math.Core;
 using static Fusee.Engine.Core.Input;
 using static Fusee.Engine.Core.Time;
 using System.Threading;
+using Android.OS;
 using Fusee.Tutorial.Core.Data_Transmission;
 using Fusee.Base.Common;
 using Fusee.Tutorial.Core.Data;
 using Fusee.Engine.Common;
+using Java.IO;
+using Debug = System.Diagnostics.Debug;
 
 namespace Fusee.Tutorial.Core
 {
@@ -105,18 +108,18 @@ namespace Fusee.Tutorial.Core
 
             // stream point cloud from text file
 
-            //*
+            ///*
             AssetReader.OnNewPointCallbacks += OnNewPointAdded;
             AssetReader.ReadFromAsset("PointCloud_IPM.txt");
             //*/
 
             // stream point cloud via udp
 
-            /*
-            UDPReceiver.OnNewPointCallbacks += OnNewPointAdded;
-            UDPReceiver.OnDronePositionCallbacks += OnDronePositionAdded;
-            UDPReceiver.StreamFrom(UDP_PORT);
-            //*/
+            
+          // UDPReceiver.OnNewPointCallbacks += OnNewPointAdded;
+          // UDPReceiver.OnDronePositionCallbacks += OnDronePositionAdded;
+          // UDPReceiver.StreamFrom(UDP_PORT);
+            
 
             // Set the clear color for the backbuffer
             RC.ClearColor = new float4(0.95f, 0.95f, 0.95f, 1);
@@ -233,6 +236,9 @@ namespace Fusee.Tutorial.Core
             }
 
             _zoom += _zoomVel;
+            
+            PointCloud.SetZoomValue(_zoom);
+            //Debug.WriteLine("CurrentZoomValue" + _zoom);
 
             if (Mouse.RightButton || Input.Touch.TwoPoint)
             {
@@ -241,8 +247,10 @@ namespace Fusee.Tutorial.Core
                 MoveY += speed.y * -0.0005f;
             }
 
-            _pointCloud.SetZoomValue(_zoom);
-            
+           // Debug.WriteLine("Min z" +_boundingBox.GetMinValues().z);
+            Debug.WriteLine("Max z" + _boundingBox.GetMaxValues().z);
+
+
             _angleHorz += _angleVelHorz;
             // Wrap-around to keep _angleHorz between -PI and + PI
             _angleHorz = M.MinAngle(_angleHorz);
@@ -314,6 +322,7 @@ namespace Fusee.Tutorial.Core
         private void OnBoundingBoxUpdate(BoundingBox boundingBox)
         {
             _cameraPivot = boundingBox.GetCenterPoint();
+           
         }
 
         /// <summary>
