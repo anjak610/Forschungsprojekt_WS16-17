@@ -7,6 +7,11 @@ varying float far;
 varying vec4 newVertex;
 varying float zoom;
 
+//float LinearizeDepth(float depth) 
+//{
+//    float z = depth * 2.0 - 1.0; // Back to NDC 
+//    return (2.0 * near * far) / (far + near - z * (far - near));	
+//}
 
 void main()
 {
@@ -27,25 +32,33 @@ void main()
 	//{
 	//	pointFar = vec3(0.0,0.0,20.0);
 	//}
-	
-	vec3 point = vec3(0.0,0.0,far/2.0);
+
+	float zlength = distance(pointFar, pointNear);
+	//float zlength = abs(pointNear-pointFar);	
+
+	vec3 point = vec3(0.0,0.0,zlength/2.0+zoom);
 	vec3 normal = vec3(0.0,0.0,1.0);
 	float d = dot(point, normal);
 	vec4 u_abcd = vec4 (normal.x, normal.y, normal.z, d);
+    float depth = dot(u_abcd.xyz, newVertex.xyz)+ u_abcd.w;	
 	
-	float zlength = distance(pointFar, pointNear)+zoom;
-	//float zlength = abs(pointNear-pointFar)+zoom;
-	
-	
-	float depth = dot(u_abcd.xyz, newVertex.xyz)+ u_abcd.w;	
 	vec3 color = vec3(1.0- (depth/zlength));
 	gl_FragColor = vec4(color, 1.0); 
 	
-	if( depth/zlength > 1.0)
-		{
-			gl_FragColor = vec4(0.0,0.0,1.0, 1.0); 
 	
-		}
+	//float depth = (LinearizeDepth(zlength)*far); 	
+	//float trueLinearDepth=(LinearizeDepth(zlength)-near)/(far-near);
+	//vec4 color = vec4(vec3(trueLinearDepth), 1.0);
+
+
+
+	//gl_FragColor = vec4(color);
+	
+	//if( depth > 2.0)
+	//	{
+	//		gl_FragColor = vec4(0.0,0.0,1.0, 1.0); 
+	//
+	//	}
 	//float depth = LinearizeDepth(gl_FragCoord.z)/far;
 	//gl_FragColor = vec4(depth,depth,depth,1.0);
 	
