@@ -54,7 +54,7 @@ void main()
 
 	//gl_FragColor = vec4(color);
 	
-	if( zlength  20.0)
+	if( zlength < 20.0)
 		{
 			gl_FragColor = vec4(0.0,0.0,1.0+zoom, 1.0); 	
 		}

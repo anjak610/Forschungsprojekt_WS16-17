@@ -6,7 +6,7 @@ namespace Fusee.Tutorial.Core.Common
     /// Abstract class which provides the concept of how different render entitites (such as voxels, points or drone paths)
     /// provide the data for the render engine.
     /// </summary>
-    public abstract class RenderEntitiy
+    public abstract class RenderEntity
     {
         protected RenderContext _rc;
         protected ShaderProgram _shader; // set shader program before rendering
@@ -16,10 +16,11 @@ namespace Fusee.Tutorial.Core.Common
         /// </summary>
         /// <param name="rc">The render context.</param>
         /// <param name="shader">A shader program created from fragment and vertex shader via rc.CreateShader(...);</param>
-        protected RenderEntitiy(RenderContext rc)
+        protected RenderEntity(RenderContext rc)
         {
             _rc = rc;
             _shader = CreateShaderProgram();
+            GetShaderParams();
         }
 
         /// <summary>
@@ -35,7 +36,12 @@ namespace Fusee.Tutorial.Core.Common
         /// <summary>
         /// When uniform variables exist in the shader programs, they should be set here.
         /// </summary>
-        public abstract void SetShaderParams();
+        protected abstract void SetShaderParams();
+
+        /// <summary>
+        /// When the shader program is created, retrieve once at the beginning the handles for those params.
+        /// </summary>
+        protected abstract void GetShaderParams();
 
         /// <summary>
         /// Gets called by the constructor. This method should contain the code in order

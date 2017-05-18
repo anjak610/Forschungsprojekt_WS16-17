@@ -12,13 +12,13 @@ namespace Fusee.Tutorial.Core.Data
     /// Contains all the settings and variables needed for rendering the point cloud. Render context related programming is encapsulated in this class
     /// for better readability.
     /// </summary>
-    public class PointCloud : RenderEntitiy
+    public class PointCloud : RenderEntity
     {
         #region Fields
         
         private const int UPDATE_EVERY = 1000; // every xth point the point cloud should update its meshes
         private const int COMPUTE_EVERY = 1; // take only every xth point into account in order to speed up calculation
-
+        
         private static float _particleSize = 0.05f; // maybe gets changed from platform specific classes
         public const float ParticleSizeInterval = 0.025f;
         
@@ -28,6 +28,10 @@ namespace Fusee.Tutorial.Core.Data
 
         private float2 _zBounds = float2.Zero;
         private static float _zoom = 60f;
+
+        private IShaderParam _particleSizeParam;
+        private IShaderParam _zBoundsParam;
+        private IShaderParam _zZoomParam;
 
         // This is the object where new vertices are stored. Also look at the description of the class(es) for more information.
         private StaticMeshList _meshList = new StaticMeshList();
@@ -62,27 +66,34 @@ namespace Fusee.Tutorial.Core.Data
         }
 
         /// <summary>
+        /// When the shader program is created, retrieve once at the beginning the handles for those params.
+        /// </summary>
+        protected override void GetShaderParams()
+        {
+            _particleSizeParam = _rc.GetShaderParam(_shader, "particleSize");
+            _zBoundsParam = _rc.GetShaderParam(_shader, "zBounds");
+            _zZoomParam = _rc.GetShaderParam(_shader, "zZoom");
+        }
+
+        /// <summary>
         /// Sets the shader params for the point cloud.
         /// </summary>
-        public override void SetShaderParams()
+        protected override void SetShaderParams()
         {
-            var particleSizeParam = _rc.GetShaderParam(_shader, "particleSize");
-            _rc.SetShaderParam(particleSizeParam, new float2(_particleSize, _particleSize * _aspectRatio));
+            _rc.SetShaderParam(_particleSizeParam, new float2(_particleSize, _particleSize * _aspectRatio));
 
             // SetZNearFarPlane
             _zBounds = new float2(_zBounds.x, _zBounds.y);
 
             Debug.WriteLine("zBounds" + _zBounds);
-
-            var zBoundsParam = _rc.GetShaderParam(_shader, "zBounds");
-            _rc.SetShaderParam(zBoundsParam, _zBounds);
+            
+            _rc.SetShaderParam(_zBoundsParam, _zBounds);
 
             //Debug.WriteLine("zBounds" + _zBounds);
             //Debug.WriteLine("Max z" + _boundingBox.GetMaxValues().z);
 
             // SetZoomValue
-            var zZoomParam = _rc.GetShaderParam(_shader, "zZoom");
-            _rc.SetShaderParam(zZoomParam, _zoom);
+            _rc.SetShaderParam(_zZoomParam, _zoom);
         }
 
         #endregion
