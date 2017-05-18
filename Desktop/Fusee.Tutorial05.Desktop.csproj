@@ -45,6 +45,9 @@
   <PropertyGroup>
     <OutputRoot>$(ProjectBuildRoot)\bin\$(Configuration)\</OutputRoot>
   </PropertyGroup>
+  <PropertyGroup>
+    <NoWin32Manifest>true</NoWin32Manifest>
+  </PropertyGroup>
   <!--PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug+Web|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>

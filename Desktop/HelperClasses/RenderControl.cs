@@ -34,7 +34,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
                     break;
                 case WM_KEYDOWN:
                     // case WM_SYSKEYDOWN:
-                    OnKeyDown(new KeyEventArgs((Keys) m.WParam));
+                       OnKeyDown(new KeyEventArgs((Keys) m.WParam));
                   
                     break;
                 case WM_KEYUP:

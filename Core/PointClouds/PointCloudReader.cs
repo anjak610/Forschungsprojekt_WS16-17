@@ -213,15 +213,9 @@ namespace Fusee.Tutorial.Core.PointClouds
             Diagnostics.Log("Quaternion Z: " + quaternionZ);
             Diagnostics.Log("Number of points: " + numberOfPoints);
 
-            List<UInt32> values = CreateHexList(file);
+            List<List<UInt32>> values = CreateHexList(file, numberOfPoints);
 
-            foreach (var value in values)
-            {
-                if (value != 0)
-                {
-                    Diagnostics.Log("Pointvalue: 0x" + value.ToString("X"));
-                }
-            }
+            
           
         }
 
@@ -232,22 +226,28 @@ namespace Fusee.Tutorial.Core.PointClouds
             return result;
         }
 
-        private static List<UInt32> CreateHexList(byte[] array)
+        private static List<List<UInt32>> CreateHexList(byte[] array, uint numberOfPoints)
         {
-
+        
            List<UInt32> pointChunks = new List<UInt32>();
+           List< UInt32> tmpList = new List<UInt32>();
             int count = 52;
             while (count < array.Length)
             {
-                UInt32 chunk = BitConverter.ToUInt32(SubArray(array, count, 4), 0);
-                if (chunk != 0xDEADBEEF)
+                UInt32 piece = BitConverter.ToUInt32(SubArray(array, count, 4), 0);
+                if ((piece != 0xDEADBEEF) && (tmpList.Count < numberOfPoints))
                 {
-                    pointChunks.Add(chunk);
+                    tmpList.Add(piece);
                 }
-                else Diagnostics.Log("End of Package");
+                else
+                {
+                    pointChunks.Add(tmpList);
+                    Diagnostics.Log("End of Package");
+                }
                
                 count = count + 4;
             }
+
             return pointChunks;
         }
 
