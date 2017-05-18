@@ -7,6 +7,7 @@ using Fusee.Math.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Android.OS;
 
 
 namespace Fusee.Tutorial.Core.PointClouds
@@ -174,16 +175,59 @@ namespace Fusee.Tutorial.Core.PointClouds
 
         public static void ReadFromBinary(byte[] file)
         {
-           
-            UInt32 packetBeginMarker = BitConverter.ToUInt32((SubArray(file, 0, 4)),0);
+            int paketCount = 0;
+            List<UInt32[]> pointPakets = new List<UInt32[]>();
+            while (file.Length >= 2052)//at least one paket must be there
+            {
+                if (CheckHeader(file))
+                {
+                    try
+                    {
+                        float[] droneInfo = ReadDronePos(file);
+                        UInt32[] packet = CreatePaket(file);
+                        pointPakets.Add(packet);
+                        Diagnostics.Log("Packet count:" + pointPakets.Count);
+                        file = file.Skip(2056).ToArray();
+                    }
+                    catch
+                    {
+                        Diagnostics.Log("Error creating hex point packets");
+                    }
+                }
+                else
+                {
+                    Diagnostics.Log("File not vaild");//TODO make it read more than 1 packet
+                    break;
+                }
+            
+            }
+
+            //TODO calculate point values with hex values  
+        }
+
+        public static bool CheckHeader(byte[] file)
+        {
+            UInt32 packetBeginMarker = BitConverter.ToUInt32((SubArray(file, 0, 4)), 0);
             UInt16 typeID = BitConverter.ToUInt16((SubArray(file, 4, 2)), 0);
             UInt16 version = BitConverter.ToUInt16((SubArray(file, 6, 2)), 0);
-            UInt32 packetSize = BitConverter.ToUInt32((SubArray(file, 8, 4)), 0);
-            double time = BitConverter.ToDouble((SubArray(file, 12, 8)), 0);
+            //UInt32 packetSize = BitConverter.ToUInt32((SubArray(file, 8, 4)), 0);
+            //double time = BitConverter.ToDouble((SubArray(file, 12, 8)), 0);
+            //TimeSpan timespan = TimeSpan.FromMilliseconds(time);
 
-            TimeSpan timespan = TimeSpan.FromMilliseconds(time);
+            //Print out on console for testing
+            Diagnostics.Log("Packet Begin Marker: 0x" + packetBeginMarker.ToString("X"));
+            Diagnostics.Log("TypeID: 0x" + typeID.ToString("X"));
+            Diagnostics.Log("Version: 0x" + version.ToString("X"));
+            //Diagnostics.Log("Packet Size: " + packetSize);
+           // Diagnostics.Log("Time milliseconds: " + time);
+
+            return ((packetBeginMarker == 0xFEEDBEEF) && (typeID == 0x1010) && (version == 0x0001));
+        }
 
 
+        public static float[] ReadDronePos(byte[] file)
+        {
+            float[] values = new float[7];
             //Position of Scanner
             float drone_posX = BitConverter.ToSingle((SubArray(file, 20, 4)), 0);
             float drone_posY = BitConverter.ToSingle((SubArray(file, 24, 4)), 0);
@@ -194,16 +238,17 @@ namespace Fusee.Tutorial.Core.PointClouds
             float quaternionX = BitConverter.ToSingle((SubArray(file, 36, 4)), 0);
             float quaternionY = BitConverter.ToSingle((SubArray(file, 40, 4)), 0);
             float quaternionZ = BitConverter.ToSingle((SubArray(file, 44, 4)), 0);
-            //number of points
-            UInt32 numberOfPoints = BitConverter.ToUInt32((SubArray(file, 48, 4)), 0);
 
-            
-           //Print out on console for testing
-            Diagnostics.Log("Packet Begin Marker: 0x" + packetBeginMarker.ToString("X"));
-            Diagnostics.Log("TypeID: 0x" + typeID.ToString("X"));
-            Diagnostics.Log("Version: 0x" + version.ToString("X"));
-            Diagnostics.Log("Packet Size: " + packetSize);
-            Diagnostics.Log("Time milliseconds: " + time);
+            values[0] = drone_posX;
+            values[1] = drone_posY;
+            values[2] = drone_posZ;
+            values[3] = quaternionW;
+            values[4] = quaternionX;
+            values[5] = quaternionY;
+            values[6] = quaternionZ;
+
+
+            //Debug
             Diagnostics.Log("Pos X: " + drone_posX);
             Diagnostics.Log("Pos Y: " + drone_posY);
             Diagnostics.Log("Pos Z: " + drone_posZ);
@@ -211,12 +256,8 @@ namespace Fusee.Tutorial.Core.PointClouds
             Diagnostics.Log("Quaternion X: " + quaternionX);
             Diagnostics.Log("Quaternion Y: " + quaternionY);
             Diagnostics.Log("Quaternion Z: " + quaternionZ);
-            Diagnostics.Log("Number of points: " + numberOfPoints);
 
-            List<List<UInt32>> values = CreateHexList(file, numberOfPoints);
-
-            
-          
+            return values;
         }
 
         public static  T[] SubArray<T>( T[] data, int index, int length)
@@ -226,29 +267,32 @@ namespace Fusee.Tutorial.Core.PointClouds
             return result;
         }
 
-        private static List<List<UInt32>> CreateHexList(byte[] array, uint numberOfPoints)
+        private static UInt32[] CreatePaket(byte[] array)
         {
-        
-           List<UInt32> pointChunks = new List<UInt32>();
+            UInt32 numberOfPoints = BitConverter.ToUInt32((SubArray(array, 48, 4)), 0);
+            Diagnostics.Log("Number of points: " + numberOfPoints);
+           
            List< UInt32> tmpList = new List<UInt32>();
             int count = 52;
-            while (count < array.Length)
+            UInt32 limit = 2056; //((numberOfPoints * 4) + 52 + 4); --> last 4 bytes should be beginn marker of next paket
+            while (count <= limit)
             {
                 UInt32 piece = BitConverter.ToUInt32(SubArray(array, count, 4), 0);
-                if ((piece != 0xDEADBEEF) && (tmpList.Count < numberOfPoints))
+                if (piece == 0xFEEDBEEF)
                 {
-                    tmpList.Add(piece);
+                    Diagnostics.Log("End of Packet");
+
                 }
                 else
                 {
-                    pointChunks.Add(tmpList);
-                    Diagnostics.Log("End of Package");
+                    tmpList.Add(piece);                  
                 }
                
                 count = count + 4;
             }
-
-            return pointChunks;
+            tmpList.RemoveAt(500);//Remove packet begin marker and create an array
+      
+            return tmpList.ToArray();
         }
 
 
