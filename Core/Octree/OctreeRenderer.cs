@@ -48,7 +48,7 @@ namespace Fusee.Tutorial.Core.Octree
             _renderCanvas = renderCanvas;
             _octree = octree;
         }
-
+        
         /// <summary>
         /// Tells the octree renderer to start a new octree traversal.
         /// </summary>
@@ -59,6 +59,7 @@ namespace Fusee.Tutorial.Core.Octree
             if (_nextMVP != modelViewProjection)
             {
                 _nextMVP = modelViewProjection;
+                _currentViewFrustum = new Frustum(modelViewProjection);
                 _cameraPosition = cameraPosition;
             }   
 
@@ -93,7 +94,6 @@ namespace Fusee.Tutorial.Core.Octree
                 _visibleNodes = new List<OctreeNode>();
 
                 _nodesOrderedByProjectionSize = new SortedDictionary<double, OctreeNode>();
-                _currentViewFrustum = new Frustum(_nextMVP);
 
                 OnTraversalStartedCallbacks?.Invoke();
 
