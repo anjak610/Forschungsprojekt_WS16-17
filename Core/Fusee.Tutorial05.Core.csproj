@@ -47,7 +47,7 @@
     <Compile Include="Common\Color.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
-    <Compile Include="Common\RenderEntitiy.cs" />
+    <Compile Include="Common\RenderEntity.cs" />
     <Compile Include="Common\StaticMeshList.cs" />
     <Compile Include="Data Transmission\AssetReader.cs" />
     <Compile Include="Data Transmission\IUDPReceiver.cs" />
@@ -55,6 +55,7 @@
     <Compile Include="Data\ViewController.cs" />
     <Compile Include="Data\Wireframe.cs" />
     <Compile Include="Octree\ByteArrayComparer.cs" />
+    <Compile Include="Octree\IOctreeRenderer.cs" />
     <Compile Include="Octree\Octree.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
@@ -73,6 +74,7 @@
     </Compile>
     <Compile Include="Data\VoxelSpace.cs" />
     <Compile Include="Octree\OctreeNodeVSP.cs" />
+    <Compile Include="Octree\OctreeRenderer.cs" />
     <Compile Include="Octree\OctreeVSP.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PointVisualizationBase.cs" />
@@ -111,6 +113,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\TestPoints.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Assets\BasicPoints.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

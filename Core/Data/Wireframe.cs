@@ -4,6 +4,7 @@ using Fusee.Tutorial.Core.Common;
 using System.Collections.Generic;
 using Fusee.Math.Core;
 using Fusee.Tutorial.Core.Octree;
+using Fusee.Engine.Common;
 
 namespace Fusee.Tutorial.Core.Data
 {
@@ -11,7 +12,7 @@ namespace Fusee.Tutorial.Core.Data
     /// Contains all the settings and variables needed for rendering the wireframe (for the octree). 
     /// Render context related programming is encapsulated in this class for better readability.
     /// </summary>
-    public class Wireframe : RenderEntitiy
+    public class Wireframe : RenderEntity
     {
         #region Fields
         
@@ -21,7 +22,11 @@ namespace Fusee.Tutorial.Core.Data
         private const float LINE_WIDTH_EMPHASIZED = 4;
 
         private const int MAX_NODE_LEVEL = 8; // the maximum level of a node for a bounding box to render
-        
+
+        // shader
+
+        private IShaderParam _colorParam;
+
         // debugging
         
         private DynamicAttributes _debugWireframe;
@@ -57,12 +62,19 @@ namespace Fusee.Tutorial.Core.Data
         }
 
         /// <summary>
+        /// Should set member variables which store a handle to the uniform variables in the shader.
+        /// </summary>
+        protected override void GetShaderParams()
+        {
+            _colorParam = _rc.GetShaderParam(_shader, "color");
+        }
+
+        /// <summary>
         /// Sets the shader params for the point cloud.
         /// </summary>
-        public override void SetShaderParams()
+        protected override void SetShaderParams()
         {
-            var particleSizeParam = _rc.GetShaderParam(_shader, "color");
-            _rc.SetShaderParam(particleSizeParam, new float3(0.33f, 0.33f, 0.33f));
+            _rc.SetShaderParam(_colorParam, new float3(0.33f, 0.33f, 0.33f));
         }
 
         /// <summary>
@@ -71,9 +83,7 @@ namespace Fusee.Tutorial.Core.Data
         public void SetLineColor(bool active)
         {
             float3 color = active ? new float3(1, 0.5f, 0) : new float3(0.33f, 0.33f, 0.33f);
-
-            var particleSizeParam = _rc.GetShaderParam(_shader, "color");
-            _rc.SetShaderParam(particleSizeParam, color);
+            _rc.SetShaderParam(_colorParam, color);
         }
 
         #endregion
@@ -131,7 +141,7 @@ namespace Fusee.Tutorial.Core.Data
         public void RenderSnapshot()
         {
             base.Render();
-
+            
             if (_snapshotWireframes != null)
             {
                 foreach (DynamicAttributes da in _snapshotWireframes)

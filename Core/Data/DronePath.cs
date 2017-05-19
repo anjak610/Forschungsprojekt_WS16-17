@@ -10,7 +10,7 @@ namespace Fusee.Tutorial.Core.Data
     /// Contains all the settings and variables needed for rendering the drone path. Render context related programming is encapsulated in this class
     /// for better readability.
     /// </summary>
-    public class DronePath : RenderEntitiy
+    public class DronePath : RenderEntity
     {
         #region Fields
         
@@ -71,9 +71,17 @@ namespace Fusee.Tutorial.Core.Data
         }
 
         /// <summary>
+        /// Should set member variables which store a handle to the uniform variables in the shader.
+        /// </summary>
+        protected override void GetShaderParams()
+        {
+            // no uniform variables available. Line width is set in Render().
+        }
+
+        /// <summary>
         /// Sets the shader params for the point cloud.
         /// </summary>
-        public override void SetShaderParams()
+        protected override void SetShaderParams()
         {
             // no uniform variables available. Line width is set in Render().
         }

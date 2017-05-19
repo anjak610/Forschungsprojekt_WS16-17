@@ -17,8 +17,7 @@ namespace Fusee.Tutorial.Core.Octree
         public readonly float Spacing;
         public readonly List<float3> Bucket; // where data/points gets stored
         public byte[] Path;
-
-        public OctreeNodeStates RenderFlag = OctreeNodeStates.NonVisible; // flag whether to load/render this node
+        
         public bool HasBucketChanged = false; // some kind of flag whether points have been added to or removed from this node
 
         public OctreeNode Parent;
@@ -34,7 +33,7 @@ namespace Fusee.Tutorial.Core.Octree
             CenterPosition = centerPos;
             SideLength = sideLength;
 
-            Spacing = sideLength / 8; // see Schuetz (2016), 3.3
+            Spacing = sideLength / 4; // see Schuetz (2016), 3.3
             Bucket = new List<float3>();
         }
 
@@ -129,13 +128,14 @@ namespace Fusee.Tutorial.Core.Octree
                 {
                     // become inner node by creating a child node for position
                     CreateChildNode(ref position);
-                    
-                    for (var i=0; i<Bucket.Count; i++)
-                    {
-                        float3 point = Bucket[i];
-                        Bucket.RemoveAt(i);
-                        
-                        SubAdd(ref point);
+
+                    float3[] pointsToPass = new float3[Bucket.Count];
+                    Bucket.CopyTo(pointsToPass);
+                    Bucket.Clear();
+
+                    for (var i=0; i<pointsToPass.Length; i++)
+                    {                        
+                        SubAdd(ref pointsToPass[i]);
                     }
 
                     HasBucketChanged = true;

@@ -1,4 +1,5 @@
 ﻿using Fusee.Base.Core;
+using Fusee.Engine.Common;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using Fusee.Tutorial.Core.Common;
@@ -10,13 +11,14 @@ namespace Fusee.Tutorial.Core.Data
     /// Contains all the settings and variables needed for rendering the voxel space. Render context related programming is encapsulated in this class
     /// for better readability.
     /// </summary>
-    public class VoxelSpace : RenderEntitiy
+    public class VoxelSpace : RenderEntity
     {
         #region Fields
         
         private const float VOXEL_SIZE = 1;
         private const int COMPUTE_EVERY = 1; // take only every xth point into account in order to speed up calculation
-        
+
+        private IShaderParam _yBoundsParam;
         private float2 _yBounds;
 
         // TO-DO: set shader param for voxelsize?
@@ -105,12 +107,19 @@ namespace Fusee.Tutorial.Core.Data
         }
 
         /// <summary>
+        /// Should set member variables which store a handle to the uniform variables in the shader.
+        /// </summary>
+        protected override void GetShaderParams()
+        {
+            _yBoundsParam = _rc.GetShaderParam(_shader, "yBounds");
+        }
+
+        /// <summary>
         /// Sets the shader params for the point cloud.
         /// </summary>
-        public override void SetShaderParams()
+        protected override void SetShaderParams()
         {
-            var yBoundsParam = _rc.GetShaderParam(_shader, "yBounds");
-            _rc.SetShaderParam(yBoundsParam, _yBounds);
+            _rc.SetShaderParam(_yBoundsParam, _yBounds);
         }
 
         /// <summary>

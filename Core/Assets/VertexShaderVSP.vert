@@ -23,8 +23,8 @@ vec3 hsv2rgb(in vec3 c)
 void main()
 {
 	vec3 modelpos = fuVertex + fuInstance;
-	//normal = normalize(mat3(FUSEE_MV) * fuNormal);
-	normal = vec3(0, 1, 0);
+	normal = normalize(mat3(FUSEE_MV) * fuNormal);
+	//normal = vec3(0, 1, 0);
 
 	uv = fuUV;
 	

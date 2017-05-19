@@ -7,6 +7,7 @@ using Fusee.Tutorial.Core.Octree;
 using static Fusee.Tutorial.Core.PointVisualizationBase;
 using System.Threading.Tasks;
 using System.Threading;
+using Fusee.Engine.Common;
 
 /**
  * Three different threads or tasks are involved:
@@ -26,7 +27,7 @@ namespace Fusee.Tutorial.Core.Data
     /// Contains all the settings and variables needed for rendering the point cloud. Render context related programming is encapsulated in this class
     /// for better readability.
     /// </summary>
-    public class PointCloud : RenderEntitiy
+    public class PointCloud : RenderEntity, IOctreeRenderer
     {
         #region Fields
 
@@ -46,7 +47,10 @@ namespace Fusee.Tutorial.Core.Data
         private float _zoom = 60f;
 
         private float _aspectRatio = 1; // needed for particle size to be square, aspect ratio of viewport => see OnWindowResize
-                
+
+        private IShaderParam _particleSizeParam;
+        private IShaderParam _colorParam;
+
         // data structure
 
         // This is the object where new vertices are stored. Also look at the description of the class(es) for more information.
@@ -85,15 +89,21 @@ namespace Fusee.Tutorial.Core.Data
         }
 
         /// <summary>
+        /// Should set member variables which store a handle to the uniform variables in the shader.
+        /// </summary>
+        protected override void GetShaderParams()
+        {
+            _particleSizeParam = _rc.GetShaderParam(_shader, "particleSize");
+            _colorParam = _rc.GetShaderParam(_shader, "color");
+        }
+
+        /// <summary>
         /// Sets the shader params for the point cloud.
         /// </summary>
-        public override void SetShaderParams()
+        protected override void SetShaderParams()
         {
-            var particleSizeParam = _rc.GetShaderParam(_shader, "particleSize");
-            _rc.SetShaderParam(particleSizeParam, new float2(_particleSize, _particleSize * _aspectRatio));
-
-            var colorParam = _rc.GetShaderParam(_shader, "color");
-            _rc.SetShaderParam(colorParam, new float3(0, 0, 0.5f));
+            _rc.SetShaderParam(_particleSizeParam, new float2(_particleSize, _particleSize * _aspectRatio));
+            _rc.SetShaderParam(_colorParam, new float3(0, 0, 0.5f));
             /*
             // SetZNearFarPlane
             var zBoundsParam = _rc.GetShaderParam(_shader, "zBounds");
