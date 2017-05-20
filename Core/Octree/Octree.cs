@@ -15,9 +15,9 @@ using System;
 
 namespace Fusee.Tutorial.Core.Octree
 {
-    public enum OctreeNodeStates
+    public enum RenderFlag
     {
-        Visible, VisibleButUnloaded, NonVisible
+        Visible, NonVisible, VisibleButUnloaded, NonVisibleButLoaded
     }
 
     public class Octree

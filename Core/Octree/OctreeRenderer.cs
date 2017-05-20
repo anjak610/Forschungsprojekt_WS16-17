@@ -19,7 +19,7 @@ namespace Fusee.Tutorial.Core.Octree
         public Action<OctreeNode> OnTraversalVisibleNodeFoundCallbacks; // gets called every time a traversal has found a visible node
         public Action<OctreeNode> OnTraversalNonVisibleNodeFoundCallbacks; // gets called every time a traversal has found a non-visible node
         
-        private const int POINT_BUDGET = 100000; // number of points that are visible at one frame, tradeoff between performance and quality
+        private const int POINT_BUDGET = 50000; // number of points that are visible at one frame, tradeoff between performance and quality
         private const float MIN_SCREEN_PROJECTED_SIZE = 5; // minimum screen size of the node
 
         private Octree _octree;

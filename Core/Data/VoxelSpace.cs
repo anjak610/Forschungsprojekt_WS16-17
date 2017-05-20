@@ -4,6 +4,7 @@ using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using Fusee.Tutorial.Core.Common;
 using Fusee.Tutorial.Core.Octree;
+using System.Threading;
 
 namespace Fusee.Tutorial.Core.Data
 {
@@ -15,8 +16,7 @@ namespace Fusee.Tutorial.Core.Data
     {
         #region Fields
         
-        private const float VOXEL_SIZE = 1;
-        private const int COMPUTE_EVERY = 1; // take only every xth point into account in order to speed up calculation
+        private float VOXEL_SIZE_AT_LEVEL = 8;
 
         private IShaderParam _yBoundsParam;
         private float2 _yBounds;
@@ -28,12 +28,11 @@ namespace Fusee.Tutorial.Core.Data
         
         // multiple cubes will be rendered on different positions
         private Cube _cube = new Cube();
+        private bool _cubeSideLengthHasInitialized = false;
 
-        // An octree for better searchability, of when to add a new voxel.
-        private OctreeVSP<OctreeNodeStatesVSP> _octree;
-        
-        private int _pointCounter = 0;
-        
+        // multithreading
+        private AutoResetEvent _signalEvent = new AutoResetEvent(true);
+
         #endregion
 
         #region Methods
@@ -47,8 +46,8 @@ namespace Fusee.Tutorial.Core.Data
         {
             boundingBox.UpdateCallbacks += OnBoundingBoxUpdate;
             
-            OctreeVSP<OctreeNodeStatesVSP>.OnNodeAddedCallback += OnNewNodeAdded;
-            _octree = new OctreeVSP<OctreeNodeStatesVSP>(float3.Zero, VOXEL_SIZE);
+            Octree.Octree.OnNodeAddedCallback += OnNewNodeAdded;
+            Octree.Octree.OnOctreeNodeLevelsChangedCallback += OnOctreeHasGrown;
         }
 
         /// <summary>
@@ -66,35 +65,34 @@ namespace Fusee.Tutorial.Core.Data
         /// Event handler for when a new node gets added to the octree.
         /// </summary>
         /// <param name="node">The node that was added.</param>
-        private void OnNewNodeAdded(OctreeNodeVSP<OctreeNodeStatesVSP> node)
+        private void OnNewNodeAdded(OctreeNode node)
         {
-            if (node.Data == OctreeNodeStatesVSP.Occupied && node.SideLength == VOXEL_SIZE)
+            if (node.GetLevel() == VOXEL_SIZE_AT_LEVEL)
             {
-                _positions.AddAttribute(node.Position);
+                _signalEvent.WaitOne();
+                _positions.AddAttribute(node.CenterPosition);
+                _signalEvent.Set();
+                
+                // initialize cube side length
+
+                if(!_cubeSideLengthHasInitialized)
+                {
+                    _cubeSideLengthHasInitialized = true;
+
+                    for(var i=0; i<_cube.Vertices.Length; i++)
+                    {
+                        _cube.Vertices[i] *= node.SideLength;
+                    }
+                }
             }
         }
 
         /// <summary>
-        /// Adds another point for the octree.
+        /// Gets called when the octree grows and thus the node's level change.
         /// </summary>
-        /// <param name="point">The point to add.</param>
-        public void AddPoint(Common.Point point)
+        private void OnOctreeHasGrown()
         {
-            AddPoint(point.Position);
-        }
-
-        /// <summary>
-        /// Overload method for <see cref="AddPoint(Point)"/>. 
-        /// </summary>
-        /// <param name="position"></param>
-        public void AddPoint(float3 position)
-        {
-            _pointCounter++;
-
-            if (_pointCounter % COMPUTE_EVERY != 0 && COMPUTE_EVERY != 1)
-                return;
-
-            _octree.Add(position, OctreeNodeStatesVSP.Occupied);
+            VOXEL_SIZE_AT_LEVEL++;
         }
 
         /// <summary>
@@ -103,7 +101,10 @@ namespace Fusee.Tutorial.Core.Data
         public override void Render()
         {
             base.Render();
+
+            _signalEvent.WaitOne();
             _rc.RenderAsInstance(_cube, _positions);
+            _signalEvent.Set();
         }
 
         /// <summary>

@@ -17,6 +17,7 @@ namespace Fusee.Tutorial.Core.Octree
         public readonly float Spacing;
         public readonly List<float3> Bucket; // where data/points gets stored
         public byte[] Path;
+        public RenderFlag RenderFlag = RenderFlag.NonVisible;
         
         public bool HasBucketChanged = false; // some kind of flag whether points have been added to or removed from this node
 
