@@ -5,6 +5,7 @@ using Fusee.Base.Common;
 using Fusee.Base.Core;
 using Fusee.Math.Core;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Android.OS;
@@ -177,13 +178,15 @@ namespace Fusee.Tutorial.Core.PointClouds
         {
             int paketCount = 0;
             List<UInt32[]> pointPakets = new List<UInt32[]>();
+            List<float[]> droneInfos = new List<float[]>();
             while (file.Length >= 2052)//at least one paket must be there
             {
                 if (CheckHeader(file))
                 {
                     try
                     {
-                        float[] droneInfo = ReadDronePos(file);
+                        float[] info = ReadDronePos(file);
+                        droneInfos.Add(info);
                         UInt32[] packet = CreatePaket(file);
                         pointPakets.Add(packet);
                         Diagnostics.Log("Packet count:" + pointPakets.Count);
@@ -196,13 +199,30 @@ namespace Fusee.Tutorial.Core.PointClouds
                 }
                 else
                 {
-                    Diagnostics.Log("File not vaild");//TODO make it read more than 1 packet
+                    Diagnostics.Log("File not vaild or End of file");
                     break;
                 }
             
             }
 
             //TODO calculate point values with hex values  
+            foreach (var paket in pointPakets)//iterate through paket
+            {
+                for (int i = 0; i < paket.Length; i++)//interate through points
+                {                   
+                    //extract values with bitshift
+                    int echoId = (int) paket[i] >> 30;//get first to bits
+                    int intensity = (int) ((paket[i] << 2) >> 26);//skip 2 bits take next 6 bits
+                    float distance = (paket[i] << 8);//skip 8 bits --> 8 bit left shift
+                    distance = distance/ (10 *10 * 100 *100);
+                    Diagnostics.Log("Distance:" + distance);
+                    Diagnostics.Log("EchoId:" + echoId);
+                    Diagnostics.Log("Intensity:" + intensity);
+
+                }
+            }
+
+
         }
 
         public static bool CheckHeader(byte[] file)
