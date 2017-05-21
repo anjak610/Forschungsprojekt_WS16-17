@@ -190,6 +190,9 @@ namespace Fusee.Tutorial.Core.Data
 
             foreach (KeyValuePair<byte[], DynamicAttributes> kvp in _pointsPerNode) // for each level
             {
+                _particleSize = 1 + (10 - kvp.Key.Length) * 0.5f;
+                SetShaderParams();
+                
                 _rc.RenderAsPoints(kvp.Value);
             }
         }
@@ -201,12 +204,15 @@ namespace Fusee.Tutorial.Core.Data
         public void Render(int level)
         {
             base.Render();
-
+            
+            _particleSize = 1 + (10 - level) * 0.5f;
+            SetShaderParams();
+            
             foreach (KeyValuePair<byte[], DynamicAttributes> kvp in _pointsPerNode) // for each level
             {
                 if (level != kvp.Key.Length - 1)
                     continue;
-
+                
                 _rc.RenderAsPoints(kvp.Value);
             }
         }

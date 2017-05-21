@@ -55,15 +55,14 @@ namespace Fusee.Tutorial.Core
 
         private ConcurrentQueue<OctreeNode> _nodesToBeLoaded = new ConcurrentQueue<OctreeNode>();
         private ConcurrentQueue<OctreeNode> _nodesToBeRemoved = new ConcurrentQueue<OctreeNode>();
-        
-        private bool _collectingFinished = true;
-        private bool _cancelTraversal = false;
-        
-        private Frustum _currentViewFrustum; // the view frustum to check nodes again
 
         // conditions of when to start and stop the traversal
         
         private float3 _cameraPosition = float3.Zero;
+
+        // multithreading 
+
+        private AutoResetEvent _signalEvent = new AutoResetEvent(true);
         
         #endregion
 
@@ -167,7 +166,19 @@ namespace Fusee.Tutorial.Core
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
             
             RC.ModelView = MoveInScene();
-            
+
+            // check on camera move changes
+
+            float3 cameraPos = float4x4.Invert(RC.ModelView) * float3.Zero;
+
+            if (cameraPos != _cameraPosition)
+            {
+                _cameraPosition = cameraPos;
+                _octreeRenderer.ScheduleNewTraversal(RC.ModelViewProjection, _cameraPosition);
+            }
+
+            // View Controlling
+
             ViewCtrl.CheckOnKeyboardEvents();
    
             if (ViewCtrl.GetCurrentViewMode() == ViewMode.PointCloud)
@@ -342,15 +353,7 @@ namespace Fusee.Tutorial.Core
             var MtxCam = float4x4.LookAt(0, 0, _zoom, 0, 0, 0, 0, 1, 0) * float4x4.CreateTranslation(MoveX, MoveY, 0);
             var MtxRot = float4x4.CreateRotationZ(_angleRoll) * float4x4.CreateRotationX(_angleVert) * float4x4.CreateRotationY(_angleHorz);
             float4x4 ModelView = MtxCam * MtxRot * view;
-
-            float3 cameraPos = float4x4.Invert(ModelView) * float3.Zero;
-
-            if(cameraPos != _cameraPosition)
-            {
-                _cameraPosition = cameraPos;
-                _octreeRenderer.ScheduleNewTraversal(RC.ModelViewProjection, _cameraPosition);
-            }
-
+            
             return ModelView;
         }
         
@@ -448,11 +451,18 @@ namespace Fusee.Tutorial.Core
         {
             // remove all nodes from _nodesCurrentlyRendered that aren't in _currentVisibleNodes
 
+            _signalEvent.WaitOne();
+
+            OctreeNode[] currentRenderedNodes = new OctreeNode[_nodesCurrentlyRendered.Count];
+            _nodesCurrentlyRendered.CopyTo(currentRenderedNodes);
+
+            _signalEvent.Set();
+
             OctreeNode node;
 
-            for(var i=0; i<_nodesCurrentlyRendered.Count; i++)
+            for(var i=0; i< currentRenderedNodes.Length; i++)
             {
-                node = _nodesCurrentlyRendered[i];
+                node = currentRenderedNodes[i];
 
                 if (!visibleNodes.Contains(node)) // node needs to be removed
                 {
@@ -493,10 +503,12 @@ namespace Fusee.Tutorial.Core
                 {
                     _wireframe.AddNode(node);
                     _pointCloud.AddNode(node);
-
+                    
                     if (!_nodesCurrentlyRendered.Contains(node))
                     {
+                        _signalEvent.WaitOne();
                         _nodesCurrentlyRendered.Add(node);
+                        _signalEvent.Set();
                     }
 
                     node.RenderFlag = RenderFlag.Visible;
@@ -523,7 +535,9 @@ namespace Fusee.Tutorial.Core
                     _wireframe.RemoveNode(node);
                     _pointCloud.RemoveNode(node);
 
+                    _signalEvent.WaitOne();
                     _nodesCurrentlyRendered.Remove(node);
+                    _signalEvent.Set();
 
                     node.RenderFlag = RenderFlag.NonVisible;
                 }
