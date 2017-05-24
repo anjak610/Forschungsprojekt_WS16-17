@@ -176,10 +176,11 @@ namespace Fusee.Tutorial.Core.PointClouds
 
         public static void ReadFromBinary(byte[] file)
         {
-            int paketCount = 0;
+            
             List<UInt32[]> pointPakets = new List<UInt32[]>();
             List<float[]> droneInfos = new List<float[]>();
-            while (file.Length >= 2052)//at least one paket must be there
+            int originallength = file.Length;
+            while (file.Length > 0)//at least one paket must be there //>=2052
             {
                 if (CheckHeader(file))
                 {
@@ -190,6 +191,7 @@ namespace Fusee.Tutorial.Core.PointClouds
                         UInt32[] packet = CreatePaket(file);
                         pointPakets.Add(packet);
                         Diagnostics.Log("Packet count:" + pointPakets.Count);
+                        //file = SubArray(file, 2056, file.Length - 2056);
                         file = file.Skip(2056).ToArray();
                     }
                     catch
@@ -199,10 +201,11 @@ namespace Fusee.Tutorial.Core.PointClouds
                 }
                 else
                 {
-                    Diagnostics.Log("File not vaild or End of file");
-                    break;
+                    Diagnostics.Log("Paket not vaild");
+                    //break;
+                    file = file.Skip(2040).ToArray();//TODO validate with end marker 0xDEADBEEF                   
                 }
-            
+                
             }
 
             //TODO calculate point values with hex values  
@@ -230,7 +233,7 @@ namespace Fusee.Tutorial.Core.PointClouds
             UInt32 packetBeginMarker = BitConverter.ToUInt32((SubArray(file, 0, 4)), 0);
             UInt16 typeID = BitConverter.ToUInt16((SubArray(file, 4, 2)), 0);
             UInt16 version = BitConverter.ToUInt16((SubArray(file, 6, 2)), 0);
-            //UInt32 packetSize = BitConverter.ToUInt32((SubArray(file, 8, 4)), 0);
+            UInt32 packetSize = BitConverter.ToUInt32((SubArray(file, 8, 4)), 0);
             //double time = BitConverter.ToDouble((SubArray(file, 12, 8)), 0);
             //TimeSpan timespan = TimeSpan.FromMilliseconds(time);
 
@@ -238,7 +241,7 @@ namespace Fusee.Tutorial.Core.PointClouds
             Diagnostics.Log("Packet Begin Marker: 0x" + packetBeginMarker.ToString("X"));
             Diagnostics.Log("TypeID: 0x" + typeID.ToString("X"));
             Diagnostics.Log("Version: 0x" + version.ToString("X"));
-            //Diagnostics.Log("Packet Size: " + packetSize);
+            Diagnostics.Log("Packet Size: " + packetSize);
            // Diagnostics.Log("Time milliseconds: " + time);
 
             return ((packetBeginMarker == 0xFEEDBEEF) && (typeID == 0x1010) && (version == 0x0001));

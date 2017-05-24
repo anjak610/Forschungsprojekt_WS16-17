@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UIForm));
             this.canvaspanel = new System.Windows.Forms.Panel();
             this.chg_view_btn = new System.Windows.Forms.Button();
             this.setup_btn = new System.Windows.Forms.Button();
@@ -120,10 +121,11 @@
             this.Controls.Add(this.label_particle_size);
             this.Controls.Add(this.canvaspanel);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.MinimumSize = new System.Drawing.Size(1200, 1000);
             this.Name = "UIForm";
-            this.Text = "Fusee Point Clouds";
+            this.Text = "Fusee Cloud Vision";
             this.Load += new System.EventHandler(this.UIForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();

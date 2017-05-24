@@ -21,9 +21,9 @@ using Java.IO;
 namespace Fusee.Tutorial.Android
 {
 
-	[Activity (Label = "@string/app_name", MainLauncher = true, Icon = "@drawable/icon",
+	[Activity (Label = "@string/app_name", MainLauncher = true, Icon = "@drawable/icon", ScreenOrientation = ScreenOrientation.Landscape,
 #if __ANDROID_11__
-		HardwareAccelerated=false,
+        HardwareAccelerated =false,
 #endif
 		ConfigurationChanges = ConfigChanges.KeyboardHidden, LaunchMode = LaunchMode.SingleTask)]
 	public class MainActivity : Activity

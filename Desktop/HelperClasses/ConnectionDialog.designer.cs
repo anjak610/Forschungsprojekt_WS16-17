@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ConnectionDialog));
             this.connectButton = new System.Windows.Forms.Button();
             this.disconButton = new System.Windows.Forms.Button();
             this.statusText = new System.Windows.Forms.RichTextBox();
@@ -111,9 +112,10 @@
             this.Controls.Add(this.disconButton);
             this.Controls.Add(this.connectButton);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "ConnectionDialog";
-            this.Text = "Setup connection";
+            this.Text = "Setup Connection";
             this.ResumeLayout(false);
             this.PerformLayout();
 

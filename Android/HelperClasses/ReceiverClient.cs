@@ -62,7 +62,7 @@ namespace Fusee.Tutorial.Android.HelperClasses
             {
                 while (connected && receiving)
                 {
-                    byte[] sizebuffer = new byte[4];
+                    byte[] sizebuffer = new byte[8];
                     acceptor.Receive(sizebuffer, 0, sizebuffer.Length, 0);
                     //receive length of data                 
                     int size = BitConverter.ToInt32(sizebuffer, 0);
@@ -84,9 +84,9 @@ namespace Fusee.Tutorial.Android.HelperClasses
                     {
                         ms.Close();
                         data = ms.ToArray();
-                        //TODO convert to float not to string
-                        string datastring = Encoding.UTF8.GetString(data);
-                        Core.PointClouds.PointCloudReader.ReadFromString(datastring);
+                        Core.PointClouds.PointCloudReader.ReadFromBinary(data);
+                        //string datastring = Encoding.UTF8.GetString(data);
+                       // Core.PointClouds.PointCloudReader.ReadFromString(datastring);
                         ms.Dispose();
 
                     }
