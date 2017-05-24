@@ -1,7 +1,24 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+  <group android:checkableBehavior="single">
+    <item
+android:id="@+id/nav_home"
+android:title="Home" />
   <item android:id="@+id/action_open_conn_dialog"
         android:title="Setup connection"
         android:showAsAction="always" />
- 
+  <item
+android:id="@+id/nav_voxelview"
+android:title="Voxel View" />
+  <item
+ android:id="@+id/nav_increase_psize"
+ android:title="Particle Size + " />
+ <item
+android:id="@+id/nav_decrease_psize"
+android:title="Particle Size - " />
+ <item 
+   android:id="@+id/nav_about"
+  android:title="About" />
+  </group>
+
 </menu>

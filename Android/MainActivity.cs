@@ -14,6 +14,10 @@ using Font = Fusee.Base.Core.Font;
 using Path = Fusee.Base.Common.Path;
 using Fusee.Tutorial.Android.HelperClasses;
 using Android.Runtime;
+using Android.Support.V4.Widget;
+using V7Toolbar = Android.Support.V7.Widget.Toolbar;
+using Android.Support.V7.App;
+using Android.Support.Design.Widget;
 using Fusee.Tutorial.Core;
 using Fusee.Tutorial.Core.PointClouds;
 using Java.IO;
@@ -21,7 +25,7 @@ using Java.IO;
 namespace Fusee.Tutorial.Android
 {
 
-	[Activity (Label = "@string/app_name", MainLauncher = true, Icon = "@drawable/icon", ScreenOrientation = ScreenOrientation.Landscape,
+	[Activity (Label = "@string/app_name", Theme = "@style/Theme.CVDesign", MainLauncher = true, Icon = "@drawable/icon", ScreenOrientation = ScreenOrientation.Landscape,
 #if __ANDROID_11__
         HardwareAccelerated =false,
 #endif
@@ -33,6 +37,9 @@ namespace Fusee.Tutorial.Android
 	    private Button viewMode;
         private Core.PointVisualizationBase app;
         private RelativeLayout canvas_view;
+
+        DrawerLayout drawerLayout;
+        NavigationView navigationView;
 
         protected override void OnCreate (Bundle savedInstanceState)
 		{
@@ -46,8 +53,22 @@ namespace Fusee.Tutorial.Android
             minusButton = FindViewById<Button>(Resource.Id.minus_btn);
 		    viewMode = FindViewById<Button>(Resource.Id.view_btn);
 
-            this.ActionBar.SetTitle(Resource.String.actionbar_title);
-            this.ActionBar.Show();
+
+            //menu and toolbar
+            var toolbar = FindViewById<V7Toolbar>(Resource.Id.toolbar);
+            SetSupportActionBar(toolbar);
+            SupportActionBar.SetDisplayHomeAsUpEnabled(true);
+            SupportActionBar.SetDisplayShowTitleEnabled(false);
+            SupportActionBar.SetHomeButtonEnabled(true);
+            SupportActionBar.SetHomeAsUpIndicator(Resource.Drawable.ic_menu);
+            drawerLayout = FindViewById<DrawerLayout>(Resource.Id.drawer_layout);
+            navigationView = FindViewById<NavigationView>(Resource.Id.nav_view);
+
+
+
+            //old
+            // this.ActionBar.SetTitle(Resource.String.actionbar_title);
+            // this.ActionBar.Show();
 
             //FrameRateLogger frl = new FrameRateLogger();
 
@@ -163,14 +184,20 @@ namespace Fusee.Tutorial.Android
         /// </summary>
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
-            var id = item.ItemId;
-            //If someone clicks on the Add Service button
-            if (id == Resource.Id.action_open_conn_dialog)
+            //var id = item.ItemId;
+            ////If someone clicks on the Add Service button
+            //if (id == Resource.Id.action_open_conn_dialog)
+            //{
+            //    //Create a new dialog and all show on
+            //    //That dialog
+            //    var dialog = ConnectionDialog.NewInstance();
+            //    dialog.Show(FragmentManager, "dialog");
+            //}
+            switch (item.ItemId)
             {
-                //Create a new dialog and all show on
-                //That dialog
-                var dialog = ConnectionDialog.NewInstance();
-                dialog.Show(FragmentManager, "dialog");
+                case Android.Resource.Id.Home:
+                    drawerLayout.OpenDrawer(Android.Support.V4.View.GravityCompat.Start);
+                    return true;
             }
             return base.OnOptionsItemSelected(item);
         }
