@@ -1,24 +1,30 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-  <group android:checkableBehavior="single">
-    <item
-android:id="@+id/nav_home"
-android:title="Home" />
-  <item android:id="@+id/action_open_conn_dialog"
-        android:title="Setup connection"
-        android:showAsAction="always" />
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto" >
+
+ 
+<item android:id="@+id/open_dialog"
+      android:title="Setup connection"
+      android:icon="@drawable/ic_cast"
+      app:showAsAction="always" />
   <item
 android:id="@+id/nav_voxelview"
-android:title="Voxel View" />
+ android:icon="@drawable/ic_view"
+android:title="Voxel View"
+ app:showAsAction="always"
+/>
+    
   <item
  android:id="@+id/nav_increase_psize"
- android:title="Particle Size + " />
+ android:title="Particle Size + "
+  app:showAsAction="always"
+  android:icon="@drawable/ic_arrow_up"
+ />
  <item
 android:id="@+id/nav_decrease_psize"
-android:title="Particle Size - " />
- <item 
-   android:id="@+id/nav_about"
-  android:title="About" />
-  </group>
+android:title="Particle Size - "
+android:icon="@drawable/ic_arrow_down"
+app:showAsAction="always"
+/>
 
 </menu>

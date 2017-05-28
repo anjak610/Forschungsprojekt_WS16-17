@@ -13,62 +13,56 @@ using Fusee.Serialization;
 using Font = Fusee.Base.Core.Font;
 using Path = Fusee.Base.Common.Path;
 using Fusee.Tutorial.Android.HelperClasses;
-using Android.Runtime;
-using Android.Support.V4.Widget;
 using V7Toolbar = Android.Support.V7.Widget.Toolbar;
 using Android.Support.V7.App;
+using Android.Support.V4.Widget;
+using Android.Support.V4.View;
 using Android.Support.Design.Widget;
 using Fusee.Tutorial.Core;
 using Fusee.Tutorial.Core.PointClouds;
 using Java.IO;
 
+
 namespace Fusee.Tutorial.Android
 {
 
-	[Activity (Label = "@string/app_name", Theme = "@style/Theme.CVDesign", MainLauncher = true, Icon = "@drawable/icon", ScreenOrientation = ScreenOrientation.Landscape,
+	[Activity (Label = "@string/app_name", Theme = "@style/Theme.FuseeDesign", MainLauncher = true, Icon = "@drawable/icon", ScreenOrientation = ScreenOrientation.Landscape,
 #if __ANDROID_11__
         HardwareAccelerated =false,
 #endif
 		ConfigurationChanges = ConfigChanges.KeyboardHidden, LaunchMode = LaunchMode.SingleTask)]
-	public class MainActivity : Activity
+	public class MainActivity : AppCompatActivity
 	{
         private Button plusButton;
         private Button minusButton;
 	    private Button viewMode;
         private Core.PointVisualizationBase app;
         private RelativeLayout canvas_view;
-
-        DrawerLayout drawerLayout;
-        NavigationView navigationView;
+        private DrawerLayout drawerLayout;
+        private NavigationView navigationView;
+	    private ConnectionDialog dialog;
 
         protected override void OnCreate (Bundle savedInstanceState)
 		{
 
 			base.OnCreate (savedInstanceState);
             RequestWindowFeature(WindowFeatures.ActionBar);
-
+            dialog = ConnectionDialog.NewInstance();
             SetContentView(Resource.Layout.main_activity_layout);
             canvas_view = FindViewById<RelativeLayout>(Tutorial.Android.Resource.Id.canvas_container);
-            plusButton = FindViewById<Button>(Resource.Id.plus_btn);
-            minusButton = FindViewById<Button>(Resource.Id.minus_btn);
-		    viewMode = FindViewById<Button>(Resource.Id.view_btn);
+            
 
 
             //menu and toolbar
-            var toolbar = FindViewById<V7Toolbar>(Resource.Id.toolbar);
+            V7Toolbar toolbar = FindViewById<V7Toolbar>(Resource.Id.toolbar);
             SetSupportActionBar(toolbar);
-            SupportActionBar.SetDisplayHomeAsUpEnabled(true);
+            SupportActionBar.SetDisplayHomeAsUpEnabled(false);
             SupportActionBar.SetDisplayShowTitleEnabled(false);
-            SupportActionBar.SetHomeButtonEnabled(true);
-            SupportActionBar.SetHomeAsUpIndicator(Resource.Drawable.ic_menu);
-            drawerLayout = FindViewById<DrawerLayout>(Resource.Id.drawer_layout);
-            navigationView = FindViewById<NavigationView>(Resource.Id.nav_view);
+            SupportActionBar.SetTitle(Resource.String.actionbar_title);
+            SupportActionBar.SetHomeButtonEnabled(false);            
+            toolbar.SetNavigationIcon(Resource.Drawable.icon);		   
+            toolbar.InflateMenu(Resource.Menu.menu_main);
 
-
-
-            //old
-            // this.ActionBar.SetTitle(Resource.String.actionbar_title);
-            // this.ActionBar.Show();
 
             //FrameRateLogger frl = new FrameRateLogger();
 
@@ -119,31 +113,13 @@ namespace Fusee.Tutorial.Android
 
                 AssetStorage.RegisterProvider(fap);
 
-                var app = new Core.PointVisualizationBase();
+                app = new Core.PointVisualizationBase();
+                app._pointCloud = new PointCloud();
+              
 
-                plusButton.Click += (sender, e) =>
-                {
-                    app._pointCloud.IncreaseParticleSize();
-                    //app.ParticleSize = app.ParticleSize + app.ParticleSize / 2;
-                };
-
-                minusButton.Click += (sender, e) =>
-                {
-                    app._pointCloud.DecreaseParticleSize();
-                    //app.ParticleSize = app.ParticleSize - app.ParticleSize / 2;
-                };
-
-
-                //Change Shader dependent on ViewMode
-                viewMode.Click += (sender, e) =>
-                {
-                    var nextView = app._ViewMode == PointVisualizationBase.ViewMode.PointCloud ? PointVisualizationBase.ViewMode.VoxelSpace : PointVisualizationBase.ViewMode.PointCloud;
-                    app.SetViewMode(nextView);
-                    System.Diagnostics.Debug.WriteLine(nextView);
-                };
-
+              
                 // connect UDPReceiver with PointCloudReader
-                PointCloudReader.StartStreamingUDPCallback += new UDPReceiver().StreamFromUDP;
+               // PointCloudReader.StartStreamingUDPCallback += new UDPReceiver().StreamFromUDP;
                 
                 // Inject Fusee.Engine InjectMe dependencies (hard coded)
                 RenderCanvasImp rci = new RenderCanvasImp(ApplicationContext, null, delegate { app.Run(); });
@@ -153,7 +129,7 @@ namespace Fusee.Tutorial.Android
 		       // SetContentView(rci.View);
                 canvas_view.AddView(rci.View);
 
-                //app._pointCloud.SetParticleSize(0.05f);
+                app._pointCloud.SetParticleSize(0.05f);
              
 
                 Engine.Core.Input.AddDriverImp(
@@ -168,14 +144,10 @@ namespace Fusee.Tutorial.Android
             }
         }
 
-        /// <summary>
-        /// Inflates Menu Layout
-        /// </summary>
-
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
-            var inflater = MenuInflater;
-            inflater.Inflate(Resource.Menu.menu_main, menu);
+            // Inflate the menu; this adds items to the action bar if it is present.
+            MenuInflater.Inflate(Resource.Menu.menu_main, menu);
             return true;
         }
 
@@ -184,24 +156,29 @@ namespace Fusee.Tutorial.Android
         /// </summary>
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
-            //var id = item.ItemId;
-            ////If someone clicks on the Add Service button
-            //if (id == Resource.Id.action_open_conn_dialog)
-            //{
-            //    //Create a new dialog and all show on
-            //    //That dialog
-            //    var dialog = ConnectionDialog.NewInstance();
-            //    dialog.Show(FragmentManager, "dialog");
-            //}
+            
+            Diagnostics.Log("Item Id:" + item.ItemId);
             switch (item.ItemId)
             {
-                case Android.Resource.Id.Home:
-                    drawerLayout.OpenDrawer(Android.Support.V4.View.GravityCompat.Start);
-                    return true;
+                //case Android.Resource.Id.home: home id strangely does not work??
+                case Android.Resource.Id.open_dialog:
+                    dialog.Show(FragmentManager, "dialog");
+                    break;
+                case Android.Resource.Id.nav_voxelview:
+                    var nextView = app._ViewMode == PointVisualizationBase.ViewMode.PointCloud ? PointVisualizationBase.ViewMode.VoxelSpace : PointVisualizationBase.ViewMode.PointCloud;
+                    app.SetViewMode(nextView);
+                    break;
+                case Android.Resource.Id.nav_increase_psize:
+                    app._pointCloud.IncreaseParticleSize();
+                    break;
+                case Android.Resource.Id.nav_decrease_psize:
+                    app._pointCloud.DecreaseParticleSize();
+                    break;
             }
             return base.OnOptionsItemSelected(item);
         }
-
+       
+       
         /// <summary>
         /// Gets the supported OpenGL ES version of device.
         /// </summary>
