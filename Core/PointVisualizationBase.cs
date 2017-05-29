@@ -29,7 +29,7 @@ namespace Fusee.Tutorial.Core
 
         #region UDP Connection
 
-        private const int UDP_PORT = 8001;
+        private const int UDP_PORT = 8001;//50123;//8001;
 
         [InjectMe]
         public IUDPReceiver UDPReceiver;
@@ -210,7 +210,7 @@ namespace Fusee.Tutorial.Core
             if (Mouse.LeftButton)
             {
                 _keys = false;
-                _angleVelHorz = Mouse.XVel * 0.0002f;
+                _angleVelHorz = Mouse.XVel * -0.0002f;
                 _angleVelVert = Mouse.YVel * 0.0002f;
             }
             else if (Input.Touch.GetTouchActive(TouchPoints.Touchpoint_0) && !Input.Touch.TwoPoint)

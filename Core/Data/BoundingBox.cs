@@ -66,6 +66,19 @@ namespace Fusee.Tutorial.Core.Data
             return _maxValues;
         }
 
+        public float3 GetSize()
+        {
+            return _maxValues - _minValues;
+         }
+
+
+        public float GetRadius()
+        {
+            float3 size = GetSize();
+            float maxyz = (size.y > size.z) ? size.y : size.z;
+            return (size.x < maxyz) ? size.x : maxyz;
+        }
+
         public float3 GetCenterPoint()
         {
             return _center;
