@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using static Fusee.Tutorial.Core.Data_Transmission.AssetReader;
+using Fusee.Tutorial.Core.PointClouds;
 
 namespace Fusee.Tutorial.Desktop.HelperClasses
 {

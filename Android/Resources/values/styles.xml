@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <style name="Theme.FuseeDesign" parent="Base.Theme.CVDesign"></style>
+  <style name="Base.Theme.CVDesign" parent="Theme.AppCompat.Light.NoActionBar">
+    <item name="colorPrimary">#008d58</item>
+    <item name="colorPrimaryDark">#085b35</item>
+    <item name="colorAccent">#008d58</item>
+  </style>
+</resources>
