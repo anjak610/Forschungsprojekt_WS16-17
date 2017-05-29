@@ -4,12 +4,13 @@ using static Fusee.Engine.Core.Input;
 using static Fusee.Engine.Core.Time;
 using System.Threading;
 using Android.OS;
-using Fusee.Tutorial.Core.Data_Transmission;
 using Fusee.Base.Common;
-using Fusee.Tutorial.Core.Data;
 using Fusee.Engine.Common;
+using Fusee.Tutorial.Core.Data;
+using Fusee.Tutorial.Core.Data_Transmission;
 using Java.IO;
 using Debug = System.Diagnostics.Debug;
+
 
 namespace Fusee.Tutorial.Core
 {
@@ -30,6 +31,7 @@ namespace Fusee.Tutorial.Core
         #region UDP Connection
 
         private const int UDP_PORT = 8001;//50123;//8001;
+        public int udpPort { get; set; }
 
         [InjectMe]
         public IUDPReceiver UDPReceiver;

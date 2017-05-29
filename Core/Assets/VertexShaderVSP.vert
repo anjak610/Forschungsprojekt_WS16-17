@@ -30,7 +30,7 @@ void main()
 	// albedo depends on yBounds
 
 	float hue = (modelpos.y - yBounds.x) / (yBounds.y - yBounds.x);
-	albedo = hsv2rgb( vec3(hue, 1, 1) );
+	albedo = hsv2rgb( vec3(hue, 1.0, 1.0) );
 
 	gl_Position = FUSEE_MVP * vec4(modelpos, 1.0);
 }

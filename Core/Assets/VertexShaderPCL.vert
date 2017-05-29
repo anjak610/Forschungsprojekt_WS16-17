@@ -35,7 +35,7 @@ void main()
 	vec4 cloudCenterCam = FUSEE_MV  *  vec4(n_cloudCenterWorld, 1.0); //statt modelpos sollte hier zCenter hin
     vec4 particleCam = FUSEE_MV * vec4(modelpos, 1.0);
     float zToCenter = cloudCenterCam.z - particleCam.z;
-	float scaledZ = (zToCenter / n_cloudRadius) * 0.5 + 1;
+	float scaledZ = (zToCenter / n_cloudRadius) * 0.5 + 1.0;
 	n_depthColor = vec3(0.0, scaledZ, scaledZ);
     
 	

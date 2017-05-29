@@ -5,6 +5,7 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.IO;
+using Fusee.Tutorial.Core.DataTransmission;
 
 namespace Fusee.Tutorial.Android.HelperClasses
 {
@@ -84,7 +85,7 @@ namespace Fusee.Tutorial.Android.HelperClasses
                     {
                         ms.Close();
                         data = ms.ToArray();
-                        Core.PointClouds.PointCloudReader.ReadFromBinary(data);
+                        PointCloudReader.ReadFromBinary(data);
                         //string datastring = Encoding.UTF8.GetString(data);
                        // Core.PointClouds.PointCloudReader.ReadFromString(datastring);
                         ms.Dispose();

@@ -11,8 +11,10 @@ using Fusee.Base.Imp.Desktop;
 using Fusee.Math.Core;
 using Fusee.Serialization;
 using Fusee.Tutorial.Core;
+using Fusee.Tutorial.Core.DataTransmission;
 using Path = Fusee.Base.Common.Path;
-using Fusee.Tutorial.Core.PointClouds;
+using Fusee.Tutorial.Core.Common;
+using Fusee.Tutorial.Core.Data;
 using Font = Fusee.Base.Core.Font;
 
 namespace Fusee.Tutorial.Desktop.HelperClasses
@@ -63,7 +65,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
             //
             currentControl = new RenderControl
             {
-                BackColor = Color.Black,
+                BackColor = System.Drawing.Color.Black,
                 Location = new System.Drawing.Point(0, 0),
                 Size = renderPanel.Size,
                 Dock = DockStyle.Fill,
@@ -97,7 +99,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
            // FrameRateLogger _fRL = new FrameRateLogger(); // start logging frame rate on console
 
             // connect UDPReceiver with PointCloudReader
-            PointCloudReader.StartStreamingUDPCallback += new UDPReceiver().StreamFromUDP;
+            PointCloudReader.StartStreamingUDPCallback += new UDPReceiver().StreamFrom;
 
             // Inject Fusee.Engine.Base InjectMe dependencies
             IO.IOImp = new Fusee.Base.Imp.Desktop.IOImp();
@@ -136,6 +138,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
 
             currentApp = new Core.PointVisualizationBase();
 
+
             // Now use the host as the canvas AND the input implementation of your App
             // Inject Fusee.Engine InjectMe dependencies (hard coded)
             currentApp.CanvasImplementor = currentHost;
@@ -154,12 +157,12 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
 
         private void plus_button_Click(object sender, EventArgs e)
         {
-            currentApp._pointCloud.IncreaseParticleSize(0.02f);
+           PointCloud.IncreaseParticleSize(0.02f);
         }
 
         private void minus_button_Click(object sender, EventArgs e)
         {
-            currentApp._pointCloud.DecreaseParticleSize(0.02f);
+            PointCloud.DecreaseParticleSize(0.02f);
         }
 
         private void CloseCurrentApp()
@@ -211,9 +214,8 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
 
         private void chg_view_btn_Click(object sender, EventArgs e)
         {
-            var nextView = currentApp._ViewMode == PointVisualizationBase.ViewMode.PointCloud ? PointVisualizationBase.ViewMode.VoxelSpace : PointVisualizationBase.ViewMode.PointCloud;
-            currentApp.SetViewMode(nextView);
-            System.Diagnostics.Debug.WriteLine(nextView);
+             currentApp.SwitchViewMode();
+            
         }
     }
 }

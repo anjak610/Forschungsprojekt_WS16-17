@@ -1,17 +1,15 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Fusee.Base.Common;
 using Fusee.Base.Core;
 using Fusee.Math.Core;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using Android.OS;
+using Fusee.Tutorial.Core.Common;
 
-
-namespace Fusee.Tutorial.Core.PointClouds
+namespace Fusee.Tutorial.Core.DataTransmission
 {
     /// <summary>
     /// This class loads an asset and fires callbacks whenever a new point gets loaded. May be used in the future to load
