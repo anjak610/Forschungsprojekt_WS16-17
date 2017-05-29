@@ -33,8 +33,6 @@ namespace Fusee.Tutorial.Core.Data
         private static float _zoom = 60f;
 
         private IShaderParam _particleSizeParam;
-        private IShaderParam _zBoundsParam;
-        private IShaderParam _zZoomParam;
 
         private IShaderParam n_cloudCenterWorldParam;
         private IShaderParam n_cloudRadiusParam;
@@ -55,8 +53,6 @@ namespace Fusee.Tutorial.Core.Data
         public PointCloud(RenderContext rc, BoundingBox boundingBox) : base(rc)
         {
             boundingBox.UpdateCallbacks += OnBoundingBoxUpdate;
-            _zBounds.x = boundingBox.GetMinValues().z;
-            _zBounds.y = boundingBox.GetMaxValues().z;
 
             n_cloudCenterWorld = boundingBox.GetCenterPoint();
             n_cloudRadius = boundingBox.GetRadius();
@@ -81,8 +77,6 @@ namespace Fusee.Tutorial.Core.Data
         protected override void GetShaderParams()
         {
             _particleSizeParam = _rc.GetShaderParam(_shader, "particleSize");
-            _zBoundsParam = _rc.GetShaderParam(_shader, "zBounds");
-            _zZoomParam = _rc.GetShaderParam(_shader, "zZoom");
             n_cloudCenterWorldParam = _rc.GetShaderParam(_shader, "n_cloudCenterWorld");
             n_cloudRadiusParam = _rc.GetShaderParam(_shader, "n_cloudRadius");
         }
@@ -98,14 +92,10 @@ namespace Fusee.Tutorial.Core.Data
             _zBounds = new float2(_zBounds.x, _zBounds.y);
 
             //Debug.WriteLine("zBounds" + _zBounds);
-            
-            _rc.SetShaderParam(_zBoundsParam, _zBounds);
 
             //Debug.WriteLine("zBounds" + _zBounds);
             //Debug.WriteLine("Max z" + _boundingBox.GetMaxValues().z);
 
-            // SetZoomValue
-            _rc.SetShaderParam(_zZoomParam, _zoom);
             _rc.SetShaderParam(n_cloudCenterWorldParam,n_cloudCenterWorld);
             _rc.SetShaderParam(n_cloudRadiusParam, n_cloudRadius);
         }

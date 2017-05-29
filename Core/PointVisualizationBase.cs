@@ -203,17 +203,17 @@ namespace Fusee.Tutorial.Core
             else
             {
                 _twoTouchRepeated = false;
-                _zoomVel = Mouse.WheelVel * -0.05f;
-                _angleRoll *= curDamp * 0.8f;
-                _offset *= curDamp * 0.8f;
+                _zoomVel = Mouse.WheelVel * -0.0005f;
+                _angleRoll *= curDamp * 0.008f;
+                _offset *= curDamp * 0.008f;
             }
 
             // UpDown / LeftRight rotation
             if (Mouse.LeftButton)
             {
                 _keys = false;
-                _angleVelHorz = Mouse.XVel * -0.0002f;
-                _angleVelVert = Mouse.YVel * 0.0002f;
+                _angleVelHorz = -RotationSpeed* Mouse.XVel * -0.00002f;
+                _angleVelVert = -RotationSpeed * Mouse.YVel * 0.00002f;
             }
             else if (Input.Touch.GetTouchActive(TouchPoints.Touchpoint_0) && !Input.Touch.TwoPoint)
             {
@@ -227,8 +227,8 @@ namespace Fusee.Tutorial.Core
             {
                 if (_keys)
                 {
-                    _angleVelHorz = -RotationSpeed * Keyboard.LeftRightAxis * 0.002f;
-                    _angleVelVert = -RotationSpeed * Keyboard.UpDownAxis * 0.002f;
+                    _angleVelHorz = -RotationSpeed * Keyboard.LeftRightAxis * 0.00002f;
+                    _angleVelVert = -RotationSpeed * Keyboard.UpDownAxis * 0.00002f;
                 }
                 else
                 {
@@ -238,7 +238,14 @@ namespace Fusee.Tutorial.Core
             }
 
             _zoom += _zoomVel;
-            
+
+            // Limit zoom
+            if (_zoom < 20)
+                _zoom = 20;
+            if (_zoom > 1000)
+                _zoom = 1000;
+
+
             PointCloud.SetZoomValue(_zoom);
             //Debug.WriteLine("CurrentZoomValue" + _zoom);
 
