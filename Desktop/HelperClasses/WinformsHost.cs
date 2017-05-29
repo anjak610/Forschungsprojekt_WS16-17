@@ -11,6 +11,7 @@ using MouseEventArgs = Fusee.Engine.Common.MouseEventArgs;
 using KeyEventArgs = Fusee.Engine.Common.KeyEventArgs;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms.VisualStyles;
 
 namespace Fusee.Tutorial.Desktop.HelperClasses
 {
@@ -536,6 +537,8 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
     {
         private Control _form;
         private ButtonImpDescription _btnLeftDesc, _btnRightDesc, _btnMiddleDesc;
+        private AxisImpDescription _wheelAxisDescription;
+        private float _currentWheel;
 
         /// <summary>
         /// Creates a new mouse input device instance using an existing <see cref="OpenTK.GameWindow"/>.
@@ -546,6 +549,8 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
             _form = gameWindow;
             _form.MouseDown += OnGameWinMouseDown;
             _form.MouseUp += OnGameWinMouseUp;
+            _form.MouseWheel += OnMouseWheel;
+            _currentWheel = 0;
 
             _btnLeftDesc = new ButtonImpDescription
             {
@@ -574,6 +579,34 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
                 },
                 PollButton = false
             };
+            _wheelAxisDescription = new AxisImpDescription
+            {
+                AxisDesc = new AxisDescription
+                {
+                    Name = "Wheel",
+                    Id = (int)MouseAxes.Wheel,
+                    Direction = AxisDirection.Z,
+                    Nature = AxisNature.Position,
+                    Bounded = AxisBoundedType.Unbound,
+                    MinValueOrAxis = float.NaN,
+                    MaxValueOrAxis = float.NaN
+                },
+                // PollAxis = true
+                PollAxis = false
+            };
+        }
+
+        private void OnMouseWheel(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (AxisValueChanged != null)
+            {
+                _currentWheel += e.Delta;
+                AxisValueChanged(this, new AxisValueChangedArgs
+                {
+                    Axis = _wheelAxisDescription.AxisDesc,
+                    Value = _currentWheel,
+                });
+            }
         }
 
         /// <summary>
@@ -616,20 +649,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
                     },
                     PollAxis = true
                 };
-                yield return new AxisImpDescription
-                {
-                    AxisDesc = new AxisDescription
-                    {
-                        Name = "Wheel",
-                        Id = (int)MouseAxes.Wheel,
-                        Direction = AxisDirection.Z,
-                        Nature = AxisNature.Position,
-                        Bounded = AxisBoundedType.Unbound,
-                        MinValueOrAxis = float.NaN,
-                        MaxValueOrAxis = float.NaN
-                    },
-                    PollAxis = true
-                };
+                yield return _wheelAxisDescription;
                 yield return new AxisImpDescription
                 {
                     AxisDesc = new AxisDescription
@@ -748,8 +768,10 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
                     return _form.PointToClient(Cursor.Position).X;
                 case (int)MouseAxes.Y:
                     return _form.PointToClient(Cursor.Position).Y;
-                case (int)MouseAxes.Wheel:
-                    return 0;  // TODO!!!
+                /*case (int)MouseAxes.Wheel:
+                     System.Diagnostics.Debug.WriteLine("Mouse Wheel used");
+        
+                    return 0;// TODO!! //mouseWheel delta */
                 case (int)MouseAxes.MinX:
                     return 0;
                 case (int)MouseAxes.MaxX:
