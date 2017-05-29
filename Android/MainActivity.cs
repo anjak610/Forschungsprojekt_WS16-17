@@ -33,9 +33,6 @@ namespace Fusee.Tutorial.Android
 		ConfigurationChanges = ConfigChanges.KeyboardHidden, LaunchMode = LaunchMode.SingleTask)]
 	public class MainActivity : AppCompatActivity
 	{
-        private Button plusButton;
-        private Button minusButton;
-	    private Button viewMode;
         private Core.PointVisualizationBase app;
         private RelativeLayout canvas_view;
         private DrawerLayout drawerLayout;
@@ -113,12 +110,9 @@ namespace Fusee.Tutorial.Android
 
                 AssetStorage.RegisterProvider(fap);
 
-                app = new Core.PointVisualizationBase();
-                app._pointCloud = new PointCloud();
-              
+		        app = new Core.PointVisualizationBase {_pointCloud = new PointCloud()};
 
-              
-                // connect UDPReceiver with PointCloudReader
+		        // connect UDPReceiver with PointCloudReader
                // PointCloudReader.StartStreamingUDPCallback += new UDPReceiver().StreamFromUDP;
                 
                 // Inject Fusee.Engine InjectMe dependencies (hard coded)

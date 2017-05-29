@@ -48,7 +48,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
             renderControl.MouseDown += delegate(object sender, System.Windows.Forms.MouseEventArgs args)
             {
                 if (MouseButtonDown != null)
-                    MouseButtonDown(this, //TODO something is not going in here
+                    MouseButtonDown(this, 
                         new MouseEventArgs
                         {
                             Button = XLateButtons(args.Button),

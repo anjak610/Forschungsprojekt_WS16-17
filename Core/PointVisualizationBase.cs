@@ -234,7 +234,7 @@ namespace Fusee.Tutorial.Core
                }
            }
           
-           //_zoom += _zoomVel;
+           _zoom += _zoomVel;
           
             if (Mouse.RightButton || Input.Touch.TwoPoint)
             {
