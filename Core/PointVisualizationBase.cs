@@ -33,8 +33,7 @@ namespace Fusee.Tutorial.Core
         private const int UDP_PORT = 8001;//50123;//8001;
         public int udpPort { get; set; }
 
-        [InjectMe]
-        public IUDPReceiver UDPReceiver;
+        [InjectMe] public IUDPReceiver UDPReceiver;
 
         #endregion
 
@@ -112,15 +111,14 @@ namespace Fusee.Tutorial.Core
 
             ///*
             AssetReader.OnNewPointCallbacks += OnNewPointAdded;
-            AssetReader.ReadFromAsset("PointCloud_IPM.txt");
+            //AssetReader.ReadFromAsset("PointCloud_IPM.txt");
             //*/
 
             // stream point cloud via udp
 
-            
-           //UDPReceiver.OnNewPointCallbacks += OnNewPointAdded;
-           //UDPReceiver.OnDronePositionCallbacks += OnDronePositionAdded;
-           //UDPReceiver.StreamFrom(UDP_PORT);
+           UDPReceiver.OnNewPointCallbacks += OnNewPointAdded;
+           UDPReceiver.OnDronePositionCallbacks += OnDronePositionAdded;
+           UDPReceiver.StreamFrom(UDP_PORT);
             
 
             // Set the clear color for the backbuffer

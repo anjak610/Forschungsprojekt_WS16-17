@@ -33,13 +33,9 @@ using V7Toolbar = Android.Support.V7.Widget.Toolbar;
 using Android.Support.V7.App;
 
 using Android.Support.V4.Widget;
-
-using Android.Support.V4.View;
 using Android.Support.Design.Widget;
-using Fusee.Tutorial.Core;
 using Fusee.Tutorial.Core.Data;
 using Fusee.Tutorial.Core.DataTransmission;
-using Java.IO;
 
 namespace Fusee.Tutorial.Android
 
@@ -179,15 +175,15 @@ namespace Fusee.Tutorial.Android
 
 
 
+
                 app = new Core.PointVisualizationBase();
 
 
-
                 // connect UDPReceiver with PointCloudReader
+                app.UDPReceiver = new UDPReceiver();
+                PointCloudReader.StartStreamingUDPCallback += app.UDPReceiver.StreamFrom;
 
-                PointCloudReader.StartStreamingUDPCallback += new UDPReceiver().StreamFrom;
-
-
+                
 
                 // Inject Fusee.Engine InjectMe dependencies (hard coded)
 
