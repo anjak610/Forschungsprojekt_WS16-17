@@ -22,9 +22,35 @@ void main()
 	vec4 cloudCenterCam = FUSEE_MV  *  vec4(n_cloudCenterWorld, 1.0); //statt modelpos sollte hier zCenter hin
     vec4 particleCam = FUSEE_MV * vec4(modelpos, 1.0);
     float zToCenter = cloudCenterCam.z - particleCam.z;
-	float scaledZ = (zToCenter / n_cloudRadius) * 0.5 + 1.0;
-	n_depthColor = vec3(0.0, scaledZ, scaledZ);
+	float scaledZ = (zToCenter / n_cloudRadius) * 0.7 + 1.0;
+	//n_depthColor = vec3(0.0, scaledZ, scaledZ);
     
 	
+
+	//if(scaledZ >= 0.8 && scaledZ <= 1.0)
+	//{
+	//	n_depthColor = vec3(scaledZ,scaledZ, 0.0);
+	//}
+	//
+	//if(scaledZ <= 0.8 && scaledZ >= 0.6)
+	//{
+	//	n_depthColor = vec3(scaledZ,0.0,0.0);
+	//}
+	//
+	//
+	//if(scaledZ < 0.6 && scaledZ>= 0.3)
+	//{
+	//	n_depthColor = vec3(scaledZ,0.0, scaledZ);
+	//}
+	
+		n_depthColor = vec3(0.0, scaledZ,  0.5);
+	
+	//
+	//if(scaledZ < 0.3 && scaledZ>=0.0)
+	//{
+	//	n_depthColor = vec3(0.0,0.0, scaledZ);
+	//}
+	
+
 	gl_Position = result;
 }

@@ -118,9 +118,9 @@ namespace Fusee.Tutorial.Core
             // stream point cloud via udp
 
             
-          // UDPReceiver.OnNewPointCallbacks += OnNewPointAdded;
-          // UDPReceiver.OnDronePositionCallbacks += OnDronePositionAdded;
-          // UDPReceiver.StreamFrom(UDP_PORT);
+           //UDPReceiver.OnNewPointCallbacks += OnNewPointAdded;
+           //UDPReceiver.OnDronePositionCallbacks += OnDronePositionAdded;
+           //UDPReceiver.StreamFrom(UDP_PORT);
             
 
             // Set the clear color for the backbuffer
