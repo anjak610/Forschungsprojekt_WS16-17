@@ -1,41 +1,25 @@
 using System.IO;
-
 using Android.App;
-
 using Android.Content.PM;
-
 using Android.OS;
-
 using Android.Util;
-
 using Android.Views;
-
 using Android.Widget;
-
 using Fusee.Base.Common;
-
 using Fusee.Base.Core;
-
 using Fusee.Base.Imp.Android;
-
 using Fusee.Engine.Imp.Graphics.Android;
-
 using Fusee.Serialization;
-
 using Font = Fusee.Base.Core.Font;
-
 using Path = Fusee.Base.Common.Path;
-
 using Fusee.Tutorial.Android.HelperClasses;
-
 using V7Toolbar = Android.Support.V7.Widget.Toolbar;
-
 using Android.Support.V7.App;
-
 using Android.Support.V4.Widget;
 using Android.Support.Design.Widget;
 using Fusee.Tutorial.Core.Data;
 using Fusee.Tutorial.Core.DataTransmission;
+
 
 namespace Fusee.Tutorial.Android
 
@@ -60,8 +44,6 @@ namespace Fusee.Tutorial.Android
         private DrawerLayout drawerLayout;
         private NavigationView navigationView;
         private ConnectionDialog dialog;
-
-
 
         protected override void OnCreate(Bundle savedInstanceState)
 
@@ -167,23 +149,14 @@ namespace Fusee.Tutorial.Android
 
                     });
 
-
-
-
-
                 AssetStorage.RegisterProvider(fap);
 
-
-
-
                 app = new Core.PointVisualizationBase();
-
 
                 // connect UDPReceiver with PointCloudReader
                 app.UDPReceiver = new UDPReceiver();
                 PointCloudReader.StartStreamingUDPCallback += app.UDPReceiver.StreamFrom;
 
-                
 
                 // Inject Fusee.Engine InjectMe dependencies (hard coded)
 
@@ -193,19 +166,11 @@ namespace Fusee.Tutorial.Android
 
                 app.ContextImplementor = new RenderContextImp(rci, ApplicationContext);
 
-
-
                 // SetContentView(rci.View);
 
                 canvas_view.AddView(rci.View);
 
-
-
                 PointCloud.SetParticleSize(0.05f);
-
-
-
-
 
                 Engine.Core.Input.AddDriverImp(
 
@@ -229,8 +194,6 @@ namespace Fusee.Tutorial.Android
 
         }
 
-
-
         public override bool OnCreateOptionsMenu(IMenu menu)
 
         {
@@ -242,8 +205,6 @@ namespace Fusee.Tutorial.Android
             return true;
 
         }
-
-
 
         /// <summary>
 

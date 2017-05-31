@@ -28,6 +28,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
         // store asset name to load from
         private static string _assetName;
 
+        
         // store connection data to receive from
         private static int _port;
 

@@ -137,7 +137,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
             currentHost = new WinformsHost(currentControl, canvaspanel);
 
             currentApp = new Core.PointVisualizationBase();
-
+            currentApp.UDPReceiver = new UDPReceiver();
 
             // Now use the host as the canvas AND the input implementation of your App
             // Inject Fusee.Engine InjectMe dependencies (hard coded)

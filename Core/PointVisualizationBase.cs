@@ -110,15 +110,15 @@ namespace Fusee.Tutorial.Core
             // stream point cloud from text file
 
             ///*
-            AssetReader.OnNewPointCallbacks += OnNewPointAdded;
+            //AssetReader.OnNewPointCallbacks += OnNewPointAdded;
             //AssetReader.ReadFromAsset("PointCloud_IPM.txt");
             //*/
 
             // stream point cloud via udp
 
-           UDPReceiver.OnNewPointCallbacks += OnNewPointAdded;
-           UDPReceiver.OnDronePositionCallbacks += OnDronePositionAdded;
-           UDPReceiver.StreamFrom(UDP_PORT);
+            UDPReceiver.OnNewPointCallbacks += OnNewPointAdded;
+            UDPReceiver.OnDronePositionCallbacks += OnDronePositionAdded;
+            UDPReceiver.StreamFrom(UDP_PORT);
             
 
             // Set the clear color for the backbuffer
