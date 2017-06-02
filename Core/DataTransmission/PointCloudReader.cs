@@ -31,7 +31,6 @@ namespace Fusee.Tutorial.Core.DataTransmission
 
         public static PointCalculator pointCalc = new PointCalculator();
 
-
         // store connection data to receive from
         private static int _port;
 
@@ -222,11 +221,13 @@ namespace Fusee.Tutorial.Core.DataTransmission
                     distance = distance/ (10 *10 * 100 *100);
                     Diagnostics.Log("Distance:" + distance);
                     Diagnostics.Log("EchoId:" + echoId);
-                    Diagnostics.Log("Intensity:" + intensity);
-
+                    Diagnostics.Log("Intensity:" + intensity);                    
                     pointCalc.GetDistance(distance);
 
                 }
+
+                pointCalc.CalculateNewPoint(pointCalc._dist, 90f);
+
             }
 
 

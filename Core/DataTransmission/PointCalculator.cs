@@ -18,7 +18,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
 
         private float3x3 rotmat;
         //private float[] _dist;
-        List<float> _dist = new List<float>();
+        public List<float> _dist = new List<float>();
         private float3[] _points;
 
         public void GetValues(float[] values)
@@ -40,10 +40,11 @@ namespace Fusee.Tutorial.Core.DataTransmission
             //Diagnostics.Log("Pos X: " + drone_posX);
         }
 
-        public void GetDistance(float distance)
+        public List<float> GetDistance(float distance)
         {
             _dist.Add(distance);
-            CalculateNewPoint(_dist, 90f);
+            return _dist;          
+           // CalculateNewPoint(_dist, 90f);
         }
 
         public void RotationMatrix(float qx, float qy, float qz, float qw)
@@ -64,7 +65,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
            float j = (90/ 500); 
             for (int i = 0; i < _points.Length; i++)
             {
-               // float dist = _dist;                
+                            
                 float3[] distPoint = new float3[_points.Length];
                 distPoint[i] = new float3((_dist[i] * (float)(Sin(j)* Cos(phi))),(_dist[i] * (float)(Sin(j)* Sin(phi))),(_dist[i] * (float)(Cos(phi))));
                 _points[k] = rotmat * distPoint[k];
@@ -74,6 +75,6 @@ namespace Fusee.Tutorial.Core.DataTransmission
             }
             return _points;
         }
-        //TODO --> Render Points 
+        //TODO --> check if calculation is working --> fix Problems and Render Points
     }
 }
