@@ -50,6 +50,7 @@
     <Compile Include="Common\Point.cs" />
     <Compile Include="Common\RenderEntity.cs" />
     <Compile Include="Common\StaticMeshList.cs" />
+    <Compile Include="DataTransmission\PointCalculator.cs" />
     <Compile Include="Data\BoundingBox.cs" />
     <Compile Include="Data\DronePath.cs" />
     <Compile Include="Data\PointCloud.cs" />
@@ -138,7 +139,9 @@
     <None Include="Assets\PixelShaderDP.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Assets\TestPacket.uav_live_stream" />
+    <None Include="Assets\TestPacket.uav_live_stream">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Assets\VertexShaderDP.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

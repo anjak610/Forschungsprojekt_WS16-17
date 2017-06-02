@@ -27,8 +27,11 @@ namespace Fusee.Tutorial.Core.DataTransmission
 
         // store asset name to load from
         private static string _assetName;
+        //float[] values = new float[7];
 
-        
+        public static PointCalculator pointCalc = new PointCalculator();
+
+
         // store connection data to receive from
         private static int _port;
 
@@ -113,13 +116,13 @@ namespace Fusee.Tutorial.Core.DataTransmission
         public static void ConvertBytesToPoint(byte[] data)
         {
             float[] points = ConvertBytesToFloat(data);
-
+      
             Point point = new Point();
             point.Position = new float3(points[0], points[1], points[2]);
-
+      
             OnNewPointCallbacks?.Invoke(point);
         }
-
+      
         private static float[] ConvertBytesToFloat(byte[] array)
         {
             float[] floatArr = new float[array.Length / 4];
@@ -135,43 +138,43 @@ namespace Fusee.Tutorial.Core.DataTransmission
         }
 
         // Called from StreamFromAsset()
-        private static Point ConvertTextToPoint(string line)
-        {
-            string delimiter = "\t";
-            string[] textElements = line.Split(delimiter.ToCharArray());
-
-            if (textElements.Length == 1) // empty line
-                return null;
-
-            Point point = new Point();
-
-            // convert each string to float
-
-            float[] numbers = new float[textElements.Length];
-            for (var i = 0; i < numbers.Length; i++)
-            {
-                numbers[i] = float.Parse(textElements[i], CultureInfo.InvariantCulture.NumberFormat);
-
-                // prevent fusee from the same thing that happend to ariane 5
-                // because e.g. 16 - 0.0000001f = 16, but Math.Floor(0.1E-06 / 16) = -1 and that isn't what we want
-                if (numbers[i] < 0.000001f && numbers[i] > -0.000001f) 
-                {
-                    numbers[i] = 0;
-                }
-            }
-
-            point.Position = new float3(numbers[0], numbers[2], numbers[1]);
-
-            if (numbers.Length == 9)
-            {
-                point.Color = new float3(numbers[3], numbers[4], numbers[5]);
-
-                point.EchoId = numbers[6];
-                point.ScanNr = numbers[8];
-            }
-
-            return point;
-        }
+       private static Point ConvertTextToPoint(string line)
+       {
+           string delimiter = "\t";
+           string[] textElements = line.Split(delimiter.ToCharArray());
+       
+           if (textElements.Length == 1) // empty line
+               return null;
+       
+           Point point = new Point();
+       
+           // convert each string to float
+       
+           float[] numbers = new float[textElements.Length];
+           for (var i = 0; i < numbers.Length; i++)
+           {
+               numbers[i] = float.Parse(textElements[i], CultureInfo.InvariantCulture.NumberFormat);
+       
+               // prevent fusee from the same thing that happend to ariane 5
+               // because e.g. 16 - 0.0000001f = 16, but Math.Floor(0.1E-06 / 16) = -1 and that isn't what we want
+               if (numbers[i] < 0.000001f && numbers[i] > -0.000001f) 
+               {
+                   numbers[i] = 0;
+               }
+           }
+       
+           point.Position = new float3(numbers[0], numbers[2], numbers[1]);
+       
+           if (numbers.Length == 9)
+           {
+               point.Color = new float3(numbers[3], numbers[4], numbers[5]);
+       
+               point.EchoId = numbers[6];
+               point.ScanNr = numbers[8];
+           }
+       
+           return point;
+       }
 
         public static void ReadFromBinary(byte[] file)
         {
@@ -220,6 +223,8 @@ namespace Fusee.Tutorial.Core.DataTransmission
                     Diagnostics.Log("Distance:" + distance);
                     Diagnostics.Log("EchoId:" + echoId);
                     Diagnostics.Log("Intensity:" + intensity);
+
+                    pointCalc.GetDistance(distance);
 
                 }
             }
@@ -278,10 +283,11 @@ namespace Fusee.Tutorial.Core.DataTransmission
             Diagnostics.Log("Quaternion X: " + quaternionX);
             Diagnostics.Log("Quaternion Y: " + quaternionY);
             Diagnostics.Log("Quaternion Z: " + quaternionZ);
-
+            pointCalc.GetValues(values);
             return values;
+            
         }
-
+    
         public static  T[] SubArray<T>( T[] data, int index, int length)
         {
             T[] result = new T[length];

@@ -10,7 +10,7 @@ using Fusee.Tutorial.Core.Data;
 using Fusee.Tutorial.Core.Data_Transmission;
 using Java.IO;
 using Debug = System.Diagnostics.Debug;
-
+using Fusee.Tutorial.Core.DataTransmission;
 
 namespace Fusee.Tutorial.Core
 {
@@ -30,7 +30,7 @@ namespace Fusee.Tutorial.Core
 
         #region UDP Connection
 
-        private const int UDP_PORT = 8001;//50123;//8001;
+        private const int UDP_PORT = 50123;//8001;
         public int udpPort { get; set; }
 
         [InjectMe] public IUDPReceiver UDPReceiver;
@@ -112,14 +112,20 @@ namespace Fusee.Tutorial.Core
             ///*
             //AssetReader.OnNewPointCallbacks += OnNewPointAdded;
             //AssetReader.ReadFromAsset("PointCloud_IPM.txt");
-            //*/
+            //*/  
+
+            ///*
+            PointCloudReader.OnNewPointCallbacks += OnNewPointAdded;
+            PointCloudReader.ReadFromAsset("PointCloud_IPM.txt");
+            //PointCloudReader.ReadFromBinary(TestPacket.uav_live_stream);
+            //*/          
 
             // stream point cloud via udp
 
-            UDPReceiver.OnNewPointCallbacks += OnNewPointAdded;
-            UDPReceiver.OnDronePositionCallbacks += OnDronePositionAdded;
-            UDPReceiver.StreamFrom(UDP_PORT);
-            
+            //UDPReceiver.OnNewPointCallbacks += OnNewPointAdded;
+            //UDPReceiver.OnDronePositionCallbacks += OnDronePositionAdded;
+            //UDPReceiver.StreamFrom(UDP_PORT);
+
 
             // Set the clear color for the backbuffer
             RC.ClearColor = new float4(0.95f, 0.95f, 0.95f, 1);
@@ -254,15 +260,7 @@ namespace Fusee.Tutorial.Core
                 MoveY += speed.y * -0.0005f;
             }
 
-            // Debug.WriteLine("Min z" +_boundingBox.GetMinValues().z);
-            //Debug.WriteLine("Max z" + _boundingBox.GetMaxValues().z);
-            // SetZNearFarPlane
-          // float2 _zBounds = new float2(0,0);
-          // _zBounds.x = _boundingBox.GetMinValues().z;
-          // _zBounds.y = _boundingBox.GetMaxValues().z;
-          // _zBounds = new float2(_zBounds.x, _zBounds.y);
-          // Debug.WriteLine("zBounds" + _zBounds);
-
+             
             _angleHorz += _angleVelHorz;
             // Wrap-around to keep _angleHorz between -PI and + PI
             _angleHorz = M.MinAngle(_angleHorz);
