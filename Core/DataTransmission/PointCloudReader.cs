@@ -226,7 +226,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
                 }
 
                 pointCalc.CalculateNewPoint(pointCalc._dist, 90f);
-               // ConvertCalculatedPointsToPoints(pointCalc._Points);
+            
             }
         }
 
@@ -234,7 +234,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
        public static void ConvertCalculatedPointsToPoints(float3[] _points)
        {
            Point point = new Point();
-            Diagnostics.Log("New Point: "+ _points[40]);
+           Diagnostics.Log("New Point: "+ _points[40]);
      
            foreach (var singlePoint in _points)
            {
