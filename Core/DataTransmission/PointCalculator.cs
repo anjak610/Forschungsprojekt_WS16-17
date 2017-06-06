@@ -2,25 +2,33 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Fusee.Base.Core;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
 using static System.Math;
 using static Fusee.Engine.Core.Input;
 using static Fusee.Engine.Core.Time;
-using Debug = System.Diagnostics.Debug;
-
-
+//using Debug = System.Diagnostics.Debug;
 
 namespace Fusee.Tutorial.Core.DataTransmission
 {
+    /// <summary>
+    /// This class calculates points from the received data
+    /// </summary>
+    /// 
     public class PointCalculator
     {
-
+        
         private float3x3 rotmat;
-        //private float[] _dist;
         public List<float> _dist = new List<float>();
         private float3[] _points;
         private float3 _dronePoint;
+
+        public float3[] _Points
+        {
+            get { return _points; }
+            set { _points = value; }
+        }
 
         public void GetValues(float[] values)
         {
@@ -32,20 +40,16 @@ namespace Fusee.Tutorial.Core.DataTransmission
             float qy = values[4];
             float qz = values[5];
             float qw = values[6];
-
-            _dronePoint = new float3 (Posx, PosY, PosZ);            
+           
+            _dronePoint = new float3 (Posx, PosY, PosZ);
+           // Diagnostics.Log("PointCalc Values: " + _dronePoint);
             RotationMatrix(qx, qy, qz, qw);
-          
-
-            //Debug
-            //Diagnostics.Log("Pos X: " + drone_posX);
         }
 
         public List<float> GetDistance(float distance)
         {
             _dist.Add(distance);
             return _dist;          
-           // CalculateNewPoint(_dist, 90f);
         }
 
         public void RotationMatrix(float qx, float qy, float qz, float qw)
@@ -56,7 +60,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
             float el3 = 2 * (qy * qw) - (qx * qz);
 
             rotmat = new float3x3(new float3(el1, el2, el3), new float3(el2, el1, el3), new float3(el3, el2, el1));
-           
+            //Diagnostics.Log("RotationMatrix: " + rotmat);
         }
               
 
@@ -73,10 +77,10 @@ namespace Fusee.Tutorial.Core.DataTransmission
                 _points[k] = (rotmat * distPoint[k])+_offset;
                 k++;
                 j= j + 0.18f;
-               // return _points;
             }
+            //Diagnostics.Log("_points: " + _points[41]);
             return _points;
         }
-        //TODO --> check if calculation is working --> fix Problems and Render Points
+        //TODO --> check if calculation is working --> fix possible Problems and Render Points
     }
 }

@@ -203,7 +203,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
                 else
                 {
                     Diagnostics.Log("Paket not vaild");
-                    //break;
+                    break;
                     file = file.Skip(2040).ToArray();//TODO validate with end marker 0xDEADBEEF                   
                 }
                 
@@ -223,15 +223,29 @@ namespace Fusee.Tutorial.Core.DataTransmission
                     Diagnostics.Log("EchoId:" + echoId);
                     Diagnostics.Log("Intensity:" + intensity);                    
                     pointCalc.GetDistance(distance);
-
                 }
 
                 pointCalc.CalculateNewPoint(pointCalc._dist, 90f);
-
+               // ConvertCalculatedPointsToPoints(pointCalc._Points);
             }
-
-
         }
+
+
+       public static void ConvertCalculatedPointsToPoints(float3[] _points)
+       {
+           Point point = new Point();
+            Diagnostics.Log("New Point: "+ _points[40]);
+     
+           foreach (var singlePoint in _points)
+           {
+               point.Position = singlePoint;
+               OnNewPointCallbacks?.Invoke(point);
+            }
+           //return point;
+       }
+      //TODO: Complete foreach and transfer float3 array to Point Class and further to render Points
+
+
 
         public static bool CheckHeader(byte[] file)
         {
