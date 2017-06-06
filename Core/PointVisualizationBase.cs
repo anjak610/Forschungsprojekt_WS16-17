@@ -104,7 +104,6 @@ namespace Fusee.Tutorial.Core
             _voxelSpace = new VoxelSpace(RC, _boundingBox);
             _dronePath = new DronePath(RC);
 
-            //byte[] test = TestPacket.uav_live_stream;
 
             //Zoom Value
             _zoom = 60;
@@ -116,11 +115,10 @@ namespace Fusee.Tutorial.Core
             //AssetReader.ReadFromAsset("PointCloud_IPM.txt");
             //*/  
 
-            ///*
-            //PointCloudReader.OnNewPointCallbacks += OnNewPointAdded;
-            //PointCloudReader.ReadFromAsset("PointCloud_IPM.txt");
-            //PointCloudReader.ReadFromBinary(TestPacket.uav_live_stream);
-            //*/          
+           //stream from binary via udp 
+            PointCloudReader.OnNewPointCallbacks += OnNewPointAdded;
+
+                     
 
             // stream point cloud via udp
 

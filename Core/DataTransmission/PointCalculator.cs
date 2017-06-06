@@ -79,7 +79,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
                 j= j + 0.18f;
             }
             //Diagnostics.Log("_points: " + _points[41]);
-            PointCloudReader.ConvertCalculatedPointsToPoints(_points);
+            //PointCloudReader.ConvertCalculatedPointsToPoints(_points);
             return _points;
         }
         //TODO --> check if calculation is working --> fix possible Problems and Render Points

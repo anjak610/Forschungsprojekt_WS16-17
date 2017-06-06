@@ -219,30 +219,32 @@ namespace Fusee.Tutorial.Core.DataTransmission
                     int intensity = (int) ((paket[i] << 2) >> 26);//skip 2 bits take next 6 bits
                     float distance = (paket[i] << 8);//skip 8 bits --> 8 bit left shift
                     distance = distance/ (10 *10 * 100 *100);
-                    Diagnostics.Log("Distance:" + distance);
-                    Diagnostics.Log("EchoId:" + echoId);
-                    Diagnostics.Log("Intensity:" + intensity);                    
-                    pointCalc.GetDistance(distance);
+                    //Diagnostics.Log("Distance:" + distance);
+                    //Diagnostics.Log("EchoId:" + echoId);
+                    //Diagnostics.Log("Intensity:" + intensity);                    
+                    pointCalc.GetDistance(distance); //fill list with distance values
                 }
 
-                pointCalc.CalculateNewPoint(pointCalc._dist, 90f);
-            
+              float3[] values =  pointCalc.CalculateNewPoint(pointCalc._dist, 90f); //calculate 500 points of paket
+              ConvertCalculatedPointsToPoints(values); //create point objects
             }
+           
         }
 
 
        public static void ConvertCalculatedPointsToPoints(float3[] _points)
        {
-           Point point = new Point();
+           
            Diagnostics.Log("New Point: "+ _points[40]);
      
            foreach (var singlePoint in _points)
            {
-               point.Position = singlePoint;
-               OnNewPointCallbacks?.Invoke(point);
+                Point point = new Point();
+                point.Position = singlePoint;
+                OnNewPointCallbacks?.Invoke(point);              
             }
-           //return point;
-       }
+           
+        }
       //TODO: Complete foreach and transfer float3 array to Point Class and further to render Points
 
 
@@ -257,10 +259,10 @@ namespace Fusee.Tutorial.Core.DataTransmission
             //TimeSpan timespan = TimeSpan.FromMilliseconds(time);
 
             //Print out on console for testing
-            Diagnostics.Log("Packet Begin Marker: 0x" + packetBeginMarker.ToString("X"));
-            Diagnostics.Log("TypeID: 0x" + typeID.ToString("X"));
-            Diagnostics.Log("Version: 0x" + version.ToString("X"));
-            Diagnostics.Log("Packet Size: " + packetSize);
+            //Diagnostics.Log("Packet Begin Marker: 0x" + packetBeginMarker.ToString("X"));
+            //Diagnostics.Log("TypeID: 0x" + typeID.ToString("X"));
+            //Diagnostics.Log("Version: 0x" + version.ToString("X"));
+            //Diagnostics.Log("Packet Size: " + packetSize);
            // Diagnostics.Log("Time milliseconds: " + time);
 
             return ((packetBeginMarker == 0xFEEDBEEF) && (typeID == 0x1010) && (version == 0x0001));
@@ -291,13 +293,13 @@ namespace Fusee.Tutorial.Core.DataTransmission
 
 
             //Debug
-            Diagnostics.Log("Pos X: " + drone_posX);
-            Diagnostics.Log("Pos Y: " + drone_posY);
-            Diagnostics.Log("Pos Z: " + drone_posZ);
-            Diagnostics.Log("Quaternion W: " + quaternionW);
-            Diagnostics.Log("Quaternion X: " + quaternionX);
-            Diagnostics.Log("Quaternion Y: " + quaternionY);
-            Diagnostics.Log("Quaternion Z: " + quaternionZ);
+            //Diagnostics.Log("Pos X: " + drone_posX);
+            //Diagnostics.Log("Pos Y: " + drone_posY);
+            //Diagnostics.Log("Pos Z: " + drone_posZ);
+            //Diagnostics.Log("Quaternion W: " + quaternionW);
+            //Diagnostics.Log("Quaternion X: " + quaternionX);
+            //Diagnostics.Log("Quaternion Y: " + quaternionY);
+            //Diagnostics.Log("Quaternion Z: " + quaternionZ);
             pointCalc.GetValues(values);
             return values;
             
