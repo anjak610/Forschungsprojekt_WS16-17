@@ -194,6 +194,8 @@ namespace Fusee.Tutorial.Core.DataTransmission
                         Diagnostics.Log("Packet count:" + pointPakets.Count);
                         //file = SubArray(file, 2056, file.Length - 2056);
                         file = file.Skip(2056).ToArray();
+                        //pointCalc.GetValues();
+                       
                     }
                     catch
                     {
@@ -235,13 +237,11 @@ namespace Fusee.Tutorial.Core.DataTransmission
        public static void ConvertCalculatedPointsToPoints(float3[] _points)
        {
            
-           Diagnostics.Log("New Point: "+ _points[40]);
-     
-           foreach (var singlePoint in _points)
+          foreach (var singlePoint in _points)
            {
                 Point point = new Point();
                 point.Position = singlePoint;
-                Diagnostics.Log("Point Position: "+ point.Position);
+               // Diagnostics.Log("Point Position: "+ point.Position);
                 OnNewPointCallbacks?.Invoke(point);              
             }
            
@@ -292,7 +292,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
             values[5] = quaternionY;
             values[6] = quaternionZ;
 
-
+            pointCalc.GetValues(drone_posX, drone_posY, drone_posZ, quaternionX, quaternionY, quaternionZ, quaternionW);
             //Debug
             //Diagnostics.Log("Pos X: " + drone_posX);
             //Diagnostics.Log("Pos Y: " + drone_posY);
@@ -301,7 +301,9 @@ namespace Fusee.Tutorial.Core.DataTransmission
             //Diagnostics.Log("Quaternion X: " + quaternionX);
             //Diagnostics.Log("Quaternion Y: " + quaternionY);
             //Diagnostics.Log("Quaternion Z: " + quaternionZ);
-            pointCalc.GetValues(values);
+
+
+            //pointCalc.GetValues();
             return values;
             
         }
