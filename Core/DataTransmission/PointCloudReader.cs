@@ -241,6 +241,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
            {
                 Point point = new Point();
                 point.Position = singlePoint;
+                Diagnostics.Log("Point Position: "+ point.Position);
                 OnNewPointCallbacks?.Invoke(point);              
             }
            
@@ -259,11 +260,11 @@ namespace Fusee.Tutorial.Core.DataTransmission
             //TimeSpan timespan = TimeSpan.FromMilliseconds(time);
 
             //Print out on console for testing
-            //Diagnostics.Log("Packet Begin Marker: 0x" + packetBeginMarker.ToString("X"));
-            //Diagnostics.Log("TypeID: 0x" + typeID.ToString("X"));
-            //Diagnostics.Log("Version: 0x" + version.ToString("X"));
-            //Diagnostics.Log("Packet Size: " + packetSize);
-           // Diagnostics.Log("Time milliseconds: " + time);
+           //Diagnostics.Log("Packet Begin Marker: 0x" + packetBeginMarker.ToString("X"));
+           //Diagnostics.Log("TypeID: 0x" + typeID.ToString("X"));
+           //Diagnostics.Log("Version: 0x" + version.ToString("X"));
+           //Diagnostics.Log("Packet Size: " + packetSize);
+            //Diagnostics.Log("Time milliseconds: " + time);
 
             return ((packetBeginMarker == 0xFEEDBEEF) && (typeID == 0x1010) && (version == 0x0001));
         }

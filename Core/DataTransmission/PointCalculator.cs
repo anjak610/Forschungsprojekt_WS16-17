@@ -36,10 +36,10 @@ namespace Fusee.Tutorial.Core.DataTransmission
             float Posx = values[0];
             float PosY = values[1];
             float PosZ = values[2];
-            float qx = values[3];
-            float qy = values[4];
-            float qz = values[5];
-            float qw = values[6];
+            float qw = values[3];
+            float qx = values[4];
+            float qy = values[5];
+            float qz = values[6];
            
             _dronePoint = new float3 (Posx, PosY, PosZ);
            // Diagnostics.Log("PointCalc Values: " + _dronePoint);
