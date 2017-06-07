@@ -19,10 +19,12 @@ namespace Fusee.Tutorial.Core.DataTransmission
     public class PointCalculator
     {
         
-        private float3x3 rotmat;
+        private List <float3x3> rotmat = new List<float3x3>();
         public List<float> _dist = new List<float>();
         private float3[] _points;
-        private float3 _dronePoint;
+        private List<float3> _dronePos = new List<float3>();
+ 
+         private int pos = 0;
 
         public float3[] _Points
         {
@@ -30,20 +32,14 @@ namespace Fusee.Tutorial.Core.DataTransmission
             set { _points = value; }
         }
 
-        public void GetValues(float[] values)
+        public void GetValues(float PosX,float PosY, float PosZ, float qx, float qy, float qz, float qw )
         {
             _points = new float3[500];
-            float Posx = values[0];
-            float PosY = values[1];
-            float PosZ = values[2];
-            float qx = values[3];
-            float qy = values[4];
-            float qz = values[5];
-            float qw = values[6];
-           
-            _dronePoint = new float3 (Posx, PosY, PosZ);
-           // Diagnostics.Log("PointCalc Values: " + _dronePoint);
+
+           _dronePos.Add(new float3(PosX, PosY, PosZ)); 
             RotationMatrix(qx, qy, qz, qw);
+   
+            
         }
 
         public List<float> GetDistance(float distance)
@@ -59,8 +55,8 @@ namespace Fusee.Tutorial.Core.DataTransmission
             float el2 = 2 * (qy * qz) - (qx * qw);
             float el3 = 2 * (qy * qw) - (qx * qz);
 
-            rotmat = new float3x3(new float3(el1, el2, el3), new float3(el2, el1, el3), new float3(el3, el2, el1));
-            //Diagnostics.Log("RotationMatrix: " + rotmat);
+            rotmat.Add(new float3x3(new float3(el1, el2, el3), new float3(el2, el1, el3), new float3(el3, el2, el1)));
+          
         }
               
 
@@ -73,11 +69,16 @@ namespace Fusee.Tutorial.Core.DataTransmission
                             
                 float3[] distPoint = new float3[_points.Length];
                 distPoint[i] = new float3((_dist[i] * (float)(Sin(j)* Cos(phi))),(_dist[i] * (float)(Sin(j)* Sin(phi))),(_dist[i] * (float)(Cos(phi))));
-                float3 _offset = _dronePoint;
-                _points[k] = (rotmat * distPoint[k])+_offset;
+                float3[] _offset = new float3[_points.Length];
+                _offset[pos]=_dronePos[pos];
+                _points[k] = (rotmat[pos] * distPoint[k])+_offset[pos];
+                Diagnostics.Log("_dronepos " + _dronePos[pos]);
                 k++;
                 j= j + 0.18f;
+
+                //TODO check spherical coordinates --> computation seems to be wrong/ chose wrong directions for X,Y,Z ??
             }
+            pos++;
             //Diagnostics.Log("_points: " + _points[41]);
             //PointCloudReader.ConvertCalculatedPointsToPoints(_points);
             return _points;
