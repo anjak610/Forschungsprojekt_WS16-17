@@ -69,13 +69,14 @@ namespace Fusee.Tutorial.Core.DataTransmission
                             
                 float3[] distPoint = new float3[_points.Length];
                 distPoint[i] = new float3((_dist[i] * (float)(Sin(j)* Cos(phi))),(_dist[i] * (float)(Sin(j)* Sin(phi))),(_dist[i] * (float)(Cos(phi))));
-                float3[] _offset = new float3[_points.Length];
+                float3[] _offset = new float3[_dronePos.Count];
+
                 _offset[pos]=_dronePos[pos];
                 _points[k] = (rotmat[pos] * distPoint[k])+_offset[pos];
-                Diagnostics.Log("_dronepos " + _dronePos[pos]);
+                //Diagnostics.Log("_dronepos " + _dronePos[pos]);
                 k++;
                 j= j + 0.18f;
-
+               
                 //TODO check spherical coordinates --> computation seems to be wrong/ chose wrong directions for X,Y,Z ??
             }
             pos++;
@@ -83,6 +84,5 @@ namespace Fusee.Tutorial.Core.DataTransmission
             //PointCloudReader.ConvertCalculatedPointsToPoints(_points);
             return _points;
         }
-        //TODO --> check if calculation is working --> fix possible Problems and Render Points
     }
 }
