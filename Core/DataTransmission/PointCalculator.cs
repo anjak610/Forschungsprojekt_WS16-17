@@ -36,13 +36,13 @@ namespace Fusee.Tutorial.Core.DataTransmission
             float Posx = values[0];
             float PosY = values[1];
             float PosZ = values[2];
-            float qx = values[3];
-            float qy = values[4];
-            float qz = values[5];
-            float qw = values[6];
+            float qw = values[3];
+            float qx = values[4];
+            float qy = values[5];
+            float qz = values[6];
            
             _dronePoint = new float3 (Posx, PosY, PosZ);
-           // Diagnostics.Log("PointCalc Values: " + _dronePoint);
+            //Diagnostics.Log("PointCalc Values: " + qx+"\t" + qy+"\t" + qz+"\t" + qw);
             RotationMatrix(qx, qy, qz, qw);
         }
 
@@ -77,6 +77,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
                 _points[k] = (rotmat * distPoint[k])+_offset;
                 k++;
                 j= j + 0.18f;
+                //TODO: Check Spherical Coordinates again and orientation of created xyz Points!!
             }
             //Diagnostics.Log("_points: " + _points[41]);
             PointCloudReader.ConvertCalculatedPointsToPoints(_points);
