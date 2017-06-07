@@ -117,8 +117,9 @@ namespace Fusee.Tutorial.Core
             //*/  
 
             ///*
-            PointCloudReader.OnNewPointCallbacks += OnNewPointAdded;
+            //PointCloudReader.OnNewPointCallbacks += OnNewPointAdded;
             //PointCloudReader.ReadFromAsset("PointCloud_IPM.txt");
+            //PointCloudReader.ReadFromBinary(TestPacket.uav_live_stream);
             //*/          
 
             // stream point cloud via udp

@@ -219,9 +219,9 @@ namespace Fusee.Tutorial.Core.DataTransmission
                     int intensity = (int) ((paket[i] << 2) >> 26);//skip 2 bits take next 6 bits
                     float distance = (paket[i] << 8);//skip 8 bits --> 8 bit left shift
                     distance = distance/ (10 *10 * 100 *100);
-                   // Diagnostics.Log("Distance:" + distance);
-                   // Diagnostics.Log("EchoId:" + echoId);
-                   // Diagnostics.Log("Intensity:" + intensity);                    
+                    Diagnostics.Log("Distance:" + distance);
+                    Diagnostics.Log("EchoId:" + echoId);
+                    Diagnostics.Log("Intensity:" + intensity);                    
                     pointCalc.GetDistance(distance);
                 }
 
@@ -234,20 +234,18 @@ namespace Fusee.Tutorial.Core.DataTransmission
        public static void ConvertCalculatedPointsToPoints(float3[] _points)
        {
            Point point = new Point();
-
-           int c = 0;
+           Diagnostics.Log("New Point: "+ _points[40]);
+     
            foreach (var singlePoint in _points)
            {
-               c++;
-             
                point.Position = singlePoint;
-                Diagnostics.Log("Points " + point.Position);
                OnNewPointCallbacks?.Invoke(point);
-               //Diagnostics.Log("ForeachCount " + c);
             }
            //return point;
        }
-      
+      //TODO: Complete foreach and transfer float3 array to Point Class and further to render Points
+
+
 
         public static bool CheckHeader(byte[] file)
         {
