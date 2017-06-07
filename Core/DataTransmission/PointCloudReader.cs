@@ -77,7 +77,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
 
 
         private static byte[] pendingfile;
-
+        private static int overallPaketCount = 0;
         /// <summary>
 
         /// Starts loading from the specified asset.
@@ -332,12 +332,9 @@ namespace Fusee.Tutorial.Core.DataTransmission
 
             point.Position = new float3(numbers[0], numbers[2], numbers[1]);
 
-
-
             if (numbers.Length == 9)
 
             {
-
                 point.Color = new float3(numbers[3], numbers[4], numbers[5]);
 
 
@@ -366,7 +363,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
 
             List<float[]> droneInfos = new List<float[]>();
 
-            while (file.Length > 0)//at least one paket must be there //>=2052
+            while (file.Length > 2056)//at least one paket must be there //>=2052
             {
                 if (CheckHeader(file))
                 {
@@ -376,7 +373,8 @@ namespace Fusee.Tutorial.Core.DataTransmission
                         droneInfos.Add(info);
                         UInt32[] packet = CreatePaket(file);
                         pointPakets.Add(packet);
-                        Diagnostics.Log("Packet count:" + pointPakets.Count);
+                        overallPaketCount++;
+                        Diagnostics.Log("Packet count:" + overallPaketCount);
 
                         for (int i = 0; i < packet.Length; i++)//interate through points in packet and render
 
@@ -396,6 +394,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
                         float3[] values = pointCalc.CalculateNewPoint(pointCalc._dist, 90f); //calculate 500 points of paket
                         ConvertCalculatedPointsToPoints(values); //create point objects
                         file = file.Skip(2056).ToArray();//go to next paket
+
                     }
                     catch
                     {
@@ -405,7 +404,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
                 else
                 {
                     Diagnostics.Log("Paket not vaild");
-                    if (file.Length > 0)
+                    if (file.Length > 2056)
                     {
                         Diagnostics.Log("Looking for new pakets");
                         pendingfile = file;
@@ -593,9 +592,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
 
             UInt32 numberOfPoints = BitConverter.ToUInt32((SubArray(array, 48, 4)), 0);
 
-            Diagnostics.Log("Number of points: " + numberOfPoints);
-
-
+           // Diagnostics.Log("Number of points: " + numberOfPoints);
 
             List<UInt32> tmpList = new List<UInt32>();
 
@@ -609,26 +606,12 @@ namespace Fusee.Tutorial.Core.DataTransmission
 
                 UInt32 piece = BitConverter.ToUInt32(SubArray(array, count, 4), 0);
 
-                if (piece == 0xFEEDBEEF)
+                if (piece != 0xFEEDBEEF)
 
                 {
-
-                    Diagnostics.Log("End of Packet");
-
-
-
-                }
-
-                else
-
-                {
-
                     tmpList.Add(piece);
-
                 }
-
-
-
+                
                 count = count + 4;
 
             }
