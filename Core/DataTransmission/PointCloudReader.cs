@@ -8,6 +8,7 @@ using Fusee.Base.Common;
 using Fusee.Base.Core;
 using Fusee.Math.Core;
 using Fusee.Tutorial.Core.Common;
+using System.Threading;
 
 namespace Fusee.Tutorial.Core.DataTransmission
 {
@@ -36,6 +37,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
 
         public static Action<int> StartStreamingUDPCallback;
 
+        private static byte[] pendingfile;
         /// <summary>
         /// Starts loading from the specified asset.
         /// </summary>        
@@ -180,7 +182,6 @@ namespace Fusee.Tutorial.Core.DataTransmission
             
             List<UInt32[]> pointPakets = new List<UInt32[]>();
             List<float[]> droneInfos = new List<float[]>();
-            int originallength = file.Length;
             while (file.Length > 0)//at least one paket must be there //>=2052
             {
                 if (CheckHeader(file))
@@ -192,7 +193,6 @@ namespace Fusee.Tutorial.Core.DataTransmission
                         UInt32[] packet = CreatePaket(file);
                         pointPakets.Add(packet);
                         Diagnostics.Log("Packet count:" + pointPakets.Count);
-                        //file = SubArray(file, 2056, file.Length - 2056);
                         file = file.Skip(2056).ToArray();
                     }
                     catch
@@ -203,13 +203,21 @@ namespace Fusee.Tutorial.Core.DataTransmission
                 else
                 {
                     Diagnostics.Log("Paket not vaild");
-                    break;
-                    file = file.Skip(2040).ToArray();//TODO validate with end marker 0xDEADBEEF                   
+                    if (file.Length > 0)
+                    {
+                        Diagnostics.Log("Looking for new pakets");
+                        pendingfile = file;
+                        Task t = new Task(LookforMarkers);
+                        t.Start();
+                    }
+                    else Diagnostics.Log("File reading done");
+                    break;                
                 }
                 
             }
 
-            //TODO calculate point values with hex values  
+           
+
             foreach (var paket in pointPakets)//iterate through paket
             {
                 for (int i = 0; i < paket.Length; i++)//interate through points
@@ -232,20 +240,42 @@ namespace Fusee.Tutorial.Core.DataTransmission
         }
 
 
+        public static void LookforMarkers()
+        {
+            int i = 0;
+            while (pendingfile[i] == 0)
+            {
+                i++;
+
+            }
+                                                       
+           pendingfile = pendingfile.Skip(i).ToArray();
+
+            while (BitConverter.ToUInt32((SubArray(pendingfile, i, 4)), 0) != 0xFEEDBEEF)
+            {
+                i++;
+            }
+
+            pendingfile = pendingfile.Skip(i).ToArray();
+            //start paket readout again
+            ReadFromBinary(pendingfile);
+                           
+        }
+
+
        public static void ConvertCalculatedPointsToPoints(float3[] _points)
        {
-           
-           Diagnostics.Log("New Point: "+ _points[40]);
-     
+               
            foreach (var singlePoint in _points)
            {
                 Point point = new Point();
                 point.Position = singlePoint;
+                //Diagnostics.Log("New Point: " + point.Position);
                 OnNewPointCallbacks?.Invoke(point);              
             }
            
         }
-      //TODO: Complete foreach and transfer float3 array to Point Class and further to render Points
+
 
 
 
