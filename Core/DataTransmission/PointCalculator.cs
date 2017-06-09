@@ -26,6 +26,8 @@ namespace Fusee.Tutorial.Core.DataTransmission
  
          private int pos = 0;
 
+        
+
         public float3[] _Points
         {
             get { return _points; }
@@ -38,7 +40,6 @@ namespace Fusee.Tutorial.Core.DataTransmission
 
            _dronePos.Add(new float3(PosX, PosY, PosZ)); 
             RotationMatrix(qx, qy, qz, qw);
-   
             
         }
 
@@ -71,9 +72,17 @@ namespace Fusee.Tutorial.Core.DataTransmission
                 distPoint[i] = new float3((_dist[i] * (float)(Sin(j)* Cos(phi))),(_dist[i] * (float)(Sin(j)* Sin(phi))),(_dist[i] * (float)(Cos(phi))));
                 float3[] _offset = new float3[_dronePos.Count];
 
+
+                //_points[k].x = (rotmat[pos] * distPoint[k].x) + _offset[pos].x;
                 _offset[pos]=_dronePos[pos];
-                _points[k] = (rotmat[pos] * distPoint[k])+_offset[pos];
-                //Diagnostics.Log("_dronepos " + _dronePos[pos]);
+
+                _points[k] = (rotmat[pos] * distPoint[k]) + _offset[pos];
+
+                if (_points[k] == _offset[pos])
+                {
+                    _points[k] = _points[k+1];
+                }
+
                 k++;
                 j= j + 0.18f;
                

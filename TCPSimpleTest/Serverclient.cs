@@ -26,11 +26,11 @@ namespace Server
             @"C:/Users/Tanja Langer/Documents/Studium/Forschungsprojekt/Forschungsprojekt_WS16-17/TCPSimpleTest/PointCloud_IPM.txt";
 
 
-        private static string binarydatapath =
-           @"C:\Users\Tanja Langer\Desktop\Forschungsprojekt_WS16-17\TCPSimpleTest\TestPacket.uav_live_stream";
-
         //private static string binarydatapath =
-        // @"L:\Programme\Gitkraken\Forschungsprojekt_WS16-17\TCPSimpleTest\TestPacket.uav_live_stream";
+        //   @"C:\Users\Tanja Langer\Desktop\Forschungsprojekt_WS16-17\TCPSimpleTest\TestPacket.uav_live_stream";
+
+        private static string binarydatapath =
+         @"L:\Programme\Gitkraken\Forschungsprojekt_WS16-17\TCPSimpleTest\TestPacket.uav_live_stream";
 
 
         //private static string path = @"L:/Programme/Gitkraken/Forschungsprojekt_WS16-17/TCPSimpleTest/TestPoints.txt";

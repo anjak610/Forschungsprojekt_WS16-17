@@ -28,8 +28,6 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
             sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             receiving = false;
             connected = false;
-
-            
         }
 
         public void ConnecttoServer(string serveraddress, string localip)//send on port 1234
