@@ -391,7 +391,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
 
                         }
 
-                        float3[] values = pointCalc.CalculateNewPoint(pointCalc._dist, 90f); //calculate 500 points of paket
+                        float3[] values = pointCalc.CalculateNewPoint(pointCalc._dist, 0f); //calculate 500 points of paket
                         ConvertCalculatedPointsToPoints(values); //create point objects
                         file = file.Skip(2056).ToArray();//go to next paket
 

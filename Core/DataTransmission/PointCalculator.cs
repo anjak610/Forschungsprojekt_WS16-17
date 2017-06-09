@@ -23,8 +23,15 @@ namespace Fusee.Tutorial.Core.DataTransmission
         public List<float> _dist = new List<float>();
         private float3[] _points;
         private List<float3> _dronePos = new List<float3>();
- 
-         private int pos = 0;
+        private double yaw;
+
+        public double Yaw
+        {
+            get { return yaw; }
+            set { yaw = value; }
+        }
+
+        private int pos = 0;
 
         
 
@@ -56,6 +63,8 @@ namespace Fusee.Tutorial.Core.DataTransmission
             float el2 = 2 * (qy * qz) - (qx * qw);
             float el3 = 2 * (qy * qw) - (qx * qz);
 
+            yaw = System.Math.Atan2(2 * (qx * qz * qw * qw), qw * qw - qx * qx - qy * qy - qz * qz);
+
             rotmat.Add(new float3x3(new float3(el1, el2, el3), new float3(el2, el1, el3), new float3(el3, el2, el1)));
           
         }
@@ -76,17 +85,27 @@ namespace Fusee.Tutorial.Core.DataTransmission
                 //_points[k].x = (rotmat[pos] * distPoint[k].x) + _offset[pos].x;
                 _offset[pos]=_dronePos[pos];
 
+
+                //Switch y with z values
+                // float3[] _pointsAll = new float3[_dronePos.Count];
+                // _pointsAll[k] = (rotmat[pos] * distPoint[k]) + _offset[pos];
+                // _points[k]= new float3(_pointsAll[k].x, _pointsAll[k].z, _pointsAll[k].y);
+
                 _points[k] = (rotmat[pos] * distPoint[k]) + _offset[pos];
 
-                if (_points[k] == _offset[pos])
-                {
-                    _points[k] = _points[k+1];
-                }
+                //TODO exchange y and z values --> Rendering then stops after first package??? --> Solution in Progress
+
+
+                //turn on and off dronepos
+                // if (_points[k] == _offset[pos])
+                // {
+                //     _points[k] = _points[k-1];
+                // }
 
                 k++;
                 j= j + 0.18f;
                
-                //TODO check spherical coordinates --> computation seems to be wrong/ chose wrong directions for X,Y,Z ??
+                
             }
             pos++;
             //Diagnostics.Log("_points: " + _points[41]);
