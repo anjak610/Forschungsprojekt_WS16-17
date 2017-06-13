@@ -29,11 +29,11 @@ namespace Server
         //private static string binarydatapath =
         //   @"C:\Users\Tanja Langer\Desktop\Forschungsprojekt_WS16-17\TCPSimpleTest\TestPacket.uav_live_stream";
 
-       // private static string binarydatapath =
-       //  @"L:\Programme\Gitkraken\Forschungsprojekt_WS16-17\TCPSimpleTest\TestPacket.uav_live_stream";
-
         private static string binarydatapath =
-        @"D:\Gitkraken\Forschungsprojekt_WS16-17\Core\Assets\TestPacket.uav_live_stream";
+         @"L:\Programme\Gitkraken\Forschungsprojekt_WS16-17\TCPSimpleTest\TestPacket.uav_live_stream";
+
+       //private static string binarydatapath =
+       //@"D:\Gitkraken\Forschungsprojekt_WS16-17\Core\Assets\TestPacket.uav_live_stream";
 
 
         //private static string path = @"L:/Programme/Gitkraken/Forschungsprojekt_WS16-17/TCPSimpleTest/TestPoints.txt";

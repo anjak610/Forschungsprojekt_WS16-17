@@ -45,6 +45,17 @@ namespace Fusee.Tutorial.Core.DataTransmission
 
         public static PointCalculator pointCalc = new PointCalculator();
 
+
+        private static float drone_posX;
+        private static float drone_posY ;
+        private static float drone_posZ ;
+                         
+        //Orientation    
+        private static float quaternionW;
+        private static float quaternionX;
+        private static float quaternionY;
+        private static float quaternionZ;
+
         // store connection data to receive from
         private static int _port;
 
@@ -227,12 +238,53 @@ namespace Fusee.Tutorial.Core.DataTransmission
                             //Diagnostics.Log("Distance:" + distance);
                             //Diagnostics.Log("EchoId:" + echoId);
                             //Diagnostics.Log("Intensity:" + intensity);                    
-                            pointCalc.GetDistance(distance); //fill list with distance values
+                           // pointCalc.GetDistance(distance); //fill list with distance values
 
                         }
+                        OnDronePositionCallbacks?.Invoke(new float3(drone_posX,drone_posY, drone_posZ));
 
-                        float3[] values = pointCalc.CalculateNewPoint(pointCalc._dist, 0f); //calculate 500 points of paket
-                        ConvertCalculatedPointsToPoints(values); //create point objects
+                        float3 droneposition = new float3(drone_posX, drone_posY, drone_posZ);
+
+                        Point point2Pass = new Point();
+
+                        double angle = -45 * System.Math.PI / 180.0;
+                        double angle_inc = ((90.0) / 500.0) * System.Math.PI / 180.0;
+
+                        Quaternion uav_rot = new Quaternion(quaternionX,quaternionY,quaternionZ, quaternionW);
+
+                        float4x4 uav_rot_mat = Quaternion.QuaternionToMatrix(uav_rot);
+
+                        float4x4 global_rot_mat;
+                        float4x4.CreateFromAxisAngle(float3.UnitY, (float)System.Math.PI, out global_rot_mat);
+
+                        // convert point data to position, color and echo id
+                        foreach (uint point in packet)
+                        {
+                            double distance = point & 0x00FFFFFF;
+                            distance *= 0.0001; // --> to m
+
+                            if (distance < 0.001)
+                                continue;
+
+                            float3 ray = new float3(0, (float)(distance * System.Math.Sin(angle)), (float)(distance * System.Math.Cos(angle)));
+
+                            float intensity = (point & 0x3F000000) >> 24;
+                            intensity = intensity / 63;
+
+                            intensity *= 0.7f;
+                            intensity += 0.3f;
+
+                            byte echoId = (byte)(point >> 30);
+
+                            float3 posPoint = global_rot_mat * (uav_rot_mat * ray + droneposition);
+                            point2Pass.Position = new float3(posPoint.x, posPoint.z, posPoint.y);
+                            OnNewPointCallbacks?.Invoke(point2Pass);
+
+                            angle += angle_inc;
+                        }
+
+                        //float3[] values = pointCalc.CalculateNewPoint(pointCalc._dist, 0f); //calculate 500 points of paket
+                        //ConvertCalculatedPointsToPoints(values); //create point objects
                         file = file.Skip(2056).ToArray();//go to next paket
 
                     }
@@ -316,15 +368,15 @@ namespace Fusee.Tutorial.Core.DataTransmission
 
             float[] values = new float[7];
             //Position of Scanner
-            float drone_posX = BitConverter.ToSingle((SubArray(file, 20, 4)), 0);
-            float drone_posY = BitConverter.ToSingle((SubArray(file, 24, 4)), 0);
-            float drone_posZ = BitConverter.ToSingle((SubArray(file, 28, 4)), 0);
+             drone_posX = BitConverter.ToSingle((SubArray(file, 20, 4)), 0);
+             drone_posY = BitConverter.ToSingle((SubArray(file, 24, 4)), 0);
+             drone_posZ = BitConverter.ToSingle((SubArray(file, 28, 4)), 0);
 
             //Orientation
-            float quaternionW = BitConverter.ToSingle((SubArray(file, 32, 4)), 0);
-            float quaternionX = BitConverter.ToSingle((SubArray(file, 36, 4)), 0);
-            float quaternionY = BitConverter.ToSingle((SubArray(file, 40, 4)), 0);
-            float quaternionZ = BitConverter.ToSingle((SubArray(file, 44, 4)), 0);
+             quaternionW = BitConverter.ToSingle((SubArray(file, 32, 4)), 0);
+             quaternionX = BitConverter.ToSingle((SubArray(file, 36, 4)), 0);
+             quaternionY = BitConverter.ToSingle((SubArray(file, 40, 4)), 0);
+             quaternionZ = BitConverter.ToSingle((SubArray(file, 44, 4)), 0);
 
             values[0] = drone_posX;
             values[1] = drone_posY;
@@ -334,7 +386,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
             values[5] = quaternionY;
             values[6] = quaternionZ;
 
-            pointCalc.GetValues(drone_posX, drone_posY, drone_posZ, quaternionX, quaternionY, quaternionZ, quaternionW);
+            //pointCalc.GetValues(drone_posX, drone_posY, drone_posZ, quaternionX, quaternionY, quaternionZ, quaternionW);
 
             //Debug
             //Diagnostics.Log("Pos X: " + drone_posX);
@@ -344,7 +396,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
             //Diagnostics.Log("Quaternion X: " + quaternionX);
             //Diagnostics.Log("Quaternion Y: " + quaternionY);
             //Diagnostics.Log("Quaternion Z: " + quaternionZ);
-            //pointCalc.GetValues();
+           
 
             return values;            
         }

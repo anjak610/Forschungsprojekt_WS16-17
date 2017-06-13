@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Android.Graphics;
 using Fusee.Base.Core;
 using Fusee.Engine.Core;
 using Fusee.Math.Core;
@@ -20,7 +21,8 @@ namespace Fusee.Tutorial.Core.DataTransmission
     {
         
         private List <float3x3> rotmat = new List<float3x3>();
-        public List<float> _dist = new List<float>();
+        private List< float4x4> rotmtx = new List<float4x4>();
+        public List<double> _dist = new List<double>();
         //private float3[] _points;
         private float3[] _points = new float3[500];
         private List<float3> _dronePos = new List<float3>();
@@ -49,7 +51,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
             RotationMatrix(qx, qy, qz, qw);
         }
 
-        public List<float> GetDistance(float distance)
+        public List<double> GetDistance(float distance)
         {
             _dist.Add(distance);
             return _dist;          
@@ -58,42 +60,56 @@ namespace Fusee.Tutorial.Core.DataTransmission
         public void RotationMatrix(float qx, float qy, float qz, float qw)
         {
 
-            float el1 = (qx * qx) + (qy * qy) - (qz * qz) - (qw * qw);
-            float el2 = 2 * (qy * qz) - (qx * qw);
-            float el3 = 2 * (qy * qw) - (qx * qz);
+           // float el1 = (qx * qx) + (qy * qy) - (qz * qz) - (qw * qw);
+           // float el2 = 2 * (qy * qz) - (qx * qw);
+           // float el3 = 2 * (qy * qw) - (qx * qz);
+           //
+           // rotmat.Add(new float3x3(new float3(el1, el2, el3), new float3(el2, el1, el3), new float3(el3, el2, el1)));
+            Quaternion uav_rot = new Quaternion(qx, qy, qz, qw);
+            rotmtx.Add(Quaternion.QuaternionToMatrix(uav_rot));
 
-            rotmat.Add(new float3x3(new float3(el1, el2, el3), new float3(el2, el1, el3), new float3(el3, el2, el1)));
+           // Quaternion uav_rot = new Quaternion(qw, qx, qy, qz);
+           // float4x4 uav_rot_mat = Quaternion.QuaternionToMatrix(uav_rot);
         }
 
 
-        public float3[] CalculateNewPoint(List<float> _dist, float phi)
+        public float3[] CalculateNewPoint(List<double> _dist, float phi)
         {
            int k = 0;
-            float j = -45;// (90/ 500); 
+            //float j = (90/ 500);
+            double angle = -45 * System.Math.PI / 180.0;
+            double angle_inc = ((90.0) / 500.0) * System.Math.PI / 180.0;
+
+            float4x4 global_rot_mat;
+            float4x4.CreateFromAxisAngle(float3.UnitY, (float)System.Math.PI, out global_rot_mat);
+
+            // Matrix Mymatrix = new Matrix();
+            // Mymatrix.SetRotate(System.Math.PI,);
+
             for (int i = 0; i < 500; i++)
-            {
+            { 
 
                 float3[] distPoint = new float3[_points.Length];
-                distPoint[i] = new float3((_dist[i] * (float)(Sin(j) * Cos(phi))), (_dist[i] * (float)(Sin(j) * Sin(phi))), (_dist[i] * (float)(Cos(phi))));
-                
-                
+               // distPoint[i] = new float3((_dist[i] * (float)(Sin(j) * Cos(phi))), (_dist[i] * (float)(Sin(j) * Sin(phi))), (_dist[i] * (float)(Cos(phi))));
+               distPoint[i]= new float3(0, (float)(_dist[i] * System.Math.Sin(angle)), (float)(_dist[i] * System.Math.Cos(angle)));
+
                 float3[] _offset = new float3[_dronePos.Count];
 
                 //_points[k].x = (rotmat[pos] * distPoint[k].x) + _offset[pos].x;
                 _offset[pos] = _dronePos[pos];
 
                 float3[] _pointsAll = new float3[distPoint.Length];
-                _pointsAll[k] = (rotmat[pos] * distPoint[k]) + _offset[pos];
+                _points[k] = global_rot_mat*(rotmtx[pos] * distPoint[k] + _offset[pos]);
 
                 //Give DronePath DronePos
                 //_base.OnDronePositionAdded(_dronePos[pos]); //TODO: Not working yet
          
-               _points[k] = new float3(_pointsAll[k].x, _pointsAll[k].z, _pointsAll[k].y);                         
+               //_points[k] = new float3(_pointsAll[k].x, _pointsAll[k].z, _pointsAll[k].y);                         
 
-               // //turn on and off dronepos
                
                 k++;
-                j = j + 0.18f;                 
+                angle += angle_inc;
+                //j = j + 0.18f;                 
             
             }
             pos++;
