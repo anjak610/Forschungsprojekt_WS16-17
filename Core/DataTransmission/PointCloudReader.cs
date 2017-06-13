@@ -279,13 +279,14 @@ namespace Fusee.Tutorial.Core.DataTransmission
                             float3 posPoint = global_rot_mat * (uav_rot_mat * ray + droneposition);
                             point2Pass.Position = new float3(posPoint.x, posPoint.z, posPoint.y);
                             OnNewPointCallbacks?.Invoke(point2Pass);
-
+                            System.Diagnostics.Debug.WriteLine("New Point: " + point2Pass.Position);                          
                             angle += angle_inc;
-                        }
 
+                            
+                        }
                         //float3[] values = pointCalc.CalculateNewPoint(pointCalc._dist, 0f); //calculate 500 points of paket
                         //ConvertCalculatedPointsToPoints(values); //create point objects
-                        file = file.Skip(2056).ToArray();//go to next paket
+                        file = file.Skip(2056).ToArray();//go to next paket          
 
                     }
                     catch
@@ -335,7 +336,7 @@ namespace Fusee.Tutorial.Core.DataTransmission
             {
                 Point point = new Point();
                 point.Position = singlePoint;
-                //Diagnostics.Log("New Point: " + point.Position);
+     
                 OnNewPointCallbacks?.Invoke(point);
             }
         }
@@ -352,12 +353,12 @@ namespace Fusee.Tutorial.Core.DataTransmission
 
             //Print out on console for testing
 
-            //Diagnostics.Log("Packet Begin Marker: 0x" + packetBeginMarker.ToString("X"));
-            //Diagnostics.Log("TypeID: 0x" + typeID.ToString("X"));
-            //Diagnostics.Log("Version: 0x" + version.ToString("X"));
-            //Diagnostics.Log("Packet Size: " + packetSize);
+            Diagnostics.Log("Packet Begin Marker: 0x" + packetBeginMarker.ToString("X"));
+            Diagnostics.Log("TypeID: 0x" + typeID.ToString("X"));
+            Diagnostics.Log("Version: 0x" + version.ToString("X"));
+            Diagnostics.Log("Packet Size: " + packetSize);
             //Diagnostics.Log("Time milliseconds: " + time);
-            
+
             return ((packetBeginMarker == 0xFEEDBEEF) && (typeID == 0x1010) && (version == 0x0001));
 
         }

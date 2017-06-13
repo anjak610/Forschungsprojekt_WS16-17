@@ -67,8 +67,9 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
                     System.Diagnostics.Debug.WriteLine("Client Socket accepting");
                     byte[] sizebuffer = new byte[8];
                     acceptor.Receive(sizebuffer, 0, sizebuffer.Length, 0);
-                    //receive length of data                 
-                    int size = BitConverter.ToInt32(sizebuffer, 0);
+                    //receive length of data  
+                    int size = 0;               
+                    size = BitConverter.ToInt32(sizebuffer, 0);
                     MemoryStream ms = new MemoryStream();//will hold the data that is received
 
                     while (size > 0)
