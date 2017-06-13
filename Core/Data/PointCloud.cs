@@ -19,7 +19,7 @@ namespace Fusee.Tutorial.Core.Data
         private const int UPDATE_EVERY = 1000; // every xth point the point cloud should update its meshes
         private const int COMPUTE_EVERY = 1; // take only every xth point into account in order to speed up calculation
         
-        private static float _particleSize = 0.05f; // maybe gets changed from platform specific classes
+        private static float _particleSize = 0.15f; // maybe gets changed from platform specific classes
         public const float ParticleSizeInterval = 0.025f;
         
         private int _pointCounter = 0;

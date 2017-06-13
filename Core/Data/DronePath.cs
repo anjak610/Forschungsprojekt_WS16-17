@@ -30,6 +30,7 @@ namespace Fusee.Tutorial.Core.Data
         /// </summary>
         public DronePath(RenderContext rc) : base(rc)
         { 
+            
         }
 
         /// <summary>
@@ -55,6 +56,7 @@ namespace Fusee.Tutorial.Core.Data
             _positions.AddAttribute(position);
             _lastPosition = position;
         }
+
 
         /// <summary>
         /// Gets called every frame. Takes care of rendering the drone path.

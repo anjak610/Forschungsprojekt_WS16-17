@@ -3,6 +3,7 @@ using Fusee.Math.Core;
 using static Fusee.Engine.Core.Input;
 using static Fusee.Engine.Core.Time;
 using System.Threading;
+using System.Collections.Generic;
 using Android.OS;
 using Fusee.Base.Common;
 using Fusee.Engine.Common;
@@ -48,7 +49,8 @@ namespace Fusee.Tutorial.Core
         private DronePath _dronePath;
 
         private BoundingBox _boundingBox;
-                
+
+        private PointCalculator _pointCalc;                
         // due to multithreading
         private AutoResetEvent _signalEvent = new AutoResetEvent(true);
 
@@ -98,6 +100,9 @@ namespace Fusee.Tutorial.Core
             _boundingBox = new BoundingBox();
             _boundingBox.UpdateCallbacks += OnBoundingBoxUpdate;
 
+            //get drone position from Calculator
+            _pointCalc = new PointCalculator();
+
             // read shaders from files
 
             _pointCloud = new PointCloud(RC, _boundingBox);
@@ -106,7 +111,7 @@ namespace Fusee.Tutorial.Core
 
 
             //Zoom Value
-            _zoom = 60;
+            _zoom = 120;
 
             // stream point cloud from text file
 
@@ -117,13 +122,13 @@ namespace Fusee.Tutorial.Core
 
            //stream from binary via udp 
             PointCloudReader.OnNewPointCallbacks += OnNewPointAdded;
-
+            PointCloudReader.OnDronePositionCallbacks += OnDronePositionAdded;
                      
 
             // stream point cloud via udp
 
             //UDPReceiver.OnNewPointCallbacks += OnNewPointAdded;
-            //UDPReceiver.OnDronePositionCallbacks += OnDronePositionAdded;
+           // UDPReceiver.OnDronePositionCallbacks += OnDronePositionAdded;
             //UDPReceiver.StreamFrom(UDP_PORT);
 
 
@@ -158,7 +163,7 @@ namespace Fusee.Tutorial.Core
             // Render
 
             RC.ModelView = MoveInScene();
-            
+
             _signalEvent.WaitOne(); // stop other thread from adding points until these points have been written to the gpu memory
             
             if (CurrentViewMode == ViewMode.PointCloud)
@@ -339,10 +344,12 @@ namespace Fusee.Tutorial.Core
         /// Gets called when a new position for the drone is transmitted.
         /// </summary>
         /// <param name="position"></param>
-        private void OnDronePositionAdded(float3 position)
+        public void OnDronePositionAdded(float3 position)
         {
             _dronePath.AddPosition(position);
         }
+
+      
 
         #endregion
 
