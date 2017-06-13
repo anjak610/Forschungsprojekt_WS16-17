@@ -62,14 +62,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup -->
   <ItemGroup>
-    <Compile Include="HelperClasses\ConnectionDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="HelperClasses\ConnectionDialog.designer.cs">
-      <DependentUpon>ConnectionDialog.cs</DependentUpon>
-    </Compile>
     <Compile Include="HelperClasses\Keymapper.cs" />
-    <Compile Include="HelperClasses\ReceiverClient.cs" />
     <Compile Include="HelperClasses\RenderControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -153,9 +146,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="HelperClasses\ConnectionDialog.resx">
-      <DependentUpon>ConnectionDialog.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="HelperClasses\UIForm.resx">
       <DependentUpon>UIForm.cs</DependentUpon>
     </EmbeddedResource>

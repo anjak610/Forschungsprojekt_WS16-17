@@ -1,19 +1,15 @@
 ﻿using Fusee.Engine.Core;
 using System;
-using System.Drawing;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using Fusee.Base.Common;
 using Fusee.Base.Core;
 using Fusee.Base.Imp.Desktop;
-using Fusee.Math.Core;
 using Fusee.Serialization;
 using Fusee.Tutorial.Core;
 using Fusee.Tutorial.Core.DataTransmission;
 using Path = Fusee.Base.Common.Path;
-using Fusee.Tutorial.Core.Common;
 using Fusee.Tutorial.Core.Data;
 using Font = Fusee.Base.Core.Font;
 
@@ -23,11 +19,12 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
     {
         public Panel renderPanel;
         public IntPtr panelHandle;
+
         private PointVisualizationBase currentApp;
+
         private RenderControl currentControl;
         private WinformsHost currentHost;
-
-
+        
         public UIForm()
         {
             InitializeComponent();
@@ -39,9 +36,6 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
 
             SetSize(width, height);
             StartPosition = FormStartPosition.CenterScreen;
-            plus_button.Click += plus_button_Click;
-            minus_button.Click += minus_button_Click;
-
         }
 
         public void SetSize(int width, int height)
@@ -49,6 +43,8 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
             Width = width + (Width - ClientSize.Width);
             Height = height + (Height - ClientSize.Height);
         }
+
+        #region window life cycle
 
         public void StartCurrentApp()
         {
@@ -71,35 +67,21 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
                 Dock = DockStyle.Fill,
                 Name = "RenderControl",
                 TabIndex = 0
-            };         
+            };
 
             currentControl.HandleCreated += renderControl_HandleCreated; // <- This is crucial: Prepare for STEP TWO.
 
             renderPanel.Controls.Add(currentControl);
-
-
         }
 
         private void renderControl_HandleCreated(object sender, EventArgs e)
         {
             //  STEP TWO - Now the underlying Windows Window was created - we can hook OpenGL on it.
-            //
-
             // Take this as an example how to hook up any FUSEE application with a given Winforms form:
-
-
-
             // Then instantiate your app (could be as well _currentApp = new MyOwnRenderCanvasDerivedClass(); )
 
-
-           
-
-
             // Inject Fusee.Engine.Base InjectMe dependencies
-           // FrameRateLogger _fRL = new FrameRateLogger(); // start logging frame rate on console
-
-            // connect UDPReceiver with PointCloudReader
-            PointCloudReader.StartStreamingUDPCallback += new UDPReceiver().StreamFrom;
+            //FrameRateLogger _fRL = new FrameRateLogger(); // start logging frame rate on console
 
             // Inject Fusee.Engine.Base InjectMe dependencies
             IO.IOImp = new Fusee.Base.Imp.Desktop.IOImp();
@@ -131,13 +113,13 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
                 });
 
             AssetStorage.RegisterProvider(fap);
-          
 
             // First create a WinformsHost around the control
             currentHost = new WinformsHost(currentControl, canvaspanel);
 
             currentApp = new Core.PointVisualizationBase();
             currentApp.UDPReceiver = new UDPReceiver();
+            currentApp.SetUDPPort(50123);
 
             // Now use the host as the canvas AND the input implementation of your App
             // Inject Fusee.Engine InjectMe dependencies (hard coded)
@@ -151,18 +133,6 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
 
             //// Then you can run the app
             currentApp.Run();
-
-           
-        }
-
-        private void plus_button_Click(object sender, EventArgs e)
-        {
-           PointCloud.IncreaseParticleSize(0.02f);
-        }
-
-        private void minus_button_Click(object sender, EventArgs e)
-        {
-            PointCloud.DecreaseParticleSize(0.02f);
         }
 
         private void CloseCurrentApp()
@@ -205,17 +175,36 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
             StartCurrentApp();
         }
 
-        private void setup_btn_Click(object sender, EventArgs e)
-        {
+        #endregion
+        
+        #region Event Handler for UI Elements
 
-            ConnectionDialog SetupForm = new ConnectionDialog();
-            SetupForm.Show();
+        private void plus_button_Click(object sender, EventArgs e)
+        {
+            PointCloud.IncreaseParticleSize(0.02f);
+        }
+
+        private void minus_button_Click(object sender, EventArgs e)
+        {
+            PointCloud.DecreaseParticleSize(0.02f);
         }
 
         private void chg_view_btn_Click(object sender, EventArgs e)
         {
-             currentApp.SwitchViewMode();
-            
+            currentApp.SwitchViewMode();
         }
+
+        private void port_apply_btn_Click(object sender, EventArgs e)
+        {
+            int port;
+            bool success = int.TryParse(this.port_txt.Text, out port);
+
+            if(success)
+            {
+                currentApp.SetUDPPort(port);
+            }
+        }
+
+        #endregion
     }
 }

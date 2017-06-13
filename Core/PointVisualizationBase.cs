@@ -3,13 +3,10 @@ using Fusee.Math.Core;
 using static Fusee.Engine.Core.Input;
 using static Fusee.Engine.Core.Time;
 using System.Threading;
-using Android.OS;
 using Fusee.Base.Common;
 using Fusee.Engine.Common;
 using Fusee.Tutorial.Core.Data;
 using Fusee.Tutorial.Core.Data_Transmission;
-using Java.IO;
-using Debug = System.Diagnostics.Debug;
 using Fusee.Tutorial.Core.DataTransmission;
 
 namespace Fusee.Tutorial.Core
@@ -29,10 +26,7 @@ namespace Fusee.Tutorial.Core
         #region Fields
 
         #region UDP Connection
-
-        private const int UDP_PORT = 50123;//8001;
-        public int udpPort { get; set; }
-
+        
         [InjectMe] public IUDPReceiver UDPReceiver;
 
         #endregion
@@ -103,8 +97,7 @@ namespace Fusee.Tutorial.Core
             _pointCloud = new PointCloud(RC, _boundingBox);
             _voxelSpace = new VoxelSpace(RC, _boundingBox);
             _dronePath = new DronePath(RC);
-
-
+            
             //Zoom Value
             _zoom = 60;
 
@@ -114,18 +107,14 @@ namespace Fusee.Tutorial.Core
             //AssetReader.OnNewPointCallbacks += OnNewPointAdded;
             //AssetReader.ReadFromAsset("PointCloud_IPM.txt");
             //*/  
-
-           //stream from binary via udp 
-            PointCloudReader.OnNewPointCallbacks += OnNewPointAdded;
-
-                     
-
+            
             // stream point cloud via udp
 
-            //UDPReceiver.OnNewPointCallbacks += OnNewPointAdded;
-            //UDPReceiver.OnDronePositionCallbacks += OnDronePositionAdded;
-            //UDPReceiver.StreamFrom(UDP_PORT);
-
+            //*
+            UDPReceiver.OnNewPointCallbacks += OnNewPointAdded;
+            UDPReceiver.OnDronePositionCallbacks += OnDronePositionAdded;
+            UDPReceiver.Listen();
+            //*/
 
             // Set the clear color for the backbuffer
             RC.ClearColor = new float4(0.95f, 0.95f, 0.95f, 1);
@@ -355,6 +344,14 @@ namespace Fusee.Tutorial.Core
         {
             ViewMode nextViewMode = CurrentViewMode == ViewMode.PointCloud ? ViewMode.VoxelSpace : ViewMode.PointCloud;
             CurrentViewMode = nextViewMode;
+        }
+
+        /// <summary>
+        /// Sets the port for the udp receiver to listen to.
+        /// </summary>
+        public void SetUDPPort(int port)
+        {
+            UDPReceiver.SetPort(port);
         }
 
         #endregion

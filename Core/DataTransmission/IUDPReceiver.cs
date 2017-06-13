@@ -12,6 +12,7 @@ namespace Fusee.Tutorial.Core.Data_Transmission
         OnNewPointAdded OnNewPointCallbacks { get; set; }
         Action<float3> OnDronePositionCallbacks { get; set; }
 
-        void StreamFrom(int port);
+        void Listen();
+        void SetPort(int port);
     }
 }

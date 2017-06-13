@@ -155,8 +155,6 @@ namespace Fusee.Tutorial.Android
 
                 // connect UDPReceiver with PointCloudReader
                 app.UDPReceiver = new UDPReceiver();
-                PointCloudReader.StartStreamingUDPCallback += app.UDPReceiver.StreamFrom;
-
 
                 // Inject Fusee.Engine InjectMe dependencies (hard coded)
 

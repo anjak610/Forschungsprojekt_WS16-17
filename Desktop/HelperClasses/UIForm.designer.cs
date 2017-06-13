@@ -31,10 +31,12 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UIForm));
             this.canvaspanel = new System.Windows.Forms.Panel();
             this.chg_view_btn = new System.Windows.Forms.Button();
-            this.setup_btn = new System.Windows.Forms.Button();
             this.label_particle_size = new System.Windows.Forms.Label();
             this.plus_button = new System.Windows.Forms.Button();
             this.minus_button = new System.Windows.Forms.Button();
+            this.port_txt = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.port_apply_btn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // canvaspanel
@@ -43,18 +45,18 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.canvaspanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.canvaspanel.Location = new System.Drawing.Point(0, 70);
+            this.canvaspanel.Location = new System.Drawing.Point(0, 75);
             this.canvaspanel.Margin = new System.Windows.Forms.Padding(70, 5, 5, 5);
-            this.canvaspanel.MinimumSize = new System.Drawing.Size(1180, 800);
+            this.canvaspanel.MinimumSize = new System.Drawing.Size(1180, 600);
             this.canvaspanel.Name = "canvaspanel";
-            this.canvaspanel.Size = new System.Drawing.Size(1182, 893);
+            this.canvaspanel.Size = new System.Drawing.Size(1182, 600);
             this.canvaspanel.TabIndex = 0;
             // 
             // chg_view_btn
             // 
             this.chg_view_btn.BackColor = System.Drawing.SystemColors.ControlLight;
             this.chg_view_btn.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.chg_view_btn.Location = new System.Drawing.Point(410, 7);
+            this.chg_view_btn.Location = new System.Drawing.Point(749, 11);
             this.chg_view_btn.MinimumSize = new System.Drawing.Size(180, 40);
             this.chg_view_btn.Name = "chg_view_btn";
             this.chg_view_btn.Size = new System.Drawing.Size(181, 40);
@@ -63,32 +65,21 @@
             this.chg_view_btn.UseVisualStyleBackColor = false;
             this.chg_view_btn.Click += new System.EventHandler(this.chg_view_btn_Click);
             // 
-            // setup_btn
-            // 
-            this.setup_btn.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.setup_btn.Location = new System.Drawing.Point(242, 7);
-            this.setup_btn.MinimumSize = new System.Drawing.Size(150, 40);
-            this.setup_btn.Name = "setup_btn";
-            this.setup_btn.Size = new System.Drawing.Size(150, 40);
-            this.setup_btn.TabIndex = 0;
-            this.setup_btn.Text = "Setup Connection";
-            this.setup_btn.UseVisualStyleBackColor = false;
-            this.setup_btn.Click += new System.EventHandler(this.setup_btn_Click);
-            // 
             // label_particle_size
             // 
             this.label_particle_size.AutoSize = true;
-            this.label_particle_size.Location = new System.Drawing.Point(12, 17);
+            this.label_particle_size.Location = new System.Drawing.Point(970, 12);
             this.label_particle_size.MinimumSize = new System.Drawing.Size(90, 18);
             this.label_particle_size.Name = "label_particle_size";
             this.label_particle_size.Size = new System.Drawing.Size(90, 18);
             this.label_particle_size.TabIndex = 1;
             this.label_particle_size.Text = "Particle Size";
+            this.label_particle_size.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // plus_button
             // 
             this.plus_button.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.plus_button.Location = new System.Drawing.Point(110, 7);
+            this.plus_button.Location = new System.Drawing.Point(1122, 12);
             this.plus_button.MinimumSize = new System.Drawing.Size(50, 40);
             this.plus_button.Name = "plus_button";
             this.plus_button.Size = new System.Drawing.Size(50, 40);
@@ -99,7 +90,7 @@
             // 
             // minus_button
             // 
-            this.minus_button.Location = new System.Drawing.Point(166, 7);
+            this.minus_button.Location = new System.Drawing.Point(1066, 12);
             this.minus_button.MinimumSize = new System.Drawing.Size(50, 40);
             this.minus_button.Name = "minus_button";
             this.minus_button.Size = new System.Drawing.Size(50, 40);
@@ -108,22 +99,52 @@
             this.minus_button.UseVisualStyleBackColor = true;
             this.minus_button.Click += new System.EventHandler(this.minus_button_Click);
             // 
+            // port_txt
+            // 
+            this.port_txt.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
+            this.port_txt.Location = new System.Drawing.Point(15, 29);
+            this.port_txt.Name = "port_txt";
+            this.port_txt.Size = new System.Drawing.Size(155, 21);
+            this.port_txt.TabIndex = 0;
+            this.port_txt.Text = "50123";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(12, 9);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(29, 15);
+            this.label1.TabIndex = 1;
+            this.label1.Text = "Port";
+            // 
+            // port_apply_btn
+            // 
+            this.port_apply_btn.Location = new System.Drawing.Point(176, 28);
+            this.port_apply_btn.Name = "port_apply_btn";
+            this.port_apply_btn.Size = new System.Drawing.Size(75, 24);
+            this.port_apply_btn.TabIndex = 2;
+            this.port_apply_btn.Text = "Apply";
+            this.port_apply_btn.UseVisualStyleBackColor = true;
+            this.port_apply_btn.Click += new System.EventHandler(this.port_apply_btn_Click);
+            // 
             // UIForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(1182, 953);
+            this.ClientSize = new System.Drawing.Size(1184, 561);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.port_apply_btn);
             this.Controls.Add(this.chg_view_btn);
+            this.Controls.Add(this.port_txt);
             this.Controls.Add(this.minus_button);
-            this.Controls.Add(this.setup_btn);
             this.Controls.Add(this.plus_button);
             this.Controls.Add(this.label_particle_size);
             this.Controls.Add(this.canvaspanel);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
-            this.MinimumSize = new System.Drawing.Size(1200, 1000);
+            this.MinimumSize = new System.Drawing.Size(1200, 600);
             this.Name = "UIForm";
             this.Text = "Fusee Cloud Vision";
             this.Load += new System.EventHandler(this.UIForm_Load);
@@ -138,7 +159,9 @@
         private System.Windows.Forms.Label label_particle_size;
         private System.Windows.Forms.Button plus_button;
         private System.Windows.Forms.Button minus_button;
-        private System.Windows.Forms.Button setup_btn;
         private System.Windows.Forms.Button chg_view_btn;
+        private System.Windows.Forms.TextBox port_txt;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button port_apply_btn;
     }
 }
