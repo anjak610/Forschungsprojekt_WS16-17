@@ -37,6 +37,13 @@
             this.port_txt = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.port_apply_btn = new System.Windows.Forms.Button();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.intensity_radio_btn = new System.Windows.Forms.RadioButton();
+            this.depth_radio_btn = new System.Windows.Forms.RadioButton();
+            this.echo_minus_btn = new System.Windows.Forms.Button();
+            this.echo_plus_btn = new System.Windows.Forms.Button();
+            this.echo_txt = new System.Windows.Forms.Label();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // canvaspanel
@@ -56,7 +63,7 @@
             // 
             this.chg_view_btn.BackColor = System.Drawing.SystemColors.ControlLight;
             this.chg_view_btn.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.chg_view_btn.Location = new System.Drawing.Point(749, 11);
+            this.chg_view_btn.Location = new System.Drawing.Point(521, 19);
             this.chg_view_btn.MinimumSize = new System.Drawing.Size(180, 40);
             this.chg_view_btn.Name = "chg_view_btn";
             this.chg_view_btn.Size = new System.Drawing.Size(181, 40);
@@ -68,7 +75,7 @@
             // label_particle_size
             // 
             this.label_particle_size.AutoSize = true;
-            this.label_particle_size.Location = new System.Drawing.Point(970, 12);
+            this.label_particle_size.Location = new System.Drawing.Point(970, 19);
             this.label_particle_size.MinimumSize = new System.Drawing.Size(90, 18);
             this.label_particle_size.Name = "label_particle_size";
             this.label_particle_size.Size = new System.Drawing.Size(90, 18);
@@ -79,7 +86,7 @@
             // plus_button
             // 
             this.plus_button.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.plus_button.Location = new System.Drawing.Point(1122, 12);
+            this.plus_button.Location = new System.Drawing.Point(1122, 19);
             this.plus_button.MinimumSize = new System.Drawing.Size(50, 40);
             this.plus_button.Name = "plus_button";
             this.plus_button.Size = new System.Drawing.Size(50, 40);
@@ -90,7 +97,7 @@
             // 
             // minus_button
             // 
-            this.minus_button.Location = new System.Drawing.Point(1066, 12);
+            this.minus_button.Location = new System.Drawing.Point(1066, 19);
             this.minus_button.MinimumSize = new System.Drawing.Size(50, 40);
             this.minus_button.Name = "minus_button";
             this.minus_button.Size = new System.Drawing.Size(50, 40);
@@ -127,12 +134,80 @@
             this.port_apply_btn.UseVisualStyleBackColor = true;
             this.port_apply_btn.Click += new System.EventHandler(this.port_apply_btn_Click);
             // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.intensity_radio_btn);
+            this.groupBox1.Controls.Add(this.depth_radio_btn);
+            this.groupBox1.Location = new System.Drawing.Point(286, 9);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(229, 55);
+            this.groupBox1.TabIndex = 4;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Shading";
+            // 
+            // intensity_radio_btn
+            // 
+            this.intensity_radio_btn.AutoSize = true;
+            this.intensity_radio_btn.Location = new System.Drawing.Point(120, 32);
+            this.intensity_radio_btn.Name = "intensity_radio_btn";
+            this.intensity_radio_btn.Size = new System.Drawing.Size(69, 19);
+            this.intensity_radio_btn.TabIndex = 1;
+            this.intensity_radio_btn.Text = "Intensity";
+            this.intensity_radio_btn.UseVisualStyleBackColor = true;
+            this.intensity_radio_btn.Click += new System.EventHandler(this.intensity_radio_btn_Click);
+            // 
+            // depth_radio_btn
+            // 
+            this.depth_radio_btn.AutoSize = true;
+            this.depth_radio_btn.Checked = true;
+            this.depth_radio_btn.Location = new System.Drawing.Point(7, 32);
+            this.depth_radio_btn.Name = "depth_radio_btn";
+            this.depth_radio_btn.Size = new System.Drawing.Size(107, 19);
+            this.depth_radio_btn.TabIndex = 0;
+            this.depth_radio_btn.TabStop = true;
+            this.depth_radio_btn.Text = "Depth Shading";
+            this.depth_radio_btn.UseVisualStyleBackColor = true;
+            this.depth_radio_btn.Click += new System.EventHandler(this.depth_radio_btn_Click);
+            // 
+            // echo_minus_btn
+            // 
+            this.echo_minus_btn.Location = new System.Drawing.Point(816, 19);
+            this.echo_minus_btn.Name = "echo_minus_btn";
+            this.echo_minus_btn.Size = new System.Drawing.Size(50, 40);
+            this.echo_minus_btn.TabIndex = 5;
+            this.echo_minus_btn.Text = "-";
+            this.echo_minus_btn.UseVisualStyleBackColor = true;
+            this.echo_minus_btn.Click += new System.EventHandler(this.echo_minus_btn_Click);
+            // 
+            // echo_plus_btn
+            // 
+            this.echo_plus_btn.Location = new System.Drawing.Point(873, 19);
+            this.echo_plus_btn.Name = "echo_plus_btn";
+            this.echo_plus_btn.Size = new System.Drawing.Size(50, 40);
+            this.echo_plus_btn.TabIndex = 6;
+            this.echo_plus_btn.Text = "+";
+            this.echo_plus_btn.UseVisualStyleBackColor = true;
+            this.echo_plus_btn.Click += new System.EventHandler(this.echo_plus_btn_Click);
+            // 
+            // echo_txt
+            // 
+            this.echo_txt.AutoSize = true;
+            this.echo_txt.Location = new System.Drawing.Point(749, 19);
+            this.echo_txt.Name = "echo_txt";
+            this.echo_txt.Size = new System.Drawing.Size(65, 15);
+            this.echo_txt.TabIndex = 7;
+            this.echo_txt.Text = "Echo Id: -1";
+            // 
             // UIForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(1184, 561);
+            this.Controls.Add(this.echo_txt);
+            this.Controls.Add(this.echo_plus_btn);
+            this.Controls.Add(this.echo_minus_btn);
+            this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.port_apply_btn);
             this.Controls.Add(this.chg_view_btn);
@@ -148,6 +223,8 @@
             this.Name = "UIForm";
             this.Text = "Fusee Cloud Vision";
             this.Load += new System.EventHandler(this.UIForm_Load);
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -163,5 +240,11 @@
         private System.Windows.Forms.TextBox port_txt;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button port_apply_btn;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.RadioButton intensity_radio_btn;
+        private System.Windows.Forms.RadioButton depth_radio_btn;
+        private System.Windows.Forms.Button echo_minus_btn;
+        private System.Windows.Forms.Button echo_plus_btn;
+        private System.Windows.Forms.Label echo_txt;
     }
 }

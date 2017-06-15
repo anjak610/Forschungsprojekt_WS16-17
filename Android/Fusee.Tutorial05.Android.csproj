@@ -124,7 +124,6 @@
   <ItemGroup>
     <Compile Include="HelperClasses\ConnectionDialog.cs" />
     <Compile Include="HelperClasses\FrameRateLogger.cs" />
-    <Compile Include="HelperClasses\ReceiverClient.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="HelperClasses\UDPReceiver.cs" />

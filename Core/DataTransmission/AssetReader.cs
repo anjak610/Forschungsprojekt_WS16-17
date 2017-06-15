@@ -95,9 +95,9 @@ namespace Fusee.Tutorial.Core.Data_Transmission
 
             if (numbers.Length == 9)
             {
-                point.Color = new float3(numbers[3], numbers[4], numbers[5]);
+                //point.Intensity = new float3(numbers[3], numbers[4], numbers[5]);
 
-                point.EchoId = numbers[6];
+                //point.EchoId = numbers[6];
                 point.ScanNr = numbers[8];
             }
 

@@ -5,6 +5,7 @@ using Fusee.Tutorial.Core.Common;
 using System.Collections.Generic;
 using Fusee.Math.Core;
 using System.Diagnostics;
+using static Fusee.Tutorial.Core.PointVisualizationBase;
 
 namespace Fusee.Tutorial.Core.Data
 {
@@ -23,6 +24,7 @@ namespace Fusee.Tutorial.Core.Data
         public const float ParticleSizeInterval = 0.025f;
         
         private int _pointCounter = 0;
+        private sbyte _currentEchoId = -1; // render all dots, not only a single echo id
 
         private float _aspectRatio = 1; // needed for particle size to be square, aspect ratio of viewport => see OnWindowResize
 
@@ -37,11 +39,12 @@ namespace Fusee.Tutorial.Core.Data
         private IShaderParam n_cloudCenterWorldParam;
         private IShaderParam n_cloudRadiusParam;
 
+        private int depthShading = 1; // acts as a bool
+        private IShaderParam _shadingModeParam;
 
         // This is the object where new vertices are stored. Also look at the description of the class(es) for more information.
-        private StaticMeshList _meshList = new StaticMeshList();
-      
-
+        private Dictionary<byte, StaticMeshList> _meshLists = new Dictionary<byte, StaticMeshList>();
+        
         #endregion
         
         #region Methods
@@ -79,6 +82,7 @@ namespace Fusee.Tutorial.Core.Data
             _particleSizeParam = _rc.GetShaderParam(_shader, "particleSize");
             n_cloudCenterWorldParam = _rc.GetShaderParam(_shader, "n_cloudCenterWorld");
             n_cloudRadiusParam = _rc.GetShaderParam(_shader, "n_cloudRadius");
+            _shadingModeParam = _rc.GetShaderParam(_shader, "depthShading");
         }
 
         /// <summary>
@@ -98,11 +102,32 @@ namespace Fusee.Tutorial.Core.Data
 
             _rc.SetShaderParam(n_cloudCenterWorldParam,n_cloudCenterWorld);
             _rc.SetShaderParam(n_cloudRadiusParam, n_cloudRadius);
+
+            _rc.SetShaderParam(_shadingModeParam, depthShading);
         }
 
         #endregion
 
         #region Setter and Getter of Fields
+
+        /// <summary>
+        /// Whether to render points in depth shading mode or by intensity.
+        /// </summary>
+        public void SetShadingMode(ShadingMode mode)
+        {
+            if (mode == ShadingMode.Depth)
+                depthShading = 1;
+            else
+                depthShading = 0;
+        }
+
+        /// <summary>
+        /// Sets the current echo id to render.
+        /// </summary>
+        public void SetEchoId(sbyte echoId)
+        {
+            _currentEchoId = echoId;
+        }
 
         /// <summary>
         /// Increases the particle size.
@@ -154,7 +179,35 @@ namespace Fusee.Tutorial.Core.Data
         /// <param name="point">The point to add.</param>
         public void AddPoint(Common.Point point)
         {
-            AddPoint(point.Position);
+            _pointCounter++;
+
+            if (_pointCounter % COMPUTE_EVERY != 0 && COMPUTE_EVERY != 1)
+                return;
+
+            PointMesh pointMesh = new PointMesh(point.Position, point.Intensity);
+
+            if (_meshLists.ContainsKey(point.EchoId))
+            {
+                StaticMeshList meshList = _meshLists[point.EchoId];
+                meshList.AddMesh(pointMesh);
+            }
+            else
+            {
+                StaticMeshList meshList = new StaticMeshList();
+                meshList.AddMesh(pointMesh);
+
+                _meshLists.Add(point.EchoId, meshList);
+            }
+            
+            //*
+            if (_pointCounter % UPDATE_EVERY == 0)
+            {
+                foreach(KeyValuePair<byte, StaticMeshList> kvp in _meshLists)
+                {
+                    kvp.Value.Apply();
+                }
+            }
+            //*/
         }
 
         /// <summary>
@@ -163,6 +216,7 @@ namespace Fusee.Tutorial.Core.Data
         /// <param name="position">The position to add.</param>
         public void AddPoint(float3 position)
         {
+            /*
             _pointCounter++;
 
             if (_pointCounter % COMPUTE_EVERY != 0 && COMPUTE_EVERY != 1)
@@ -189,16 +243,25 @@ namespace Fusee.Tutorial.Core.Data
         {
             base.Render();
 
-            List<Mesh> meshesToRemove = _meshList.GetMeshesToRemove();
-            for (var i = 0; i < meshesToRemove.Count; i++)
+            foreach(KeyValuePair<byte, StaticMeshList> kvp in _meshLists)
             {
-                _rc.Remove(meshesToRemove[i]);
+                List<Mesh> meshesToRemove = kvp.Value.GetMeshesToRemove();
+                for (var i = 0; i < meshesToRemove.Count; i++)
+                {
+                    _rc.Remove(meshesToRemove[i]);
+                }
             }
 
-            List<Mesh> meshes = _meshList.GetMeshes();
-            for (var i = 0; i < meshes.Count; i++)
+            foreach (KeyValuePair<byte, StaticMeshList> kvp in _meshLists)
             {
-                _rc.Render(meshes[i]);
+                if (_currentEchoId != -1 && _currentEchoId != kvp.Key)
+                    continue;
+
+                List<Mesh> meshes = kvp.Value.GetMeshes();
+                for (var i = 0; i < meshes.Count; i++)
+                {
+                    _rc.Render(meshes[i]);
+                }
             }
         }
 

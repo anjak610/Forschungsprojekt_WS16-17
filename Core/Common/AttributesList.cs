@@ -10,24 +10,21 @@ namespace Fusee.Tutorial.Core.Common
     /// </summary>
     public class AttributesList
     {
-        /*
         private List<DynamicAttributes> _buffers; // where all full meshes are stored
         private DynamicAttributes _currentBuffer; // to this mesh everything gets added
 
         private int _limit; // defines how many vertices can be stored by one buffer object
-        */
+        
         /// <summary>
         /// Initializes the list.
         /// </summary>
         /// <param name="limit">Defines how many vertices can be stored by one buffer object.</param>
         public AttributesList(int limit)
         {
-            /*
             _limit = limit;
 
             _buffers = new List<DynamicAttributes>();
             _currentBuffer = new DynamicAttributes(_limit);
-            */
         }
 
         /// <summary>
@@ -36,14 +33,12 @@ namespace Fusee.Tutorial.Core.Common
         /// <param name="attribute">offset respectively position</param>
         public void AddAttribute(float3 attribute)
         {
-            /*
             if (!_currentBuffer.AddAttribute(attribute))
             {
                 _buffers.Add(_currentBuffer);
                 _currentBuffer = new DynamicAttributes(_limit);
                 _currentBuffer.AddAttribute(attribute);
             }
-            */
         }
 
         /// <summary>
@@ -52,16 +47,14 @@ namespace Fusee.Tutorial.Core.Common
         /// <param name="attributes">List of attributes respectively positions.</param>
         public void AddAttributes(List<float3> attributes)
         {
-            /*
             if (!_currentBuffer.AddAttributes(attributes))
             {
                 _buffers.Add(_currentBuffer);
                 _currentBuffer = new DynamicAttributes(_limit);
                 _currentBuffer.AddAttributes(attributes);
             }
-            */
         }
-        /*
+        
         /// <summary>
         /// Returns all meshes contained by this class.
         /// </summary>
@@ -74,6 +67,5 @@ namespace Fusee.Tutorial.Core.Common
 
             return bufferList;
         }
-        */
     }
 }

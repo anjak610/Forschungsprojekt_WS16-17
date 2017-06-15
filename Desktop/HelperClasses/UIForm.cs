@@ -8,7 +8,6 @@ using Fusee.Base.Core;
 using Fusee.Base.Imp.Desktop;
 using Fusee.Serialization;
 using Fusee.Tutorial.Core;
-using Fusee.Tutorial.Core.DataTransmission;
 using Path = Fusee.Base.Common.Path;
 using Fusee.Tutorial.Core.Data;
 using Font = Fusee.Base.Core.Font;
@@ -21,6 +20,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
         public IntPtr panelHandle;
 
         private PointVisualizationBase currentApp;
+        private sbyte _echoId = -1;
 
         private RenderControl currentControl;
         private WinformsHost currentHost;
@@ -203,6 +203,32 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
             {
                 currentApp.SetUDPPort(port);
             }
+        }
+
+        private void depth_radio_btn_Click(object sender, EventArgs e)
+        {
+            currentApp.SetShadingMode(PointVisualizationBase.ShadingMode.Depth);
+        }
+
+        private void intensity_radio_btn_Click(object sender, EventArgs e)
+        {
+            currentApp.SetShadingMode(PointVisualizationBase.ShadingMode.Intensity);
+        }
+
+        private void echo_minus_btn_Click(object sender, EventArgs e)
+        {
+            _echoId--;
+            this.echo_txt.Text = "Echo Id: " + _echoId;
+
+            currentApp.SetEchoId(_echoId);
+        }
+
+        private void echo_plus_btn_Click(object sender, EventArgs e)
+        {
+            _echoId++;
+            this.echo_txt.Text = "Echo Id: " + _echoId;
+
+            currentApp.SetEchoId(_echoId);
         }
 
         #endregion

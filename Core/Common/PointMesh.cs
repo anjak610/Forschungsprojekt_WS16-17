@@ -1,4 +1,5 @@
-﻿using Fusee.Engine.Core;
+﻿using Fusee.Base.Common;
+using Fusee.Engine.Core;
 using Fusee.Math.Core;
 
 /// <summary>
@@ -13,7 +14,7 @@ namespace Fusee.Tutorial.Core.Common
         /// <summary>
         /// Initializes a new instance of the <see cref="Point" /> class.
         /// </summary>
-        public PointMesh(float3 position)
+        public PointMesh(float3 position, float intensity)
         {
             Vertices = new[]
             {
@@ -40,6 +41,17 @@ namespace Fusee.Tutorial.Core.Common
             {
                 0, 1, 3,
                 0, 3, 2
+            };
+
+            ColorUint color = new ColorUint(intensity, intensity, intensity, 1);
+            uint colour = (uint) color;
+
+            Colors = new uint[]
+            {
+                colour,
+                colour,
+                colour,
+                colour
             };
         }
     }

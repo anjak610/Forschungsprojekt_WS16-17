@@ -7,7 +7,6 @@ using Fusee.Base.Common;
 using Fusee.Engine.Common;
 using Fusee.Tutorial.Core.Data;
 using Fusee.Tutorial.Core.Data_Transmission;
-using Fusee.Tutorial.Core.DataTransmission;
 
 namespace Fusee.Tutorial.Core
 {
@@ -19,6 +18,11 @@ namespace Fusee.Tutorial.Core
         public enum ViewMode
         {
             PointCloud, VoxelSpace
+        }
+
+        public enum ShadingMode
+        {
+            Depth, Intensity
         }
 
         #endregion
@@ -352,6 +356,22 @@ namespace Fusee.Tutorial.Core
         public void SetUDPPort(int port)
         {
             UDPReceiver.SetPort(port);
+        }
+
+        /// <summary>
+        /// Whether to render points in depth shading mode or by intensity.
+        /// </summary>
+        public void SetShadingMode(ShadingMode mode)
+        {
+            _pointCloud.SetShadingMode(mode);
+        }
+
+        /// <summary>
+        /// Sets the current echo id to render.
+        /// </summary>
+        public void SetEchoId(sbyte echoId)
+        {
+            _pointCloud.SetEchoId(echoId);
         }
 
         #endregion

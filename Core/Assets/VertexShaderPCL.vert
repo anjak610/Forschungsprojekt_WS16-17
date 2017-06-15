@@ -1,5 +1,6 @@
 attribute vec3 fuVertex;
 attribute vec3 fuNormal;
+attribute vec4 fuColor;
 
 uniform mat4 FUSEE_MV;
 uniform mat4 FUSEE_MVP;
@@ -9,11 +10,13 @@ uniform vec2 particleSize;
 uniform vec3 n_cloudCenterWorld;
 uniform float n_cloudRadius;
 varying vec3 n_depthColor;
+varying vec4 color;
 //varying vec3 normalSpec;
         
 void main()
 {
 	vec3 modelpos = fuVertex;
+	color = fuColor;
 		
 	vec4 newVertex = FUSEE_MVP * vec4(modelpos, 1.0);	
 	vec4 result = newVertex + vec4(fuNormal.xy * particleSize, 0, 0);

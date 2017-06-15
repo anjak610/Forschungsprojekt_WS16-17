@@ -2,9 +2,11 @@
     precision highp float;     
 #endif
 
+uniform int depthShading;
 
 varying vec4 newVertex;
 varying vec3 n_depthColor;
+varying vec4 color;
 
 
 void main()
@@ -18,9 +20,11 @@ void main()
 	float  Pi = 3.1415926;
 	float pct = abs(sin(Pi));
 	
-	vec3 color = mix(colorA, colorB,pct);
-	gl_FragColor = vec4(n_depthColor, 1.0);
-
+	//vec3 color = mix(colorA, colorB,pct);
 	
+	if(depthShading == 1) 
+		gl_FragColor = vec4(n_depthColor, 1.0);
+	else
+		gl_FragColor = vec4(color.x, color.y, color.z, 1.0);
 	
 }

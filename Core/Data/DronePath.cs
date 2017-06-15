@@ -62,13 +62,12 @@ namespace Fusee.Tutorial.Core.Data
         public override void Render()
         {
             base.Render();
-            /*
+            
             List<DynamicAttributes> buffers = _positions.GetAttributesList();
             for(var i=0; i<buffers.Count; i++)
             {
                 _rc.RenderAsLines(buffers[i], LineWidth);
             }
-            */
         }
 
         /// <summary>
