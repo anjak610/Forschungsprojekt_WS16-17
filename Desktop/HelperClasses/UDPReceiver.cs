@@ -12,9 +12,10 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
     /// <summary>
     /// Receives input and hands it over.
     /// </summary>
-
     public class UDPReceiver : IUDPReceiver
     {
+        private int _pointCounter = 0;
+
         public OnNewPointAdded OnNewPointCallbacks { get; set; }
         public Action<float3> OnDronePositionCallbacks { get; set; }
 
@@ -94,6 +95,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
                             point2Pass.EchoId = echoId;
 
                             OnNewPointCallbacks?.Invoke(point2Pass);
+                            _pointCounter++;
 
                             angle += angle_inc;
                         }

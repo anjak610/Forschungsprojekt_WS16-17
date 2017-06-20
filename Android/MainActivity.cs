@@ -124,7 +124,7 @@ namespace Fusee.Tutorial.Android
                 // SetContentView(rci.View);
 
                 canvas_view.AddView(rci.View);
-                PointCloud.SetParticleSize(0.05f);
+                app.SetParticleSize(0.05f);
 
                 Engine.Core.Input.AddDriverImp(
                     new Fusee.Engine.Imp.Graphics.Android.RenderCanvasInputDriverImp(app.CanvasImplementor));
@@ -164,10 +164,10 @@ namespace Fusee.Tutorial.Android
                     app.SwitchViewMode();
                     break;
                 case Android.Resource.Id.nav_increase_psize:
-                    PointCloud.IncreaseParticleSize();
+                    app.IncreaseParticleSize();
                     break;
                 case Android.Resource.Id.nav_decrease_psize:
-                    PointCloud.DecreaseParticleSize();
+                    app.DecreaseParticleSize();
                     break;
             }
 

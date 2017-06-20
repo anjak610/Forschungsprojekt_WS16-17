@@ -9,7 +9,6 @@ using Fusee.Base.Imp.Desktop;
 using Fusee.Serialization;
 using Fusee.Tutorial.Core;
 using Path = Fusee.Base.Common.Path;
-using Fusee.Tutorial.Core.Data;
 using Font = Fusee.Base.Core.Font;
 
 namespace Fusee.Tutorial.Desktop.HelperClasses
@@ -118,6 +117,7 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
             currentHost = new WinformsHost(currentControl, canvaspanel);
 
             currentApp = new Core.PointVisualizationBase();
+
             currentApp.UDPReceiver = new UDPReceiver();
             currentApp.SetUDPPort(50123);
 
@@ -181,54 +181,44 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
 
         private void plus_button_Click(object sender, EventArgs e)
         {
-            PointCloud.IncreaseParticleSize(0.02f);
+            currentApp.IncreaseParticleSize(0.02f);
         }
 
         private void minus_button_Click(object sender, EventArgs e)
         {
-            PointCloud.DecreaseParticleSize(0.02f);
+            currentApp.DecreaseParticleSize(0.02f);
         }
 
-        private void chg_view_btn_Click(object sender, EventArgs e)
+        private void port_input_Click(object sender, EventArgs e)
         {
-            currentApp.SwitchViewMode();
+            int port = (int) port_input.Value;
+            currentApp.SetUDPPort(port);
         }
-
-        private void port_apply_btn_Click(object sender, EventArgs e)
+        
+        private void echo_id_input_Click(object sender, EventArgs e)
         {
-            int port;
-            bool success = int.TryParse(this.port_txt.Text, out port);
-
-            if(success)
-            {
-                currentApp.SetUDPPort(port);
-            }
+            sbyte echoId = (sbyte) echo_id_input.Value;
+            currentApp.SetEchoId(echoId);
         }
 
         private void depth_radio_btn_Click(object sender, EventArgs e)
         {
-            currentApp.SetShadingMode(PointVisualizationBase.ShadingMode.Depth);
+            currentApp.SetShadingMode(ShadingMode.Depth_Map);
         }
 
         private void intensity_radio_btn_Click(object sender, EventArgs e)
         {
-            currentApp.SetShadingMode(PointVisualizationBase.ShadingMode.Intensity);
+            currentApp.SetShadingMode(ShadingMode.Intensity);
         }
 
-        private void echo_minus_btn_Click(object sender, EventArgs e)
+        private void pcl_radio_btn_Click(object sender, EventArgs e)
         {
-            _echoId--;
-            this.echo_txt.Text = "Echo Id: " + _echoId;
-
-            currentApp.SetEchoId(_echoId);
+            currentApp.SetViewMode(ViewMode.PointCloud);
         }
 
-        private void echo_plus_btn_Click(object sender, EventArgs e)
+        private void vsp_radio_btn_Click(object sender, EventArgs e)
         {
-            _echoId++;
-            this.echo_txt.Text = "Echo Id: " + _echoId;
-
-            currentApp.SetEchoId(_echoId);
+            currentApp.SetViewMode(ViewMode.VoxelSpace);
         }
 
         #endregion

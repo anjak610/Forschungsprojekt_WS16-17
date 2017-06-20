@@ -92,6 +92,7 @@ namespace Fusee.Tutorial.Core.Data_Transmission
             }
 
             point.Position = new float3(numbers[0], numbers[2], numbers[1]);
+            point.Intensity = 0.5f;
 
             if (numbers.Length == 9)
             {

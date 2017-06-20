@@ -10,64 +10,79 @@ using Fusee.Tutorial.Core.Data_Transmission;
 
 namespace Fusee.Tutorial.Core
 {
+    #region Public Enums
+
+    public enum ViewMode
+    {
+        PointCloud, VoxelSpace
+    }
+
+    public enum ShadingMode
+    {
+        Depth_Map, Intensity
+    }
+
+    #endregion
+
     [FuseeApplication(Name = "Forschungsprojekt", Description = "HFU Wintersemester 16-17")]
     public class PointVisualizationBase : RenderCanvas
     {
-        #region Enums
-
-        public enum ViewMode
-        {
-            PointCloud, VoxelSpace
-        }
-
-        public enum ShadingMode
-        {
-            Depth, Intensity
-        }
-
-        #endregion
-
         #region Fields
 
-        #region UDP Connection
-        
-        [InjectMe] public IUDPReceiver UDPReceiver;
+        #region Constants
+
+        public const float ParticleSizeIncrement = 0.25f;
 
         #endregion
 
-        #region Helper
+        #region View Properties
 
-        // current view mode: either pointcloud or voxelspace
-        public ViewMode CurrentViewMode { get; set; } = ViewMode.PointCloud;
+        private float _pointSize = 0.05f;
+        private ViewMode _viewMode = ViewMode.PointCloud;
+        private sbyte _echoId = -1;
+        private float4 _backgroundColor = new float4(0, 0, 0, 1);
 
+        #endregion
+        
+        #region UDP Connection
+
+        [InjectMe]
+        public IUDPReceiver UDPReceiver;
+
+        #endregion
+
+        #region Model
+        
         // data
         private PointCloud _pointCloud; // particle size gets changed via static methods
         private VoxelSpace _voxelSpace;
         private DronePath _dronePath;
 
         private BoundingBox _boundingBox;
-                
-        // due to multithreading
-        private AutoResetEvent _signalEvent = new AutoResetEvent(true);
 
         #endregion
 
+        #region View ( concerning OpenGL )
+
+        // due to multithreading
+        private AutoResetEvent _signalEvent = new AutoResetEvent(true);
+
         #region Camera Positioning
 
-        private float _rotationY = (float) System.Math.PI;
-        private float _rotationX = (float) System.Math.PI / -8;
+        private float _rotationY = (float)System.Math.PI;
+        private float _rotationX = (float)System.Math.PI / -8;
 
         private float3 _cameraPosition = new float3(0, 0, -5.0f);
         private float3 _cameraPivot = new float3(0, 0, 0);
         private float3 _cameraPivotOffset = new float3(0, 0, 0);
 
-        private float _minAngleX = (float) -System.Math.PI / 4;
-        private float _maxAngleX = (float) System.Math.PI / 4;
+        private float _minAngleX = (float)-System.Math.PI / 4;
+        private float _maxAngleX = (float)System.Math.PI / 4;
 
         #endregion
 
         #region Begin Camera Values
-        
+
         private static float _zoom, _zoomVel, _angleHorz = M.PiOver6 * 2.0f, _angleVert = -M.PiOver6 * 0.5f, _angleVelHorz, _angleVelVert, _angleRoll, _angleRollInit;
         private bool _twoTouchRepeated;
         private float _maxPinchSpeed;
@@ -87,6 +102,8 @@ namespace Fusee.Tutorial.Core
 
         #endregion
 
+        #endregion
+
         /// <summary>
         /// Initializes variables.
         /// </summary>
@@ -101,15 +118,19 @@ namespace Fusee.Tutorial.Core
             _pointCloud = new PointCloud(RC, _boundingBox);
             _voxelSpace = new VoxelSpace(RC, _boundingBox);
             _dronePath = new DronePath(RC);
+
+            _pointCloud.SetParticleSize(_pointSize);
+            _pointCloud.SetEchoId(_echoId);
             
             //Zoom Value
             _zoom = 60;
 
             // stream point cloud from text file
 
-            ///*
-            //AssetReader.OnNewPointCallbacks += OnNewPointAdded;
-            //AssetReader.ReadFromAsset("PointCloud_IPM.txt");
+            /*
+            AssetReader.OnAssetLoadedCallbacks += () => { _pointCloud.OnAssetLoaded(); };
+            AssetReader.OnNewPointCallbacks += OnNewPointAdded;
+            AssetReader.ReadFromAsset("BasicPoints.txt");
             //*/  
             
             // stream point cloud via udp
@@ -121,7 +142,7 @@ namespace Fusee.Tutorial.Core
             //*/
 
             // Set the clear color for the backbuffer
-            RC.ClearColor = new float4(0.95f, 0.95f, 0.95f, 1);
+            RC.ClearColor = _backgroundColor;
         }
 
         #region Rendering
@@ -134,27 +155,13 @@ namespace Fusee.Tutorial.Core
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
             
-            // check on key down
-
-            if(Keyboard.IsKeyDown(KeyCodes.T))
-            {
-                SwitchViewMode();
-            }
-
-            // check on particle size change
-            
-            if (CurrentViewMode == ViewMode.PointCloud && (Keyboard.ADAxis != 0 || Keyboard.WSAxis != 0) )
-            {
-                PointCloud.IncreaseParticleSize(Keyboard.ADAxis * PointCloud.ParticleSizeInterval / 20);
-            }
-            
             // Render
 
             RC.ModelView = MoveInScene();
             
             _signalEvent.WaitOne(); // stop other thread from adding points until these points have been written to the gpu memory
             
-            if (CurrentViewMode == ViewMode.PointCloud)
+            if (_viewMode == ViewMode.PointCloud)
             {
                 _pointCloud.Render();
             }
@@ -176,7 +183,7 @@ namespace Fusee.Tutorial.Core
         /// </summary>
         private float4x4 MoveInScene()
         {
-          var curDamp = (float)System.Math.Exp(-Damping * DeltaTime);
+            var curDamp = (float) System.Math.Exp(-Damping * DeltaTime);
 
             if (Keyboard.LeftRightAxis != 0 || Keyboard.UpDownAxis != 0)
             {
@@ -334,21 +341,14 @@ namespace Fusee.Tutorial.Core
         /// <param name="position"></param>
         private void OnDronePositionAdded(float3 position)
         {
+            _signalEvent.WaitOne();
             _dronePath.AddPosition(position);
+            _signalEvent.Set();
         }
 
         #endregion
 
-        #region Public Members
-        
-        /// <summary>
-        /// Switches the view mode from point cloud to voxelspace and vice versa.
-        /// </summary>
-        public void SwitchViewMode()
-        {
-            ViewMode nextViewMode = CurrentViewMode == ViewMode.PointCloud ? ViewMode.VoxelSpace : ViewMode.PointCloud;
-            CurrentViewMode = nextViewMode;
-        }
+        #region Public Members ( get called by UI )
 
         /// <summary>
         /// Sets the port for the udp receiver to listen to.
@@ -359,19 +359,64 @@ namespace Fusee.Tutorial.Core
         }
 
         /// <summary>
-        /// Whether to render points in depth shading mode or by intensity.
+        /// Sets the point size directly.
         /// </summary>
-        public void SetShadingMode(ShadingMode mode)
-        {
-            _pointCloud.SetShadingMode(mode);
+        public void SetParticleSize(float particleSize) {
+            _pointSize = particleSize;
+            _pointCloud.SetParticleSize(_pointSize);
         }
 
         /// <summary>
-        /// Sets the current echo id to render.
+        /// Increases the point size.
+        /// </summary>
+        /// <param name="increment">The increment value to increase the point size.</param>
+        public void IncreaseParticleSize(float increment = ParticleSizeIncrement)
+        {
+            _pointSize += increment;
+            _pointCloud.SetParticleSize(_pointSize);
+        }
+
+        /// <summary>
+        /// Decreases the point size.
+        /// </summary>
+        /// <param name="decrement">The decrement value to decrease the point size.</param>
+        public void DecreaseParticleSize(float decrement = ParticleSizeIncrement)
+        {
+            _pointSize -= decrement;
+            _pointCloud.SetParticleSize(_pointSize);
+        }
+
+        /// <summary>
+        /// Sets the current echo id.
         /// </summary>
         public void SetEchoId(sbyte echoId)
         {
-            _pointCloud.SetEchoId(echoId);
+            _echoId = echoId;
+        }
+
+        /// <summary>
+        /// Sets the current shading mode.
+        /// </summary>
+        public void SetShadingMode(ShadingMode shadingMode)
+        {
+            _pointCloud.SetShadingMode(shadingMode);
+        }
+
+        /// <summary>
+        /// Sets the view mode directly.
+        /// </summary>
+        public void SetViewMode(ViewMode viewMode)
+        {
+            _viewMode = viewMode;
+        }
+
+        /// <summary>
+        /// Switches between the two view modes.
+        /// </summary>
+        public void SwitchViewMode()
+        {
+            ViewMode nextViewMode = _viewMode == ViewMode.PointCloud ? ViewMode.VoxelSpace : ViewMode.PointCloud;
+            _viewMode = nextViewMode;
         }
 
         #endregion
