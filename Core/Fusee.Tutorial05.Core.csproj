@@ -51,9 +51,9 @@
     <Compile Include="Model\Common\RenderEntity.cs" />
     <Compile Include="Model\Common\StaticMeshList.cs" />
     <Compile Include="Aspects\DataTransmission\PointCloudData.cs" />
-    <Compile Include="Model\Data\BoundingBox.cs" />
-    <Compile Include="Model\Data\DronePath.cs" />
-    <Compile Include="Model\Data\PointCloud.cs" />
+    <Compile Include="Model\Common\BoundingBox.cs" />
+    <Compile Include="Model\RenderEntities\DronePath.cs" />
+    <Compile Include="Model\RenderEntities\PointCloud.cs" />
     <Compile Include="Model\Octree\Octree.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
@@ -63,7 +63,7 @@
     <Compile Include="Model\Common\PointMesh.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
-    <Compile Include="Model\Data\VoxelSpace.cs" />
+    <Compile Include="Model\RenderEntities\VoxelSpace.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PointVisualizationBase.cs" />
     <Compile Include="Aspects\DataTransmission\AssetReader.cs" />
@@ -119,6 +119,7 @@
     <Content Include="Assets\smoked_oak.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="To-Do.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\AboutFuseeAssets.txt">

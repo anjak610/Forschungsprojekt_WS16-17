@@ -15,7 +15,6 @@ using Path = Fusee.Base.Common.Path;
 using Fusee.Tutorial.Android.HelperClasses;
 using V7Toolbar = Android.Support.V7.Widget.Toolbar;
 using Android.Support.V7.App;
-using Fusee.Tutorial.Core.Data;
 
 namespace Fusee.Tutorial.Android
 {
@@ -124,7 +123,6 @@ namespace Fusee.Tutorial.Android
                 // SetContentView(rci.View);
 
                 canvas_view.AddView(rci.View);
-                app.SetParticleSize(0.05f);
 
                 Engine.Core.Input.AddDriverImp(
                     new Fusee.Engine.Imp.Graphics.Android.RenderCanvasInputDriverImp(app.CanvasImplementor));
@@ -159,6 +157,9 @@ namespace Fusee.Tutorial.Android
                 //case Android.Resource.Id.home: home id strangely does not work??
                 case Android.Resource.Id.open_dialog:
                     dialog.Show(FragmentManager, "dialog");
+                    break;
+                case Android.Resource.Id.nav_shading_mode:
+                    app.SwitchShadingMode();
                     break;
                 case Android.Resource.Id.nav_voxelview:
                     app.SwitchViewMode();

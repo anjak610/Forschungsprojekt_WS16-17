@@ -181,12 +181,12 @@ namespace Fusee.Tutorial.Desktop.HelperClasses
 
         private void plus_button_Click(object sender, EventArgs e)
         {
-            currentApp.IncreaseParticleSize(0.02f);
+            currentApp.IncreaseParticleSize();
         }
 
         private void minus_button_Click(object sender, EventArgs e)
         {
-            currentApp.DecreaseParticleSize(0.02f);
+            currentApp.DecreaseParticleSize();
         }
 
         private void port_input_Click(object sender, EventArgs e)

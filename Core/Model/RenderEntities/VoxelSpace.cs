@@ -5,7 +5,7 @@ using Fusee.Math.Core;
 using Fusee.Tutorial.Core.Common;
 using Fusee.Tutorial.Core.Octree;
 
-namespace Fusee.Tutorial.Core.Data
+namespace Fusee.Tutorial.Core.RenderEntities
 {
     /// <summary>
     /// Contains all the settings and variables needed for rendering the voxel space. Render context related programming is encapsulated in this class

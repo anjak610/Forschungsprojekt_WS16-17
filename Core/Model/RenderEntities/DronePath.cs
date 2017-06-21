@@ -4,7 +4,7 @@ using Fusee.Math.Core;
 using Fusee.Tutorial.Core.Common;
 using System.Collections.Generic;
 
-namespace Fusee.Tutorial.Core.Data
+namespace Fusee.Tutorial.Core.RenderEntities
 {
     /// <summary>
     /// Contains all the settings and variables needed for rendering the drone path. Render context related programming is encapsulated in this class

@@ -5,8 +5,9 @@ using static Fusee.Engine.Core.Time;
 using System.Threading;
 using Fusee.Base.Common;
 using Fusee.Engine.Common;
-using Fusee.Tutorial.Core.Data;
+using Fusee.Tutorial.Core.RenderEntities;
 using Fusee.Tutorial.Core.Data_Transmission;
+using Fusee.Tutorial.Core.Common;
 
 namespace Fusee.Tutorial.Core
 {
@@ -31,14 +32,15 @@ namespace Fusee.Tutorial.Core
 
         #region Constants
 
-        public const float ParticleSizeIncrement = 0.25f;
+        public const float ParticleSizeIncrement = 1;
 
         #endregion
 
         #region View Properties
 
-        private float _pointSize = 0.05f;
+        private float _pointSize = 1;
         private ViewMode _viewMode = ViewMode.PointCloud;
+        private ShadingMode _shadingMode = ShadingMode.Depth_Map;
         private sbyte _echoId = -1;
         private float4 _backgroundColor = new float4(0, 0, 0, 1);
 
@@ -119,7 +121,7 @@ namespace Fusee.Tutorial.Core
             _voxelSpace = new VoxelSpace(RC, _boundingBox);
             _dronePath = new DronePath(RC);
 
-            _pointCloud.SetParticleSize(_pointSize);
+            _pointCloud.SetPointSize(_pointSize);
             _pointCloud.SetEchoId(_echoId);
             
             //Zoom Value
@@ -128,7 +130,6 @@ namespace Fusee.Tutorial.Core
             // stream point cloud from text file
 
             /*
-            AssetReader.OnAssetLoadedCallbacks += () => { _pointCloud.OnAssetLoaded(); };
             AssetReader.OnNewPointCallbacks += OnNewPointAdded;
             AssetReader.ReadFromAsset("BasicPoints.txt");
             //*/  
@@ -301,9 +302,6 @@ namespace Fusee.Tutorial.Core
             // Back clipping happens at 2000 (Anything further away from the camera than 2000 world units gets clipped, polygons will be cut)
 
             RC.Projection = float4x4.CreatePerspectiveFieldOfView(3.141592f * 0.25f, aspectRatio, 1, 20000);
-
-            // particle size set to be square
-            _pointCloud.SetAspectRatio(aspectRatio);
         }
 
         #endregion
@@ -363,7 +361,7 @@ namespace Fusee.Tutorial.Core
         /// </summary>
         public void SetParticleSize(float particleSize) {
             _pointSize = particleSize;
-            _pointCloud.SetParticleSize(_pointSize);
+            _pointCloud.SetPointSize(_pointSize);
         }
 
         /// <summary>
@@ -372,8 +370,11 @@ namespace Fusee.Tutorial.Core
         /// <param name="increment">The increment value to increase the point size.</param>
         public void IncreaseParticleSize(float increment = ParticleSizeIncrement)
         {
+            if (_pointSize + increment > 10)
+                return;
+
             _pointSize += increment;
-            _pointCloud.SetParticleSize(_pointSize);
+            _pointCloud.SetPointSize(_pointSize);
         }
 
         /// <summary>
@@ -382,8 +383,11 @@ namespace Fusee.Tutorial.Core
         /// <param name="decrement">The decrement value to decrease the point size.</param>
         public void DecreaseParticleSize(float decrement = ParticleSizeIncrement)
         {
+            if (_pointSize - decrement < 1)
+                return;
+
             _pointSize -= decrement;
-            _pointCloud.SetParticleSize(_pointSize);
+            _pointCloud.SetPointSize(_pointSize);
         }
 
         /// <summary>
@@ -399,7 +403,19 @@ namespace Fusee.Tutorial.Core
         /// </summary>
         public void SetShadingMode(ShadingMode shadingMode)
         {
+            _shadingMode = shadingMode;
             _pointCloud.SetShadingMode(shadingMode);
+        }
+
+        /// <summary>
+        /// Switches between the two shading modes.
+        /// </summary>
+        public void SwitchShadingMode()
+        {
+            ShadingMode nextMode = _shadingMode == ShadingMode.Depth_Map ? ShadingMode.Intensity : ShadingMode.Depth_Map;
+            _shadingMode = nextMode;
+
+            _pointCloud.SetShadingMode(_shadingMode);
         }
 
         /// <summary>
